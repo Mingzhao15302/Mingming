@@ -50,6 +50,8 @@ header h1 {
   background-color: #161b22;
   border: 4px solid #238636;
   border-radius: 0.5rem;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .status {
