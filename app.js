@@ -24,6 +24,99 @@ const randomNotes = [
   'Review module warmup behavior before next run.'
 ];
 
+const videoLibrary = [
+  {
+    id: 'vid-01',
+    name: 'A系列 • 500g • 旋盖 • 皮带输送',
+    line: '1号线',
+    modelSeries: 'A系列',
+    fillWeight: '500g',
+    capping: '旋盖',
+    conveying: '皮带输送',
+    buffering: '缓存仓',
+    voc: '需要',
+    explosion: '非防爆',
+    metrics: { efficiency: 88, quality: 92, uptime: 95 },
+    src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    description: 'A系列500g皮带输送线，常规旋盖与VOC治理方案。'
+  },
+  {
+    id: 'vid-02',
+    name: 'A系列 • 1kg • 压盖 • 链板输送',
+    line: '2号线',
+    modelSeries: 'A系列',
+    fillWeight: '1kg',
+    capping: '压盖',
+    conveying: '链板输送',
+    buffering: '缓存仓',
+    voc: '需要',
+    explosion: '防爆',
+    metrics: { efficiency: 82, quality: 90, uptime: 92 },
+    src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    description: '重量升级至1kg的A系列线，带压盖及防爆处理。'
+  },
+  {
+    id: 'vid-03',
+    name: 'B系列 • 500g • 旋盖 • 滚筒输送',
+    line: '3号线',
+    modelSeries: 'B系列',
+    fillWeight: '500g',
+    capping: '旋盖',
+    conveying: '滚筒输送',
+    buffering: '缓存塔',
+    voc: '免除',
+    explosion: '非防爆',
+    metrics: { efficiency: 91, quality: 95, uptime: 97 },
+    src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    description: 'B系列旋盖线，滚筒输送并采用立式缓存塔方案。'
+  },
+  {
+    id: 'vid-04',
+    name: 'B系列 • 750g • 压盖 • 皮带输送',
+    line: '4号线',
+    modelSeries: 'B系列',
+    fillWeight: '750g',
+    capping: '压盖',
+    conveying: '皮带输送',
+    buffering: '缓存仓',
+    voc: '免除',
+    explosion: '防爆',
+    metrics: { efficiency: 85, quality: 88, uptime: 90 },
+    src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    description: 'B系列中量级压盖线，配置皮带输送与防爆电控。'
+  },
+  {
+    id: 'vid-05',
+    name: 'C系列 • 1kg • 旋盖 • 链板输送',
+    line: '5号线',
+    modelSeries: 'C系列',
+    fillWeight: '1kg',
+    capping: '旋盖',
+    conveying: '链板输送',
+    buffering: '缓存塔',
+    voc: '需要',
+    explosion: '非防爆',
+    metrics: { efficiency: 79, quality: 87, uptime: 89 },
+    src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    description: 'C系列多变配方线，链板输送搭配塔式缓存。'
+  },
+  {
+    id: 'vid-06',
+    name: 'C系列 • 750g • 压盖 • 滚筒输送',
+    line: '6号线',
+    modelSeries: 'C系列',
+    fillWeight: '750g',
+    capping: '压盖',
+    conveying: '滚筒输送',
+    buffering: '缓存仓',
+    voc: '免除',
+    explosion: '防爆',
+    metrics: { efficiency: 83, quality: 86, uptime: 91 },
+    src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    description: 'C系列压盖防爆线，滚筒输送专注安全联锁。'
+  }
+];
+
 const Store = {
   load() {
     try {
@@ -180,9 +273,24 @@ const App = (() => {
   let state = Store.load();
   let selection = { group: 'lines', id: state.lines[0].id };
   let currentVideoElement;
+  const filterKeys = ['modelSeries', 'fillWeight', 'capping', 'conveying', 'buffering', 'voc', 'explosion'];
+  const metricKeys = ['efficiency', 'quality', 'uptime'];
+  const metricLabels = ['效率', '质量', '稼动率'];
+  const fillWeightCategories = ['500g', '750g', '1kg'].filter(weight =>
+    videoLibrary.some(video => video.fillWeight === weight)
+  );
+  let dashboardFilters = filterKeys.reduce((acc, key) => ({ ...acc, [key]: 'all' }), {});
+  let dashboardSelection = null;
+  let weightChart;
+  let radarChart;
 
   const refs = {
     shell: document.querySelector('.app-shell'),
+    navButtons: Array.from(document.querySelectorAll('[data-view-target]')),
+    views: {
+      video: document.querySelector('[data-view="video"]'),
+      dashboard: document.querySelector('[data-view="dashboard"]')
+    },
     modeButtons: Array.from(document.querySelectorAll('.mode-toggle__btn')),
     dashboardContainers: {
       lines: document.getElementById('lines-dashboard'),
@@ -215,11 +323,25 @@ const App = (() => {
       reset: document.querySelector('[data-action="reset"]')
     },
     paneEditButtons: Array.from(document.querySelectorAll('.pane-edit-btn')),
-    videoControls: document.querySelector('.video-controls')
+    videoControls: document.querySelector('.video-controls'),
+    dashboard: {
+      filters: filterKeys.reduce((acc, key) => {
+        acc[key] = document.querySelector(`[data-filter="${key}"]`);
+        return acc;
+      }, {}),
+      results: document.getElementById('dashboard-results'),
+      chart: document.getElementById('dashboard-chart'),
+      radar: document.getElementById('dashboard-radar'),
+      previewVideo: document.getElementById('dashboard-preview-video'),
+      previewName: document.getElementById('dashboard-preview-name'),
+      previewMeta: document.getElementById('dashboard-preview-meta')
+    }
   };
 
   function init() {
     currentVideoElement = refs.video;
+    setupNavigation();
+    initDashboard();
     updateMode(state.mode || 'presenter', { save: false });
     refs.modeButtons.forEach(btn => btn.addEventListener('click', () => updateMode(btn.dataset.mode)));
     bindTopBarActions();
@@ -307,6 +429,241 @@ const App = (() => {
       });
     });
     refreshActiveCard();
+  }
+
+  function setupNavigation() {
+    refs.navButtons.forEach(btn => {
+      btn.addEventListener('click', () => switchView(btn.dataset.viewTarget));
+    });
+  }
+
+  function switchView(target) {
+    const view = refs.views[target];
+    if (!view) return;
+    Object.values(refs.views).forEach(element => {
+      const isActive = element === view;
+      element.classList.toggle('is-active', isActive);
+      if (isActive) {
+        element.removeAttribute('hidden');
+      } else {
+        element.setAttribute('hidden', 'hidden');
+      }
+    });
+    refs.navButtons.forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.viewTarget === target);
+    });
+    if (target === 'dashboard') {
+      renderDashboard();
+    }
+  }
+
+  function initDashboard() {
+    populateFilterOptions();
+    attachFilterEvents();
+    renderDashboard();
+  }
+
+  function populateFilterOptions() {
+    Object.entries(refs.dashboard.filters).forEach(([key, select]) => {
+      if (!select) return;
+      let uniqueValues = Array.from(new Set(videoLibrary.map(video => video[key])));
+      if (key === 'fillWeight') {
+        uniqueValues = fillWeightCategories;
+      } else {
+        uniqueValues = uniqueValues.sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
+      }
+      select.innerHTML = '';
+      const allOption = new Option('全部', 'all');
+      select.appendChild(allOption);
+      uniqueValues.forEach(value => {
+        const option = new Option(value, value);
+        select.appendChild(option);
+      });
+      select.value = 'all';
+      dashboardFilters[key] = 'all';
+    });
+  }
+
+  function attachFilterEvents() {
+    Object.entries(refs.dashboard.filters).forEach(([key, select]) => {
+      if (!select) return;
+      select.addEventListener('change', () => {
+        dashboardFilters[key] = select.value;
+        renderDashboard();
+      });
+    });
+  }
+
+  function getFilteredVideos() {
+    return videoLibrary.filter(video =>
+      filterKeys.every(key => {
+        const filterValue = dashboardFilters[key];
+        return filterValue === 'all' || video[key] === filterValue;
+      })
+    );
+  }
+
+  function renderDashboard() {
+    const filtered = getFilteredVideos();
+    updateDashboardResults(filtered);
+    updateCharts(filtered);
+  }
+
+  function updateDashboardResults(filtered) {
+    const list = refs.dashboard.results;
+    if (!list) return;
+    list.innerHTML = '';
+    if (!filtered.length) {
+      const empty = document.createElement('li');
+      empty.className = 'dashboard-results__item';
+      empty.textContent = '未找到匹配的视频，请调整过滤条件。';
+      list.appendChild(empty);
+      dashboardSelection = null;
+      updatePreview(null);
+      return;
+    }
+
+    if (!dashboardSelection || !filtered.some(video => video.id === dashboardSelection)) {
+      dashboardSelection = filtered[0].id;
+    }
+
+    filtered.forEach(video => {
+      const item = document.createElement('li');
+      item.className = 'dashboard-results__item';
+      if (video.id === dashboardSelection) {
+        item.classList.add('is-active');
+      }
+      const button = document.createElement('button');
+      button.type = 'button';
+      const title = document.createElement('h3');
+      title.className = 'dashboard-results__title';
+      title.textContent = video.name;
+      const metaPrimary = document.createElement('p');
+      metaPrimary.className = 'dashboard-results__meta';
+      metaPrimary.textContent = `${video.line} • ${video.modelSeries} • ${video.fillWeight} • ${video.capping}`;
+      const metaSecondary = document.createElement('p');
+      metaSecondary.className = 'dashboard-results__meta';
+      metaSecondary.textContent = `${video.conveying} • ${video.buffering} • VOC: ${video.voc} • ${video.explosion}`;
+      const metricLine = document.createElement('p');
+      metricLine.className = 'dashboard-results__meta';
+      metricLine.textContent = `效率 ${video.metrics.efficiency}% ｜ 质量 ${video.metrics.quality}% ｜ 稼动率 ${video.metrics.uptime}%`;
+
+      button.append(title, metaPrimary, metaSecondary, metricLine);
+      button.addEventListener('click', () => {
+        dashboardSelection = video.id;
+        list.querySelectorAll('.dashboard-results__item').forEach(node => {
+          node.classList.toggle('is-active', node === item);
+        });
+        updatePreview(video);
+      });
+      item.appendChild(button);
+      list.appendChild(item);
+    });
+
+    const activeVideo = filtered.find(video => video.id === dashboardSelection);
+    updatePreview(activeVideo);
+  }
+
+  function updateCharts(filtered) {
+    if (typeof Chart === 'undefined' || !refs.dashboard.chart || !refs.dashboard.radar) {
+      return;
+    }
+    const counts = fillWeightCategories.map(weight =>
+      filtered.filter(video => video.fillWeight === weight).length
+    );
+    if (!weightChart) {
+      weightChart = new Chart(refs.dashboard.chart.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: fillWeightCategories,
+          datasets: [
+            {
+              label: '视频数量',
+              data: counts,
+              backgroundColor: 'rgba(37, 99, 235, 0.55)',
+              borderRadius: 12,
+              maxBarThickness: 48
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+    } else {
+      weightChart.data.labels = fillWeightCategories;
+      weightChart.data.datasets[0].data = counts;
+      weightChart.update();
+    }
+
+    const radarData = metricKeys.map(key => {
+      if (!filtered.length) return 0;
+      const total = filtered.reduce((sum, video) => sum + (video.metrics?.[key] ?? 0), 0);
+      return Number((total / filtered.length).toFixed(1));
+    });
+
+    if (!radarChart) {
+      radarChart = new Chart(refs.dashboard.radar.getContext('2d'), {
+        type: 'radar',
+        data: {
+          labels: metricLabels,
+          datasets: [
+            {
+              label: '平均指标',
+              data: radarData,
+              backgroundColor: 'rgba(37, 99, 235, 0.2)',
+              borderColor: 'rgba(37, 99, 235, 0.8)',
+              pointBackgroundColor: 'rgba(37, 99, 235, 1)'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            r: {
+              suggestedMin: 0,
+              suggestedMax: 100,
+              ticks: {
+                stepSize: 20
+              }
+            }
+          }
+        }
+      });
+    } else {
+      radarChart.data.datasets[0].data = radarData;
+      radarChart.update();
+    }
+  }
+
+  function updatePreview(video) {
+    if (!refs.dashboard.previewVideo || !refs.dashboard.previewName || !refs.dashboard.previewMeta) {
+      return;
+    }
+    if (!video) {
+      refs.dashboard.previewVideo.removeAttribute('src');
+      refs.dashboard.previewVideo.load();
+      refs.dashboard.previewName.textContent = '无匹配视频';
+      refs.dashboard.previewMeta.textContent = '请调整筛选条件以查看生产视频。';
+      return;
+    }
+    if (refs.dashboard.previewVideo.src !== video.src) {
+      refs.dashboard.previewVideo.src = video.src;
+      refs.dashboard.previewVideo.load();
+    }
+    refs.dashboard.previewName.textContent = video.name;
+    refs.dashboard.previewMeta.textContent = `${video.line} ｜ ${video.modelSeries} ｜ ${video.fillWeight} ｜ ${video.capping} ｜ ${video.conveying} ｜ ${video.buffering} ｜ VOC: ${video.voc} ｜ ${video.explosion}`;
   }
 
   function attachDashboardEvents() {

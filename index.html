@@ -37,132 +37,233 @@
         </div>
       </header>
 
-      <div class="layout">
-        <aside class="sidebar" aria-label="Dashboards">
-          <section class="dashboard" data-group="lines">
-            <header class="dashboard__header">
-              <h2>Production Lines</h2>
-              <p>9 monitored lines with summary stats</p>
-            </header>
-            <div class="dashboard__grid" id="lines-dashboard" role="list"></div>
-          </section>
-          <section class="dashboard" data-group="feeds">
-            <header class="dashboard__header">
-              <h2>Feed Methods</h2>
-              <p>9 active feed methods to audit</p>
-            </header>
-            <div class="dashboard__grid" id="feeds-dashboard" role="list"></div>
-          </section>
-        </aside>
+      <nav class="primary-nav" aria-label="视图切换">
+        <button class="primary-nav__btn is-active" type="button" data-view-target="video">视频管理</button>
+        <button class="primary-nav__btn" type="button" data-view-target="dashboard">仪表板</button>
+      </nav>
 
-        <main class="detail-pane" aria-live="polite">
-          <section class="video-pane" aria-labelledby="video-pane-title">
-            <div class="video-pane__header">
-              <h2 id="video-pane-title">Video Review</h2>
-              <div class="video-pane__summary-toggle">
-                <label class="switch">
-                  <input id="summary-toggle" type="checkbox" />
-                  <span class="switch__slider" aria-hidden="true"></span>
-                  <span class="switch__label">Set as summary source</span>
-                </label>
-              </div>
-            </div>
-            <div class="video-pane__player">
-              <div id="upload-dropzone" class="video-dropzone" tabindex="0">
-                <p class="video-dropzone__text">Drop MP4 here or</p>
-                <button id="video-upload-btn" type="button" class="pill-btn">Upload video</button>
-                <input id="video-input" class="visually-hidden" type="file" accept="video/mp4" />
-              </div>
-              <div class="video-wrapper">
-                <video id="video-element" playsinline></video>
-                <div class="video-controls" aria-label="Video controls">
-                  <button type="button" data-control="play">Play</button>
-                  <button type="button" data-control="pause">Pause</button>
-                  <button type="button" data-control="mute">Mute</button>
-                  <label>
-                    Volume
-                    <input type="range" data-control="volume" min="0" max="1" step="0.05" value="1" />
+      <div class="view view--video is-active" data-view="video">
+        <div class="layout">
+          <aside class="sidebar" aria-label="Dashboards">
+            <section class="dashboard" data-group="lines">
+              <header class="dashboard__header">
+                <h2>Production Lines</h2>
+                <p>9 monitored lines with summary stats</p>
+              </header>
+              <div class="dashboard__grid" id="lines-dashboard" role="list"></div>
+            </section>
+            <section class="dashboard" data-group="feeds">
+              <header class="dashboard__header">
+                <h2>Feed Methods</h2>
+                <p>9 active feed methods to audit</p>
+              </header>
+              <div class="dashboard__grid" id="feeds-dashboard" role="list"></div>
+            </section>
+          </aside>
+
+          <main class="detail-pane" aria-live="polite">
+            <section class="video-pane" aria-labelledby="video-pane-title">
+              <div class="video-pane__header">
+                <h2 id="video-pane-title">Video Review</h2>
+                <div class="video-pane__summary-toggle">
+                  <label class="switch">
+                    <input id="summary-toggle" type="checkbox" />
+                    <span class="switch__slider" aria-hidden="true"></span>
+                    <span class="switch__label">Set as summary source</span>
                   </label>
-                  <label>
-                    Speed
-                    <select data-control="speed">
-                      <option value="0.5">0.5x</option>
-                      <option value="0.75">0.75x</option>
-                      <option value="1" selected>1x</option>
-                      <option value="1.25">1.25x</option>
-                      <option value="1.5">1.5x</option>
-                      <option value="2">2x</option>
-                    </select>
-                  </label>
-                  <button type="button" data-control="fullscreen">Fullscreen</button>
-                  <button type="button" data-control="poster">Capture poster</button>
                 </div>
               </div>
-            </div>
-            <div class="video-pane__playlist" aria-label="Video playlist">
-              <h3>Playlist</h3>
-              <div id="playlist" class="playlist" role="list"></div>
-            </div>
-            <button class="metadata-toggle" type="button" data-action="metadata">Metadata drawer</button>
-          </section>
+              <div class="video-pane__player">
+                <div id="upload-dropzone" class="video-dropzone" tabindex="0">
+                  <p class="video-dropzone__text">Drop MP4 here or</p>
+                  <button id="video-upload-btn" type="button" class="pill-btn">Upload video</button>
+                  <input id="video-input" class="visually-hidden" type="file" accept="video/mp4" />
+                </div>
+                <div class="video-wrapper">
+                  <video id="video-element" playsinline></video>
+                  <div class="video-controls" aria-label="Video controls">
+                    <button type="button" data-control="play">Play</button>
+                    <button type="button" data-control="pause">Pause</button>
+                    <button type="button" data-control="mute">Mute</button>
+                    <label>
+                      Volume
+                      <input type="range" data-control="volume" min="0" max="1" step="0.05" value="1" />
+                    </label>
+                    <label>
+                      Speed
+                      <select data-control="speed">
+                        <option value="0.5">0.5x</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                      </select>
+                    </label>
+                    <button type="button" data-control="fullscreen">Fullscreen</button>
+                    <button type="button" data-control="poster">Capture poster</button>
+                  </div>
+                </div>
+              </div>
+              <div class="video-pane__playlist" aria-label="Video playlist">
+                <h3>Playlist</h3>
+                <div id="playlist" class="playlist" role="list"></div>
+              </div>
+              <button class="metadata-toggle" type="button" data-action="metadata">Metadata drawer</button>
+            </section>
 
-          <section class="params-pane" aria-labelledby="params-title">
-            <div class="pane-header">
-              <h2 id="params-title">Parameters</h2>
-              <button class="pane-edit-btn" data-pane="parameters" type="button">Edit</button>
-            </div>
-            <dl id="params-list" class="definition-list"></dl>
-          </section>
+            <section class="params-pane" aria-labelledby="params-title">
+              <div class="pane-header">
+                <h2 id="params-title">Parameters</h2>
+                <button class="pane-edit-btn" data-pane="parameters" type="button">Edit</button>
+              </div>
+              <dl id="params-list" class="definition-list"></dl>
+            </section>
 
-          <section class="process-pane" aria-labelledby="process-title">
-            <div class="pane-header">
-              <h2 id="process-title">Process Flow</h2>
-              <button class="pane-edit-btn" data-pane="process" type="button">Edit</button>
-            </div>
-            <div id="process-flow" class="process-flow" tabindex="0">
-              <svg id="process-svg" class="process-flow__svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Process flow diagram"></svg>
-              <div id="process-nodes" class="process-flow__nodes" role="list"></div>
-            </div>
-          </section>
+            <section class="process-pane" aria-labelledby="process-title">
+              <div class="pane-header">
+                <h2 id="process-title">Process Flow</h2>
+                <button class="pane-edit-btn" data-pane="process" type="button">Edit</button>
+              </div>
+              <div id="process-flow" class="process-flow" tabindex="0">
+                <svg
+                  id="process-svg"
+                  class="process-flow__svg"
+                  xmlns="http://www.w3.org/2000/svg"
+                  role="img"
+                  aria-label="Process flow diagram"
+                ></svg>
+                <div id="process-nodes" class="process-flow__nodes" role="list"></div>
+              </div>
+            </section>
 
-          <section class="modules-pane" aria-labelledby="modules-title">
-            <div class="pane-header">
-              <h2 id="modules-title">Modules</h2>
-              <button class="pane-edit-btn" data-pane="modules" type="button">Edit</button>
-            </div>
-            <ul id="modules-list" class="module-list"></ul>
-          </section>
-        </main>
+            <section class="modules-pane" aria-labelledby="modules-title">
+              <div class="pane-header">
+                <h2 id="modules-title">Modules</h2>
+                <button class="pane-edit-btn" data-pane="modules" type="button">Edit</button>
+              </div>
+              <ul id="modules-list" class="module-list"></ul>
+            </section>
+          </main>
+        </div>
+
+        <div
+          id="metadata-drawer"
+          class="metadata-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="metadata-title"
+          hidden
+        >
+          <div class="metadata-drawer__header">
+            <h2 id="metadata-title">Metadata overview</h2>
+            <button type="button" data-action="close-metadata" aria-label="Close metadata">✕</button>
+          </div>
+          <div class="metadata-drawer__content">
+            <section>
+              <h3>Parameters</h3>
+              <dl id="drawer-params" class="definition-list"></dl>
+            </section>
+            <section>
+              <h3>Process</h3>
+              <ol id="drawer-process" class="drawer-process"></ol>
+            </section>
+            <section>
+              <h3>Modules</h3>
+              <ul id="drawer-modules" class="module-list"></ul>
+            </section>
+            <section>
+              <h3>Notes</h3>
+              <textarea id="drawer-notes" rows="6" placeholder="Add operational notes"></textarea>
+              <button type="button" data-action="save-notes" class="pill-btn">Save notes</button>
+            </section>
+          </div>
+        </div>
       </div>
 
-      <div id="metadata-drawer" class="metadata-drawer" role="dialog" aria-modal="true" aria-labelledby="metadata-title" hidden>
-        <div class="metadata-drawer__header">
-          <h2 id="metadata-title">Metadata overview</h2>
-          <button type="button" data-action="close-metadata" aria-label="Close metadata">✕</button>
-        </div>
-        <div class="metadata-drawer__content">
-          <section>
-            <h3>Parameters</h3>
-            <dl id="drawer-params" class="definition-list"></dl>
+      <div class="view view--dashboard" data-view="dashboard" hidden>
+        <div class="dashboard-view" aria-live="polite">
+          <section class="dashboard-filters" aria-labelledby="dashboard-filters-title">
+            <div class="section-header">
+              <h2 id="dashboard-filters-title">筛选条件</h2>
+              <p>组合过滤器快速定位目标生产视频</p>
+            </div>
+            <div class="filter-grid">
+              <label>
+                <span>型号系列</span>
+                <select data-filter="modelSeries"></select>
+              </label>
+              <label>
+                <span>灌装重量</span>
+                <select data-filter="fillWeight"></select>
+              </label>
+              <label>
+                <span>压盖方式</span>
+                <select data-filter="capping"></select>
+              </label>
+              <label>
+                <span>输送方式</span>
+                <select data-filter="conveying"></select>
+              </label>
+              <label>
+                <span>缓存方式</span>
+                <select data-filter="buffering"></select>
+              </label>
+              <label>
+                <span>VOC要求</span>
+                <select data-filter="voc"></select>
+              </label>
+              <label>
+                <span>防爆要求</span>
+                <select data-filter="explosion"></select>
+              </label>
+            </div>
           </section>
-          <section>
-            <h3>Process</h3>
-            <ol id="drawer-process" class="drawer-process"></ol>
+
+          <section class="dashboard-insights" aria-labelledby="dashboard-insights-title">
+            <div class="section-header">
+              <h2 id="dashboard-insights-title">产线洞察</h2>
+              <p>按过滤结果实时刷新</p>
+            </div>
+            <div class="dashboard-insights__grid">
+              <div class="chart-card">
+                <h3>灌装重量分布</h3>
+                <canvas id="dashboard-chart" aria-label="灌装重量分布图" role="img"></canvas>
+              </div>
+              <div class="chart-card">
+                <h3>绩效指标雷达图</h3>
+                <canvas id="dashboard-radar" aria-label="绩效指标雷达图" role="img"></canvas>
+              </div>
+            </div>
           </section>
-          <section>
-            <h3>Modules</h3>
-            <ul id="drawer-modules" class="module-list"></ul>
+
+          <section class="dashboard-results" aria-labelledby="dashboard-results-title">
+            <div class="section-header">
+              <h2 id="dashboard-results-title">匹配视频</h2>
+              <p>点击条目更新预览</p>
+            </div>
+            <ul id="dashboard-results" class="dashboard-results__list" role="list"></ul>
           </section>
-          <section>
-            <h3>Notes</h3>
-            <textarea id="drawer-notes" rows="6" placeholder="Add operational notes"></textarea>
-            <button type="button" data-action="save-notes" class="pill-btn">Save notes</button>
+
+          <section class="dashboard-preview" aria-labelledby="dashboard-preview-title">
+            <div class="section-header">
+              <h2 id="dashboard-preview-title">视频预览</h2>
+              <p>展示过滤结果中的代表片段</p>
+            </div>
+            <div class="dashboard-preview__player">
+              <video id="dashboard-preview-video" controls playsinline></video>
+            </div>
+            <div class="dashboard-preview__meta">
+              <h3 id="dashboard-preview-name"></h3>
+              <p id="dashboard-preview-meta"></p>
+            </div>
           </section>
         </div>
       </div>
 
       <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>
