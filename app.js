@@ -161,7 +161,7 @@ const Toast = {
   show(message, { type = 'info', timeout = 3600 } = {}) {
     if (!this.region) return;
     const toast = document.createElement('div');
-    toast.className = `toast${type === 'error' ? ' toast--error' : ''}`;
+    toast.className = `toast-item text-sm text-slate-700${type === 'error' ? ' toast-item--error text-rose-700' : ''}`;
     toast.textContent = message;
     this.region.appendChild(toast);
     setTimeout(() => {
@@ -182,8 +182,8 @@ const App = (() => {
   let currentVideoElement;
 
   const refs = {
-    shell: document.querySelector('.app-shell'),
-    modeButtons: Array.from(document.querySelectorAll('.mode-toggle__btn')),
+    shell: document.getElementById('app-shell'),
+    modeButtons: Array.from(document.querySelectorAll('[data-mode-button]')),
     dashboardContainers: {
       lines: document.getElementById('lines-dashboard'),
       feeds: document.getElementById('feeds-dashboard')
@@ -214,8 +214,8 @@ const App = (() => {
       export: document.querySelector('[data-action="export"]'),
       reset: document.querySelector('[data-action="reset"]')
     },
-    paneEditButtons: Array.from(document.querySelectorAll('.pane-edit-btn')),
-    videoControls: document.querySelector('.video-controls')
+    paneEditButtons: Array.from(document.querySelectorAll('[data-role="pane-edit"]')),
+    videoControls: document.getElementById('video-controls')
   };
 
   function init() {
@@ -271,7 +271,17 @@ const App = (() => {
   function updateMode(mode, { save: shouldSave = true } = {}) {
     state.mode = mode;
     refs.shell.dataset.mode = mode;
-    refs.modeButtons.forEach(btn => btn.classList.toggle('is-active', btn.dataset.mode === mode));
+    refs.modeButtons.forEach(btn => {
+      const isActive = btn.dataset.mode === mode;
+      btn.setAttribute('aria-pressed', String(isActive));
+      btn.classList.toggle('bg-blue-600', isActive);
+      btn.classList.toggle('text-white', isActive);
+      btn.classList.toggle('shadow-md', isActive);
+      btn.classList.toggle('text-slate-500', !isActive);
+    });
+    refs.paneEditButtons.forEach(btn => {
+      btn.classList.toggle('hidden', mode === 'presenter');
+    });
     if (shouldSave) save();
     renderProcessNodes(getSelectedEntity());
   }
@@ -283,26 +293,45 @@ const App = (() => {
       state[group].forEach(entity => {
         const card = document.createElement('button');
         card.type = 'button';
-        card.className = 'dashboard-card';
+        card.className = 'relative flex flex-col gap-2 rounded-2xl border border-transparent bg-white/95 p-4 text-left shadow-lg transition duration-200 hover:-translate-y-1 hover:shadow-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600';
+        card.dataset.dashboardCard = 'true';
         card.dataset.id = entity.id;
         card.dataset.group = group;
         card.dataset.status = entity.stats.status || 'Pending';
-        card.dataset.summary = String(state.summary?.group === group && state.summary?.id === entity.id);
         card.setAttribute('role', 'listitem');
 
+        const isSummary = state.summary?.group === group && state.summary?.id === entity.id;
+        card.dataset.summary = String(isSummary);
+
+        const summaryBadge = document.createElement('span');
+        summaryBadge.dataset.summaryBadge = 'true';
+        summaryBadge.className = 'pointer-events-none absolute right-3 top-3 rounded-full bg-amber-100 px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-amber-700';
+        summaryBadge.textContent = 'Summary';
+        summaryBadge.hidden = !isSummary;
+
         const title = document.createElement('span');
-        title.className = 'dashboard-card__title';
+        title.className = 'text-sm font-semibold text-slate-900';
         title.textContent = entity.name;
 
         const stat = document.createElement('span');
-        stat.className = 'dashboard-card__stat';
+        stat.className = 'text-2xl font-bold text-slate-900';
         stat.textContent = entity.stats.duration || '0:00';
 
         const sub = document.createElement('span');
-        sub.className = 'dashboard-card__sub';
+        sub.className = 'text-xs text-slate-500';
         sub.textContent = entity.stats.updatedAt ? `Updated ${formatRelative(entity.stats.updatedAt)}` : 'Awaiting video';
 
-        card.append(title, stat, sub);
+        const status = document.createElement('span');
+        const statusValue = (entity.stats.status || 'Pending').toLowerCase();
+        const statusClass = statusValue.includes('ready')
+          ? 'text-emerald-600'
+          : statusValue.includes('await')
+            ? 'text-amber-600'
+            : 'text-blue-600';
+        status.className = `text-xs font-semibold uppercase tracking-wide ${statusClass}`;
+        status.textContent = entity.stats.status || 'Pending';
+
+        card.append(summaryBadge, title, stat, sub, status);
         container.appendChild(card);
       });
     });
@@ -312,7 +341,7 @@ const App = (() => {
   function attachDashboardEvents() {
     Object.values(refs.dashboardContainers).forEach(container => {
       container.addEventListener('click', event => {
-        const card = event.target.closest('.dashboard-card');
+        const card = event.target.closest('[data-dashboard-card]');
         if (!card) return;
         selectEntity(card.dataset.group, card.dataset.id);
       });
@@ -334,9 +363,19 @@ const App = (() => {
   }
 
   function refreshActiveCard() {
-    document.querySelectorAll('.dashboard-card').forEach(card => {
-      card.classList.toggle('is-active', card.dataset.group === selection.group && card.dataset.id === selection.id);
-      card.dataset.summary = String(state.summary?.group === card.dataset.group && state.summary?.id === card.dataset.id);
+    document.querySelectorAll('[data-dashboard-card]').forEach(card => {
+      const isActive = card.dataset.group === selection.group && card.dataset.id === selection.id;
+      const isSummary = state.summary?.group === card.dataset.group && state.summary?.id === card.dataset.id;
+      card.classList.toggle('ring-2', isActive);
+      card.classList.toggle('ring-blue-500/60', isActive);
+      card.classList.toggle('border-blue-200', isActive);
+      card.classList.toggle('ring-amber-400/60', isSummary && !isActive);
+      card.classList.toggle('border-amber-200', isSummary && !isActive);
+      card.dataset.summary = String(isSummary);
+      const badge = card.querySelector('[data-summary-badge]');
+      if (badge) {
+        badge.hidden = !isSummary;
+      }
     });
   }
 
@@ -360,8 +399,10 @@ const App = (() => {
     refs.paramsList.innerHTML = '';
     entity.parameters.forEach(param => {
       const dt = document.createElement('dt');
+      dt.className = 'text-sm font-medium text-slate-500';
       dt.textContent = param.name;
       const dd = document.createElement('dd');
+      dd.className = 'text-lg font-semibold text-slate-900';
       dd.textContent = `${param.value} ${param.unit ?? ''}`.trim();
       refs.paramsList.append(dt, dd);
     });
@@ -377,21 +418,27 @@ const App = (() => {
     const editable = state.mode === 'editor';
     entity.process.forEach(step => {
       const node = document.createElement('div');
-      node.className = 'process-node';
+      node.className = 'flex min-w-[160px] flex-col gap-2 rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600';
+      node.dataset.processNode = 'true';
       node.tabIndex = 0;
       node.dataset.id = step.id;
       node.draggable = editable;
+      node.classList.toggle('cursor-grab', editable);
+      node.classList.toggle('hover:border-blue-500', editable);
+      node.classList.toggle('hover:shadow-lg', editable);
+      node.classList.toggle('active:cursor-grabbing', editable);
+      node.classList.toggle('cursor-default', !editable);
       const title = document.createElement('div');
-      title.className = 'process-node__title';
+      title.className = 'text-sm font-semibold text-slate-900';
       title.textContent = step.title;
       const meta = document.createElement('div');
-      meta.className = 'process-node__meta';
+      meta.className = 'text-xs text-slate-500';
       meta.textContent = `Owner: ${step.owner}`;
       node.append(title, meta);
       refs.processNodes.appendChild(node);
     });
     if (editable) {
-      refs.processNodes.querySelectorAll('.process-node').forEach(node => {
+      refs.processNodes.querySelectorAll('[data-process-node="true"]').forEach(node => {
         node.addEventListener('dragstart', handleProcessDragStart);
         node.addEventListener('dragover', handleProcessDragOver);
         node.addEventListener('drop', handleProcessDrop);
@@ -405,7 +452,7 @@ const App = (() => {
     const nodes = Array.from(refs.processNodes.children);
     const width = nodes.reduce((acc, node) => acc + node.offsetWidth + 20, 40);
     refs.processSvg.setAttribute('width', width);
-    refs.processSvg.innerHTML = '<defs><marker id="arrow-head" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" /></marker></defs>';
+    refs.processSvg.innerHTML = '<defs><marker id="arrow-head" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb" /></marker></defs>';
     nodes.forEach((node, index) => {
       const rect = node.getBoundingClientRect();
       const containerRect = refs.processNodes.getBoundingClientRect();
@@ -426,12 +473,19 @@ const App = (() => {
     refs.modulesList.innerHTML = '';
     entity.modules.forEach(module => {
       const li = document.createElement('li');
-      li.className = 'module-item';
+      li.className = 'flex items-center justify-between rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm';
       const name = document.createElement('span');
+      name.className = 'text-sm font-medium text-slate-700';
       name.textContent = module.name;
       const status = document.createElement('span');
-      status.className = 'module-item__status';
-      status.textContent = module.status === 'green' ? 'Nominal' : module.status === 'amber' ? 'Watch' : 'Check';
+      const statusStyles = {
+        green: { label: 'Nominal', className: 'bg-emerald-50 text-emerald-600' },
+        amber: { label: 'Watch', className: 'bg-amber-50 text-amber-600' },
+        red: { label: 'Check', className: 'bg-rose-50 text-rose-600' }
+      };
+      const style = statusStyles[module.status] || { label: module.status, className: 'bg-slate-100 text-slate-600' };
+      status.className = `rounded-full px-3 py-1 text-xs font-semibold ${style.className}`;
+      status.textContent = style.label;
       li.append(name, status);
       refs.modulesList.appendChild(li);
     });
@@ -442,24 +496,27 @@ const App = (() => {
     const { playlist, activeId } = entity.video;
     playlist.forEach(item => {
       const card = document.createElement('div');
-      card.className = 'playlist-item';
+      card.className = 'overflow-hidden rounded-2xl border border-slate-200 bg-white/80 shadow-sm transition hover:-translate-y-1 hover:shadow-lg';
+      card.dataset.playlistItem = 'true';
       card.dataset.id = item.id;
-      if (item.id === activeId) {
-        card.classList.add('is-active');
+      const isActive = item.id === activeId;
+      if (isActive) {
+        card.classList.add('border-blue-200', 'ring-2', 'ring-blue-500/60', 'shadow-lg');
       }
       const button = document.createElement('button');
       button.type = 'button';
+      button.className = 'flex h-full w-full flex-col text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600';
       const thumb = document.createElement('img');
-      thumb.className = 'playlist-item__thumb';
+      thumb.className = 'h-28 w-full object-cover';
       thumb.alt = item.title;
       thumb.src = item.poster || createThumbnailPlaceholder(entity.name);
       const body = document.createElement('div');
-      body.className = 'playlist-item__body';
+      body.className = 'flex flex-1 flex-col gap-1 px-4 py-3';
       const title = document.createElement('span');
-      title.className = 'playlist-item__title';
+      title.className = 'text-sm font-semibold text-slate-900';
       title.textContent = item.title;
       const meta = document.createElement('span');
-      meta.className = 'playlist-item__meta';
+      meta.className = 'text-xs text-slate-500';
       meta.textContent = item.duration ? `${item.duration}` : 'No duration';
       body.append(title, meta);
       button.append(thumb, body);
@@ -478,21 +535,24 @@ const App = (() => {
     refs.drawer.params.innerHTML = '';
     entity.parameters.forEach(param => {
       const dt = document.createElement('dt');
+      dt.className = 'text-xs font-semibold uppercase tracking-wide text-slate-500';
       dt.textContent = param.name;
       const dd = document.createElement('dd');
+      dd.className = 'text-sm font-medium text-slate-700';
       dd.textContent = `${param.value} ${param.unit ?? ''}`.trim();
       refs.drawer.params.append(dt, dd);
     });
     refs.drawer.process.innerHTML = '';
     entity.process.forEach(step => {
       const li = document.createElement('li');
+      li.className = 'rounded-xl bg-slate-100/80 px-3 py-2';
       li.textContent = `${step.title} • Owner: ${step.owner}`;
       refs.drawer.process.appendChild(li);
     });
     refs.drawer.modules.innerHTML = '';
     entity.modules.forEach(module => {
       const li = document.createElement('li');
-      li.className = 'module-item';
+      li.className = 'rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm text-slate-600';
       li.textContent = `${module.name} – ${module.status}`;
       refs.drawer.modules.appendChild(li);
     });
@@ -507,14 +567,24 @@ const App = (() => {
   function attachMetadataDrawer() {
     refs.metadataToggle.addEventListener('click', () => {
       refs.metadataDrawer.hidden = false;
+      refs.metadataToggle.setAttribute('aria-expanded', 'true');
       refs.drawer.notes.focus();
     });
     refs.metadataClose.addEventListener('click', () => {
       refs.metadataDrawer.hidden = true;
+      refs.metadataToggle.setAttribute('aria-expanded', 'false');
     });
     refs.metadataDrawer.addEventListener('click', event => {
       if (event.target === refs.metadataDrawer) {
         refs.metadataDrawer.hidden = true;
+        refs.metadataToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !refs.metadataDrawer.hidden) {
+        refs.metadataDrawer.hidden = true;
+        refs.metadataToggle.setAttribute('aria-expanded', 'false');
+        refs.metadataToggle.focus();
       }
     });
   }
@@ -607,13 +677,13 @@ const App = (() => {
     ['dragenter', 'dragover'].forEach(eventName => {
       refs.dropzone.addEventListener(eventName, event => {
         event.preventDefault();
-        refs.dropzone.classList.add('is-hovered');
+        refs.dropzone.classList.add('ring-2', 'ring-offset-2', 'ring-blue-500', 'bg-blue-50');
       });
     });
     ['dragleave', 'drop'].forEach(eventName => {
       refs.dropzone.addEventListener(eventName, event => {
         event.preventDefault();
-        refs.dropzone.classList.remove('is-hovered');
+        refs.dropzone.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-500', 'bg-blue-50');
       });
     });
     refs.dropzone.addEventListener('drop', async event => {

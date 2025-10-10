@@ -10,82 +10,200 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'Segoe UI', 'sans-serif']
+            }
+          }
+        }
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <div class="app-shell" data-mode="presenter">
-      <header class="top-bar" role="banner">
-        <div class="top-bar__brand" aria-label="Mingming Intelligence">
-          <span class="brand-mark" aria-hidden="true">⧉</span>
-          <span class="brand-text">Mingming Intelligence</span>
-        </div>
-        <div class="top-bar__title" role="heading" aria-level="1">
-          <span class="title-primary">Production Summary Board</span>
-          <span class="title-sub">Real-time feed + line playback</span>
-        </div>
-        <div class="top-bar__actions">
-          <div class="mode-toggle" role="group" aria-label="Display mode">
-            <button class="mode-toggle__btn is-active" data-mode="presenter">Presenter</button>
-            <button class="mode-toggle__btn" data-mode="editor">Editor</button>
+  <body class="min-h-screen bg-gradient-to-b from-slate-50 via-slate-100 to-slate-200 font-sans text-slate-900 antialiased">
+    <div id="app-shell" data-mode="presenter" class="grid min-h-screen grid-rows-[auto,1fr]">
+      <header class="sticky top-0 z-10 bg-white/90 shadow-xl backdrop-blur">
+        <div class="mx-auto grid w-full max-w-7xl gap-6 px-6 py-6 md:grid-cols-[auto,1fr,auto] md:items-center">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="h-7 w-7">
+                <path d="M11.47 3.84a.75.75 0 0 1 1.06 0l6.63 6.63a.75.75 0 0 1 0 1.06l-6.63 6.63a.75.75 0 0 1-1.06 0l-6.63-6.63a.75.75 0 0 1 0-1.06l6.63-6.63z" />
+                <path d="M8.205 7.5a.75.75 0 0 1 1.06 0l4.235 4.235a.75.75 0 0 1 0 1.06L9.265 17.03a.75.75 0 0 1-1.06-1.06l3.705-3.705-3.705-3.705a.75.75 0 0 1 0-1.06z" class="text-white/70" />
+              </svg>
+            </span>
+            <span class="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
+              Mingming Intelligence
+            </span>
           </div>
-          <button class="top-bar__btn" data-action="import" type="button">Import JSON</button>
-          <button class="top-bar__btn" data-action="export" type="button">Export JSON</button>
-          <button class="top-bar__btn top-bar__btn--danger" data-action="reset" type="button">
-            Reset All
-          </button>
-          <input id="import-input" class="visually-hidden" type="file" accept="application/json" />
+          <div class="flex flex-col gap-1">
+            <h1 class="text-xl font-semibold text-slate-900">Production Summary Board</h1>
+            <p class="text-sm text-slate-500">Real-time feed + line playback</p>
+          </div>
+          <div class="flex flex-wrap items-center justify-end gap-3">
+            <div
+              class="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1 text-sm font-medium shadow-sm"
+              role="group"
+              aria-label="Display mode"
+            >
+              <button
+                type="button"
+                data-mode="presenter"
+                data-mode-button
+                class="rounded-full px-4 py-2 text-slate-500 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                Presenter
+              </button>
+              <button
+                type="button"
+                data-mode="editor"
+                data-mode-button
+                class="rounded-full px-4 py-2 text-slate-500 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                Editor
+              </button>
+            </div>
+            <button
+              class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              data-action="import"
+              type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 12 12 16.5m0 0 4.5-4.5M12 16.5V3" />
+              </svg>
+              Import JSON
+            </button>
+            <button
+              class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              data-action="export"
+              type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25v3M16.5 12 12 7.5m0 0L7.5 12M12 7.5V21" />
+              </svg>
+              Export JSON
+            </button>
+            <button
+              class="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-50 hover:text-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
+              data-action="reset"
+              type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0 1 12.667-5.303L19.5 3.75v6h-6l2.405-2.405A5.25 5.25 0 1 0 17.25 12h2.25a7.5 7.5 0 1 1-15 0Z" />
+              </svg>
+              Reset All
+            </button>
+            <input id="import-input" class="sr-only" type="file" accept="application/json" />
+          </div>
         </div>
       </header>
 
-      <div class="layout">
-        <aside class="sidebar" aria-label="Dashboards">
-          <section class="dashboard" data-group="lines">
-            <header class="dashboard__header">
-              <h2>Production Lines</h2>
-              <p>9 monitored lines with summary stats</p>
+      <div class="mx-auto grid w-full max-w-7xl gap-8 px-6 pb-16 pt-10 lg:grid-cols-[360px,1fr]">
+        <aside class="flex flex-col gap-8" aria-label="Dashboards">
+          <section class="flex flex-col gap-6 rounded-3xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80" data-group="lines">
+            <header class="space-y-1">
+              <h2 class="text-lg font-semibold text-slate-900">Production Lines</h2>
+              <p class="text-sm text-slate-500">9 monitored lines with summary stats</p>
             </header>
-            <div class="dashboard__grid" id="lines-dashboard" role="list"></div>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3" id="lines-dashboard" role="list"></div>
           </section>
-          <section class="dashboard" data-group="feeds">
-            <header class="dashboard__header">
-              <h2>Feed Methods</h2>
-              <p>9 active feed methods to audit</p>
+          <section class="flex flex-col gap-6 rounded-3xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80" data-group="feeds">
+            <header class="space-y-1">
+              <h2 class="text-lg font-semibold text-slate-900">Feed Methods</h2>
+              <p class="text-sm text-slate-500">9 active feed methods to audit</p>
             </header>
-            <div class="dashboard__grid" id="feeds-dashboard" role="list"></div>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3" id="feeds-dashboard" role="list"></div>
           </section>
         </aside>
 
-        <main class="detail-pane" aria-live="polite">
-          <section class="video-pane" aria-labelledby="video-pane-title">
-            <div class="video-pane__header">
-              <h2 id="video-pane-title">Video Review</h2>
-              <div class="video-pane__summary-toggle">
-                <label class="switch">
-                  <input id="summary-toggle" type="checkbox" />
-                  <span class="switch__slider" aria-hidden="true"></span>
-                  <span class="switch__label">Set as summary source</span>
+        <main class="grid gap-8 xl:grid-cols-2 2xl:grid-cols-3" aria-live="polite">
+          <section
+            class="col-span-full flex flex-col gap-6 rounded-3xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80 xl:col-span-2 2xl:col-span-3"
+            aria-labelledby="video-pane-title"
+          >
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <h2 id="video-pane-title" class="text-xl font-semibold text-slate-900">Video Review</h2>
+              <div class="flex items-center">
+                <label class="flex items-center gap-3 text-sm text-slate-600">
+                  <input id="summary-toggle" type="checkbox" class="peer sr-only" />
+                  <span class="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 transition peer-checked:bg-blue-600">
+                    <span class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+                  </span>
+                  <span class="font-medium">Set as summary source</span>
                 </label>
               </div>
             </div>
-            <div class="video-pane__player">
-              <div id="upload-dropzone" class="video-dropzone" tabindex="0">
-                <p class="video-dropzone__text">Drop MP4 here or</p>
-                <button id="video-upload-btn" type="button" class="pill-btn">Upload video</button>
-                <input id="video-input" class="visually-hidden" type="file" accept="video/mp4" />
+            <div class="grid gap-6 lg:grid-cols-2">
+              <div
+                id="upload-dropzone"
+                class="flex min-h-[220px] flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-slate-300 bg-white/70 p-8 text-center text-slate-500 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                tabindex="0"
+              >
+                <p class="text-sm">Drop MP4 here or</p>
+                <button
+                  id="video-upload-btn"
+                  type="button"
+                  class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  Upload video
+                </button>
+                <input id="video-input" class="sr-only" type="file" accept="video/mp4" />
               </div>
-              <div class="video-wrapper">
-                <video id="video-element" playsinline></video>
-                <div class="video-controls" aria-label="Video controls">
-                  <button type="button" data-control="play">Play</button>
-                  <button type="button" data-control="pause">Pause</button>
-                  <button type="button" data-control="mute">Mute</button>
-                  <label>
-                    Volume
-                    <input type="range" data-control="volume" min="0" max="1" step="0.05" value="1" />
+              <div class="space-y-4 rounded-3xl bg-slate-900/90 p-4 shadow-2xl">
+                <div class="overflow-hidden rounded-2xl bg-slate-900">
+                  <video id="video-element" class="h-full w-full" playsinline></video>
+                </div>
+                <div
+                  id="video-controls"
+                  class="flex flex-wrap items-center gap-3 rounded-2xl bg-slate-900/70 p-4 text-sm text-slate-100"
+                  aria-label="Video controls"
+                >
+                  <button
+                    type="button"
+                    data-control="play"
+                    class="rounded-full bg-white/10 px-4 py-2 font-medium text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    Play
+                  </button>
+                  <button
+                    type="button"
+                    data-control="pause"
+                    class="rounded-full bg-white/10 px-4 py-2 font-medium text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    Pause
+                  </button>
+                  <button
+                    type="button"
+                    data-control="mute"
+                    class="rounded-full bg-white/10 px-4 py-2 font-medium text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    Mute
+                  </button>
+                  <label class="flex items-center gap-2">
+                    <span>Volume</span>
+                    <input
+                      type="range"
+                      data-control="volume"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value="1"
+                      class="h-1 w-28 cursor-pointer rounded-full accent-blue-600"
+                    />
                   </label>
-                  <label>
-                    Speed
-                    <select data-control="speed">
+                  <label class="flex items-center gap-2">
+                    <span>Speed</span>
+                    <select
+                      data-control="speed"
+                      class="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    >
                       <option value="0.5">0.5x</option>
                       <option value="0.75">0.75x</option>
                       <option value="1" selected>1x</option>
@@ -94,74 +212,160 @@
                       <option value="2">2x</option>
                     </select>
                   </label>
-                  <button type="button" data-control="fullscreen">Fullscreen</button>
-                  <button type="button" data-control="poster">Capture poster</button>
+                  <button
+                    type="button"
+                    data-control="fullscreen"
+                    class="rounded-full bg-white/10 px-4 py-2 font-medium text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    Fullscreen
+                  </button>
+                  <button
+                    type="button"
+                    data-control="poster"
+                    class="rounded-full bg-white/10 px-4 py-2 font-medium text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    Capture poster
+                  </button>
                 </div>
               </div>
             </div>
-            <div class="video-pane__playlist" aria-label="Video playlist">
-              <h3>Playlist</h3>
-              <div id="playlist" class="playlist" role="list"></div>
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-slate-900">Playlist</h3>
+              <div id="playlist" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" role="list"></div>
             </div>
-            <button class="metadata-toggle" type="button" data-action="metadata">Metadata drawer</button>
+            <button
+              class="inline-flex items-center gap-2 self-start rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:-translate-y-0.5 hover:bg-blue-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              type="button"
+              data-action="metadata"
+              aria-expanded="false"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 4h.008v.008H12V16z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+              </svg>
+              Metadata drawer
+            </button>
           </section>
 
-          <section class="params-pane" aria-labelledby="params-title">
-            <div class="pane-header">
-              <h2 id="params-title">Parameters</h2>
-              <button class="pane-edit-btn" data-pane="parameters" type="button">Edit</button>
+          <section class="flex flex-col gap-4 rounded-3xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80" aria-labelledby="params-title">
+            <div class="flex items-center justify-between">
+              <h2 id="params-title" class="text-lg font-semibold text-slate-900">Parameters</h2>
+              <button
+                class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition hover:border-blue-500 hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                data-pane="parameters"
+                data-role="pane-edit"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.862 4.487z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125L16.875 4.5" />
+                </svg>
+                Edit
+              </button>
             </div>
-            <dl id="params-list" class="definition-list"></dl>
+            <dl id="params-list" class="grid gap-3"></dl>
           </section>
 
-          <section class="process-pane" aria-labelledby="process-title">
-            <div class="pane-header">
-              <h2 id="process-title">Process Flow</h2>
-              <button class="pane-edit-btn" data-pane="process" type="button">Edit</button>
+          <section class="flex flex-col gap-4 rounded-3xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80" aria-labelledby="process-title">
+            <div class="flex items-center justify-between">
+              <h2 id="process-title" class="text-lg font-semibold text-slate-900">Process Flow</h2>
+              <button
+                class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition hover:border-blue-500 hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                data-pane="process"
+                data-role="pane-edit"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h18M3 9h18m-9 4.5h9M3 18h18" />
+                </svg>
+                Edit
+              </button>
             </div>
-            <div id="process-flow" class="process-flow" tabindex="0">
-              <svg id="process-svg" class="process-flow__svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Process flow diagram"></svg>
-              <div id="process-nodes" class="process-flow__nodes" role="list"></div>
+            <div id="process-flow" class="relative overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/70 p-4" tabindex="0">
+              <svg id="process-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Process flow diagram" class="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2"></svg>
+              <div id="process-nodes" class="flex w-max items-stretch gap-4 pb-4" role="list"></div>
             </div>
           </section>
 
-          <section class="modules-pane" aria-labelledby="modules-title">
-            <div class="pane-header">
-              <h2 id="modules-title">Modules</h2>
-              <button class="pane-edit-btn" data-pane="modules" type="button">Edit</button>
+          <section class="flex flex-col gap-4 rounded-3xl bg-white/80 p-6 shadow-xl ring-1 ring-slate-200/80" aria-labelledby="modules-title">
+            <div class="flex items-center justify-between">
+              <h2 id="modules-title" class="text-lg font-semibold text-slate-900">Modules</h2>
+              <button
+                class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm transition hover:border-blue-500 hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                data-pane="modules"
+                data-role="pane-edit"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 7.5V18a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 18V7.5M6 7.5V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v1.5M6 7.5h12M9 12h6" />
+                </svg>
+                Edit
+              </button>
             </div>
-            <ul id="modules-list" class="module-list"></ul>
+            <ul id="modules-list" class="grid gap-3"></ul>
           </section>
         </main>
       </div>
 
-      <div id="metadata-drawer" class="metadata-drawer" role="dialog" aria-modal="true" aria-labelledby="metadata-title" hidden>
-        <div class="metadata-drawer__header">
-          <h2 id="metadata-title">Metadata overview</h2>
-          <button type="button" data-action="close-metadata" aria-label="Close metadata">✕</button>
-        </div>
-        <div class="metadata-drawer__content">
-          <section>
-            <h3>Parameters</h3>
-            <dl id="drawer-params" class="definition-list"></dl>
-          </section>
-          <section>
-            <h3>Process</h3>
-            <ol id="drawer-process" class="drawer-process"></ol>
-          </section>
-          <section>
-            <h3>Modules</h3>
-            <ul id="drawer-modules" class="module-list"></ul>
-          </section>
-          <section>
-            <h3>Notes</h3>
-            <textarea id="drawer-notes" rows="6" placeholder="Add operational notes"></textarea>
-            <button type="button" data-action="save-notes" class="pill-btn">Save notes</button>
-          </section>
+      <div
+        id="metadata-drawer"
+        class="fixed inset-0 flex items-start justify-end bg-slate-900/40 p-6 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="metadata-title"
+        hidden
+      >
+        <div class="flex w-full max-w-lg flex-col gap-6 rounded-3xl bg-white p-6 shadow-2xl">
+          <div class="flex items-center justify-between">
+            <h2 id="metadata-title" class="text-xl font-semibold text-slate-900">Metadata overview</h2>
+            <button
+              type="button"
+              data-action="close-metadata"
+              class="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              aria-label="Close metadata"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="space-y-6 overflow-y-auto pr-2">
+            <section class="space-y-2">
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Parameters</h3>
+              <dl id="drawer-params" class="grid gap-2"></dl>
+            </section>
+            <section class="space-y-2">
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Process</h3>
+              <ol id="drawer-process" class="list-decimal space-y-1 pl-5 text-sm text-slate-600"></ol>
+            </section>
+            <section class="space-y-2">
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Modules</h3>
+              <ul id="drawer-modules" class="grid gap-2 text-sm text-slate-600"></ul>
+            </section>
+            <section class="space-y-3">
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Notes</h3>
+              <textarea
+                id="drawer-notes"
+                rows="6"
+                placeholder="Add operational notes"
+                class="w-full rounded-2xl border border-slate-200 p-3 text-sm text-slate-700 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              ></textarea>
+              <button
+                type="button"
+                data-action="save-notes"
+                class="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+                Save notes
+              </button>
+            </section>
+          </div>
         </div>
       </div>
 
-      <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
+      <div id="toast-region" class="pointer-events-none fixed bottom-8 right-8 z-50 flex max-w-sm flex-col gap-3" role="status" aria-live="polite"></div>
     </div>
     <script type="module" src="app.js"></script>
   </body>
