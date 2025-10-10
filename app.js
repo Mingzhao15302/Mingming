@@ -32,14 +32,39 @@ class VideoStore {
   }
 
   async addFiles(files) {
+    if (!files.length) return [];
+
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('videos', file);
+    }
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('上传视频文件失败');
+    }
+
+    const payload = await response.json();
+    const uploaded = Array.isArray(payload.files) ? payload.files : [];
+
+    if (!uploaded.length) {
+      throw new Error('上传响应中没有包含任何文件');
+    }
+
     const tx = this.db.transaction('videos', 'readwrite');
     const store = tx.store;
     const added = [];
-    for (const file of files) {
+
+    for (const file of uploaded) {
       const id = crypto.randomUUID();
+      const timestamp = Date.now();
       const record = {
         id,
-        name: file.name,
+        name: file.originalName,
         clientName: '',
         material: '',
         series: CATEGORY_OPTIONS.series[0] ?? '',
@@ -49,16 +74,17 @@ class VideoStore {
         buffer: CATEGORY_OPTIONS.buffer[0] ?? '',
         voc: CATEGORY_OPTIONS.voc[0] ?? '',
         explosion: CATEGORY_OPTIONS.explosion[0] ?? '',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        blob: file,
+        createdAt: timestamp,
+        updatedAt: timestamp,
         size: file.size,
         type: file.type,
-        originalName: file.name,
+        originalName: file.originalName,
+        filePath: file.path,
       };
       await store.put(record);
       added.push(record);
     }
+
     await tx.done;
     return added;
   }
@@ -76,6 +102,25 @@ class VideoStore {
   }
 
   async deleteMany(ids) {
+    if (!ids.length) return;
+
+    const records = await Promise.all(ids.map((id) => this.db.get('videos', id)));
+    const paths = records
+      .map((record) => record?.filePath)
+      .filter((value) => typeof value === 'string' && value.length > 0);
+
+    if (paths.length) {
+      try {
+        await fetch('/api/videos', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths }),
+        });
+      } catch (error) {
+        console.error('删除视频文件时出错', error);
+      }
+    }
+
     const tx = this.db.transaction('videos', 'readwrite');
     for (const id of ids) {
       await tx.store.delete(id);
@@ -84,18 +129,43 @@ class VideoStore {
   }
 
   async deleteAll() {
+    const videos = await this.getAll();
+    const paths = videos
+      .map((video) => video.filePath)
+      .filter((value) => typeof value === 'string' && value.length > 0);
+
+    if (paths.length) {
+      try {
+        await fetch('/api/videos', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths }),
+        });
+      } catch (error) {
+        console.error('删除视频文件时出错', error);
+      }
+    }
+
     await this.db.clear('videos');
   }
 }
 
 const state = {
   videos: [],
-  objectUrls: new Map(),
   selected: new Set(),
   editingIndex: null,
   chart: null,
   chartType: 'radar',
 };
+
+const legacyObjectUrls = new Map();
+
+function clearLegacyObjectUrls() {
+  for (const url of legacyObjectUrls.values()) {
+    URL.revokeObjectURL(url);
+  }
+  legacyObjectUrls.clear();
+}
 
 const elements = {
   tabButtons: Array.from(document.querySelectorAll('.tab-button')),
@@ -166,21 +236,19 @@ elements.tabButtons.forEach((btn) => {
   btn.addEventListener('click', () => switchTab(btn.dataset.target));
 });
 
-function revokeObjectUrls() {
-  for (const url of state.objectUrls.values()) {
-    URL.revokeObjectURL(url);
+function getVideoSrc(video) {
+  if (!video) return '';
+  if (video.filePath) {
+    const cacheBuster = video.updatedAt || video.createdAt || Date.now();
+    return `./${video.filePath}?v=${cacheBuster}`;
   }
-  state.objectUrls.clear();
-}
-
-function updateObjectUrl(video) {
-  if (state.objectUrls.has(video.id)) {
-    return state.objectUrls.get(video.id);
+  if (video.blob instanceof Blob) {
+    if (!legacyObjectUrls.has(video.id)) {
+      legacyObjectUrls.set(video.id, URL.createObjectURL(video.blob));
+    }
+    return legacyObjectUrls.get(video.id) ?? '';
   }
-  if (!video.blob) return '';
-  const url = URL.createObjectURL(video.blob);
-  state.objectUrls.set(video.id, url);
-  return url;
+  return '';
 }
 
 function formatSize(bytes) {
@@ -219,7 +287,7 @@ function renderTable() {
     const previewCell = document.createElement('td');
     const videoEl = document.createElement('video');
     videoEl.className = 'video-preview';
-    videoEl.src = updateObjectUrl(video);
+    videoEl.src = getVideoSrc(video);
     videoEl.controls = true;
     videoEl.muted = true;
     previewCell.append(videoEl);
@@ -354,7 +422,7 @@ function renderPreviewGrid() {
 
     const videoEl = document.createElement('video');
     videoEl.controls = true;
-    videoEl.src = updateObjectUrl(video);
+    videoEl.src = getVideoSrc(video);
     videoEl.setAttribute('preload', 'metadata');
 
     const fullscreenBtn = document.createElement('button');
@@ -476,6 +544,7 @@ function exportCSV() {
     '防爆要求',
     '原始文件名',
     '文件大小',
+    '文件路径',
   ];
   const rows = [createCSVRow(headers)];
   for (const video of state.videos) {
@@ -494,6 +563,7 @@ function exportCSV() {
         video.explosion,
         video.originalName,
         video.size,
+        video.filePath,
       ]),
     );
   }
@@ -576,6 +646,9 @@ async function importCSV(file) {
       voc: entry['VOC要求'],
       explosion: entry['防爆要求'],
     };
+    if (entry['文件路径']) {
+      updates.filePath = entry['文件路径'];
+    }
     await store.update(entry.id, updates);
   }
   await hydrateState();
@@ -583,7 +656,7 @@ async function importCSV(file) {
 
 async function hydrateState() {
   const videos = await store.getAll();
-  revokeObjectUrls();
+  clearLegacyObjectUrls();
   videos.sort((a, b) => a.createdAt - b.createdAt);
   state.videos = videos;
   state.selected.clear();
@@ -660,9 +733,15 @@ function setupFileControls() {
   elements.uploadInput.addEventListener('change', async (event) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
-    await store.addFiles(files);
-    elements.uploadInput.value = '';
-    await hydrateState();
+    try {
+      await store.addFiles(files);
+      await hydrateState();
+    } catch (error) {
+      console.error(error);
+      alert('上传视频时出现问题，请稍后重试。');
+    } finally {
+      elements.uploadInput.value = '';
+    }
   });
 
   elements.exportBtn.addEventListener('click', exportCSV);
