@@ -1,31 +1,168 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Snake Game</title>
+    <title>铭铭智能生产看板</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="container">
-      <header>
-        <h1>Snake</h1>
-        <p class="instructions">
-          Use the arrow keys or WASD to move the snake. Press Space, Enter, or Restart to
-          start a new round.
-        </p>
-      </header>
-      <section class="game-area">
-        <div class="score-board">
-          Score: <span id="score">0</span>
+    <div class="app-shell" data-mode="presenter">
+      <header class="top-bar" role="banner">
+        <div class="top-bar__brand" aria-label="铭铭智能">
+          <span class="brand-mark" aria-hidden="true">⧉</span>
+          <span class="brand-text">铭铭智能</span>
         </div>
-        <canvas id="game" width="400" height="400" aria-label="Snake game board" role="img"></canvas>
-        <div id="status" class="status" role="status" aria-live="polite"></div>
-      </section>
-      <footer>
-        <button id="restart" type="button">Restart</button>
-      </footer>
-    </main>
-    <script src="script.js"></script>
+        <div class="top-bar__title" role="heading" aria-level="1">
+          <span class="title-primary">生产摘要控制台</span>
+          <span class="title-sub">实时供料与产线回放</span>
+        </div>
+        <div class="top-bar__actions">
+          <div class="mode-toggle" role="group" aria-label="展示模式">
+            <button class="mode-toggle__btn is-active" data-mode="presenter">演示模式</button>
+            <button class="mode-toggle__btn" data-mode="editor">编辑模式</button>
+          </div>
+          <button class="top-bar__btn" data-action="import" type="button">导入 JSON</button>
+          <button class="top-bar__btn" data-action="export" type="button">导出 JSON</button>
+          <button class="top-bar__btn top-bar__btn--danger" data-action="reset" type="button">
+            重置全部数据
+          </button>
+          <input id="import-input" class="visually-hidden" type="file" accept="application/json" />
+        </div>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar" aria-label="数据看板">
+          <section class="dashboard" data-group="lines">
+            <header class="dashboard__header">
+              <h2>生产线总览</h2>
+              <p>9 条生产线实时统计</p>
+            </header>
+            <div class="dashboard__grid" id="lines-dashboard" role="list"></div>
+          </section>
+          <section class="dashboard" data-group="feeds">
+            <header class="dashboard__header">
+              <h2>供料方式</h2>
+              <p>9 种供料方式待核查</p>
+            </header>
+            <div class="dashboard__grid" id="feeds-dashboard" role="list"></div>
+          </section>
+        </aside>
+
+        <main class="detail-pane" aria-live="polite">
+          <section class="video-pane" aria-labelledby="video-pane-title">
+            <div class="video-pane__header">
+              <h2 id="video-pane-title">视频回顾</h2>
+              <div class="video-pane__summary-toggle">
+                <label class="switch">
+                  <input id="summary-toggle" type="checkbox" />
+                  <span class="switch__slider" aria-hidden="true"></span>
+                  <span class="switch__label">设为总览来源</span>
+                </label>
+              </div>
+            </div>
+            <div class="video-pane__player">
+              <div id="upload-dropzone" class="video-dropzone" tabindex="0">
+                <p class="video-dropzone__text">拖拽 MP4 文件到此或</p>
+                <button id="video-upload-btn" type="button" class="pill-btn">上传视频</button>
+                <input id="video-input" class="visually-hidden" type="file" accept="video/mp4" />
+              </div>
+              <div class="video-wrapper">
+                <video id="video-element" playsinline></video>
+                <div class="video-controls" aria-label="视频控制">
+                  <button type="button" data-control="play">播放</button>
+                  <button type="button" data-control="pause">暂停</button>
+                  <button type="button" data-control="mute">静音</button>
+                  <label>
+                    音量
+                    <input type="range" data-control="volume" min="0" max="1" step="0.05" value="1" />
+                  </label>
+                  <label>
+                    倍速
+                    <select data-control="speed">
+                      <option value="0.5">0.5 倍</option>
+                      <option value="0.75">0.75 倍</option>
+                      <option value="1" selected>1 倍</option>
+                      <option value="1.25">1.25 倍</option>
+                      <option value="1.5">1.5 倍</option>
+                      <option value="2">2 倍</option>
+                    </select>
+                  </label>
+                  <button type="button" data-control="fullscreen">全屏</button>
+                  <button type="button" data-control="poster">截取封面</button>
+                </div>
+              </div>
+            </div>
+            <div class="video-pane__playlist" aria-label="视频播放列表">
+              <h3>播放列表</h3>
+              <div id="playlist" class="playlist" role="list"></div>
+            </div>
+            <button class="metadata-toggle" type="button" data-action="metadata">展开元数据</button>
+          </section>
+
+          <section class="params-pane" aria-labelledby="params-title">
+            <div class="pane-header">
+              <h2 id="params-title">参数看板</h2>
+              <button class="pane-edit-btn" data-pane="parameters" type="button">编辑</button>
+            </div>
+            <dl id="params-list" class="definition-list"></dl>
+          </section>
+
+          <section class="process-pane" aria-labelledby="process-title">
+            <div class="pane-header">
+              <h2 id="process-title">工序流程</h2>
+              <button class="pane-edit-btn" data-pane="process" type="button">编辑</button>
+            </div>
+            <div id="process-flow" class="process-flow" tabindex="0">
+              <svg id="process-svg" class="process-flow__svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="流程图"></svg>
+              <div id="process-nodes" class="process-flow__nodes" role="list"></div>
+            </div>
+          </section>
+
+          <section class="modules-pane" aria-labelledby="modules-title">
+            <div class="pane-header">
+              <h2 id="modules-title">模块状态</h2>
+              <button class="pane-edit-btn" data-pane="modules" type="button">编辑</button>
+            </div>
+            <ul id="modules-list" class="module-list"></ul>
+          </section>
+        </main>
+      </div>
+
+      <div id="metadata-drawer" class="metadata-drawer" role="dialog" aria-modal="true" aria-labelledby="metadata-title" hidden>
+        <div class="metadata-drawer__header">
+          <h2 id="metadata-title">元数据概览</h2>
+          <button type="button" data-action="close-metadata" aria-label="关闭元数据">✕</button>
+        </div>
+        <div class="metadata-drawer__content">
+          <section>
+            <h3>参数</h3>
+            <dl id="drawer-params" class="definition-list"></dl>
+          </section>
+          <section>
+            <h3>流程</h3>
+            <ol id="drawer-process" class="drawer-process"></ol>
+          </section>
+          <section>
+            <h3>模块</h3>
+            <ul id="drawer-modules" class="module-list"></ul>
+          </section>
+          <section>
+            <h3>备注</h3>
+            <textarea id="drawer-notes" rows="6" placeholder="添加操作备注"></textarea>
+            <button type="button" data-action="save-notes" class="pill-btn">保存备注</button>
+          </section>
+        </div>
+      </div>
+
+      <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
+    </div>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
