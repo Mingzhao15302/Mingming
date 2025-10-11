@@ -82,22 +82,59 @@ function createApp(metadata) {
 
   app.get('/api/status', async (req, res) => {
     try {
-      let totalSize = 0;
-      for (const item of metadata) {
-        totalSize += item.size || 0;
-      }
+      await fs.access(UPLOAD_DIR);
+      const entries = await fs.readdir(UPLOAD_DIR);
+      const stats = await Promise.all(
+        entries.map(async (entry) => {
+          const filePath = path.join(UPLOAD_DIR, entry);
+          try {
+            const fileStat = await fs.stat(filePath);
+            if (!fileStat.isFile()) return null;
+            return { name: entry, size: fileStat.size };
+          } catch (error) {
+            return null;
+          }
+        }),
+      );
+
+      const validStats = stats.filter(Boolean);
+      const diskFileNames = new Set(validStats.map((item) => item.name));
+      const trackedNames = new Set(
+        metadata.map((item) => item.storageName).filter(Boolean),
+      );
+
+      const missingFiles = metadata.filter(
+        (item) => item.storageName && !diskFileNames.has(item.storageName),
+      );
+      const orphanFiles = validStats.filter((item) => !trackedNames.has(item.name));
+      const diskSize = validStats.reduce((sum, item) => sum + (item.size || 0), 0);
+      const trackedSize = metadata.reduce((sum, item) => sum + (item.size || 0), 0);
+
       const status = {
         status: 'online',
         videoCount: metadata.length,
-        totalSize,
-        totalSizeReadable: formatSize(totalSize),
+        storedFiles: validStats.length,
+        missingFiles: missingFiles.length,
+        orphanFiles: orphanFiles.length,
+        totalSize: diskSize,
+        totalSizeReadable: formatSize(diskSize),
+        trackedSize,
+        trackedSizeReadable: formatSize(trackedSize),
         uptime: process.uptime(),
         lastUpdated: Math.max(0, ...metadata.map((item) => item.updatedAt || 0)),
         storagePath: UPLOAD_DIR,
+        lastScan: Date.now(),
       };
       res.json(status);
     } catch (error) {
-      res.status(500).json({ status: 'error', message: error.message });
+      res.json({
+        status: 'offline',
+        message: '文件存储目录不可访问',
+        error: error.message,
+        videoCount: metadata.length,
+        storagePath: UPLOAD_DIR,
+        lastScan: Date.now(),
+      });
     }
   });
 

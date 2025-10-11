@@ -109,6 +109,18 @@ function ensureOption(key, value) {
   return options[0] || '';
 }
 
+function sanitizeText(value) {
+  if (value == null) return '';
+  return `${value}`.trim();
+}
+
+function normalizeCategory(key, value) {
+  const normalized = sanitizeText(value);
+  if (!normalized) return '';
+  const options = CATEGORY_OPTIONS[key] || [];
+  return options.includes(normalized) ? normalized : '';
+}
+
 function populateAllSelects() {
   const filterSelects = elements.dashboardFilters.querySelectorAll('select');
   filterSelects.forEach((select) => {
@@ -129,11 +141,11 @@ async function fetchStatus() {
     if (!response.ok) throw new Error('无法获取服务器状态');
     const status = await response.json();
     state.status = status;
-    state.statusUpdatedAt = Date.now();
+    state.statusUpdatedAt = status.lastScan || Date.now();
     updateStatusUI();
   } catch (error) {
     console.error(error);
-    state.status = { status: 'offline' };
+    state.status = { status: 'offline', message: error.message };
     updateStatusUI();
   }
 }
@@ -181,19 +193,46 @@ function renderStatusCards(container, status) {
     div.innerHTML = `
       <span class="label">连接状态</span>
       <span class="value">离线</span>
-      <span class="label">请检查服务器是否已启动</span>
+      <span class="label">${status?.message || '请检查服务器是否已启动'}</span>
+      ${status?.storagePath ? `<span class="label">存储路径 · ${status.storagePath}</span>` : ''}
+      ${status?.lastScan ? `<span class="label">检测时间 · ${formatDate(status.lastScan)}</span>` : ''}
     `;
     container.appendChild(div);
     return;
   }
 
-  const items = [
-    { label: '连接状态', value: '在线' },
-    { label: '视频数量', value: `${status.videoCount || 0} 个` },
-    { label: '存储占用', value: status.totalSizeReadable || formatBytes(status.totalSize) },
-    { label: '更新时间', value: formatDate(status.lastUpdated) },
-    { label: '服务器运行时长', value: formatDuration(status.uptime || 0) },
-  ];
+  const items = [];
+  items.push({ label: '连接状态', value: '在线' });
+  items.push({ label: '视频数量（已建档）', value: `${status.videoCount || 0} 个` });
+  if (typeof status.storedFiles === 'number') {
+    items.push({ label: '存储文件数量', value: `${status.storedFiles} 个` });
+  }
+  if (typeof status.missingFiles === 'number') {
+    items.push({ label: '缺失文件', value: `${status.missingFiles} 个` });
+  }
+  if (typeof status.orphanFiles === 'number') {
+    items.push({ label: '孤立文件', value: `${status.orphanFiles} 个` });
+  }
+  if (typeof status.totalSize !== 'undefined') {
+    items.push({
+      label: '实际存储占用',
+      value: status.totalSizeReadable || formatBytes(status.totalSize),
+    });
+  }
+  if (typeof status.trackedSize !== 'undefined') {
+    items.push({
+      label: '元数据记录占用',
+      value: status.trackedSizeReadable || formatBytes(status.trackedSize),
+    });
+  }
+  if (status.storagePath) {
+    items.push({ label: '存储路径', value: status.storagePath });
+  }
+  if (status.lastScan) {
+    items.push({ label: '状态检测时间', value: formatDate(status.lastScan) });
+  }
+  items.push({ label: '信息更新时间', value: formatDate(status.lastUpdated) });
+  items.push({ label: '服务器运行时长', value: formatDuration(status.uptime || 0) });
 
   for (const item of items) {
     const card = document.createElement('div');
@@ -217,7 +256,7 @@ function updateStatusUI() {
     if (text) {
       text.textContent = isOnline
         ? `服务器在线 · 更新于 ${formatDate(state.statusUpdatedAt)}`
-        : '服务器离线';
+        : `服务器离线${status?.message ? ` · ${status.message}` : ''}`;
     }
     if (indicator) {
       indicator.style.background = isOnline ? 'var(--success)' : 'var(--danger)';
@@ -227,7 +266,7 @@ function updateStatusUI() {
   if (elements.dashboardStatus) {
     elements.dashboardStatus.textContent = isOnline
       ? `在线 · ${formatBytes(status.totalSize || 0)} / ${status.videoCount || 0} 个视频`
-      : '服务器离线';
+      : `服务器离线${status?.message ? ` · ${status.message}` : ''}`;
   }
 
   renderStatusCards(elements.managementStatus, status);
@@ -505,19 +544,20 @@ async function importCSV(file) {
     const row = rows[i];
     if (!row || !row.length) continue;
     const entry = Object.fromEntries(headers.map((header, index) => [header, row[index] ?? '']));
-    if (!entry.id) continue;
+    const id = sanitizeText(entry.id);
+    if (!id) continue;
     updates.push({
-      id: entry.id,
-      name: entry['文件名'] || '',
-      clientName: entry['客户名称'] || '',
-      material: entry['物料信息'] || '',
-      series: entry['型号系列'] || '',
-      weight: entry['灌装重量'] || '',
-      capping: entry['压盖方式'] || '',
-      conveyor: entry['输送方式'] || '',
-      buffer: entry['缓存方式'] || '',
-      voc: entry['VOC要求'] || '',
-      explosion: entry['防爆要求'] || '',
+      id,
+      name: sanitizeText(entry['文件名']),
+      clientName: sanitizeText(entry['客户名称']),
+      material: sanitizeText(entry['物料信息']),
+      series: normalizeCategory('series', entry['型号系列']),
+      weight: normalizeCategory('weight', entry['灌装重量']),
+      capping: normalizeCategory('capping', entry['压盖方式']),
+      conveyor: normalizeCategory('conveyor', entry['输送方式']),
+      buffer: normalizeCategory('buffer', entry['缓存方式']),
+      voc: normalizeCategory('voc', entry['VOC要求']),
+      explosion: normalizeCategory('explosion', entry['防爆要求']),
     });
   }
 
