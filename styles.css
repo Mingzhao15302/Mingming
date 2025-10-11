@@ -1,6 +1,7 @@
 :root {
   color-scheme: light;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   --bg: #eef2ff;
   --panel: #ffffff;
   --border: #d6d9e3;
@@ -314,6 +315,7 @@ tbody tr:hover {
   padding: 1rem 1.2rem;
   display: grid;
   gap: 0.4rem;
+  word-break: break-word;
 }
 
 .status-card .label {
@@ -324,6 +326,15 @@ tbody tr:hover {
 .status-card .value {
   font-weight: 600;
   font-size: 1.05rem;
+}
+
+.status-card .value.value--danger {
+  color: var(--danger);
+}
+
+.status-card .value.value--mono {
+  font-family: var(--mono);
+  font-size: 0.9rem;
 }
 
 .dashboard-banner {

@@ -94,6 +94,7 @@ function createApp(metadata) {
         uptime: process.uptime(),
         lastUpdated: Math.max(0, ...metadata.map((item) => item.updatedAt || 0)),
         storagePath: UPLOAD_DIR,
+        metadataPath: META_FILE,
       };
       res.json(status);
     } catch (error) {
