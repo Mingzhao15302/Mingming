@@ -11,25 +11,34 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js" defer></script>
     <script src="app.js" type="module" defer></script>
   </head>
   <body>
     <header class="app-header">
-      <h1>辉鑫科技视频管理器</h1>
-      <nav class="tab-nav">
-        <button class="tab-button active" data-target="management">视频管理</button>
-        <button class="tab-button" data-target="dashboard">仪表板</button>
-      </nav>
+      <div class="header-main">
+        <h1>辉鑫科技视频管理器</h1>
+        <p class="tagline">企业级视频资产中心 · 本地化部署 · 安全可控</p>
+      </div>
+      <div class="status-pill" id="global-status">
+        <span class="indicator"></span>
+        <span class="status-text">连接中...</span>
+      </div>
     </header>
 
     <main>
       <section id="management" class="tab-section active">
+        <div class="panel status-panel">
+          <div class="panel-header">
+            <h2>文件服务器状态</h2>
+            <button id="refresh-status" class="secondary">立即刷新</button>
+          </div>
+          <div class="status-grid" id="management-status"></div>
+        </div>
+
         <div class="panel">
           <h2>批量上传视频</h2>
           <p class="hint">
-            支持 1 ~ 300MB 以内的视频文件，上传数量不限。文件将被持久保存，下一次打开仍可使用。
+            支持 1 ~ 200MB 以内的视频文件，单次可导入 500+ 文件。文件在服务器端持久保存，可跨浏览器、跨设备访问。
           </p>
           <label class="upload-label">
             <input id="video-upload" type="file" accept="video/*" multiple hidden />
@@ -42,10 +51,10 @@
             <h2>视频列表</h2>
             <div class="panel-actions">
               <button id="select-all">全选</button>
-              <button id="clear-selection">取消选择</button>
+              <button id="clear-selection" class="secondary">取消选择</button>
               <button id="delete-selected" class="danger">删除所选</button>
               <button id="delete-all" class="danger">全部删除</button>
-              <button id="export-csv">导出 CSV</button>
+              <button id="export-csv" class="secondary">导出 CSV</button>
               <label class="import-label">
                 导入 CSV
                 <input id="import-csv" type="file" accept=".csv" hidden />
@@ -80,58 +89,6 @@
         </div>
       </section>
 
-      <section id="dashboard" class="tab-section">
-        <div class="panel">
-          <h2>筛选条件</h2>
-          <form id="dashboard-filters" class="filters">
-            <label>
-              型号系列
-              <select name="series"></select>
-            </label>
-            <label>
-              灌装重量
-              <select name="weight"></select>
-            </label>
-            <label>
-              压盖方式
-              <select name="capping"></select>
-            </label>
-            <label>
-              输送方式
-              <select name="conveyor"></select>
-            </label>
-            <label>
-              缓存方式
-              <select name="buffer"></select>
-            </label>
-            <label>
-              VOC 要求
-              <select name="voc"></select>
-            </label>
-            <label>
-              防爆要求
-              <select name="explosion"></select>
-            </label>
-            <button type="reset" class="secondary">重置筛选</button>
-          </form>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header">
-            <h2>进度分布</h2>
-            <div class="view-toggle">
-              <button data-chart="radar" class="active">雷达图</button>
-              <button data-chart="bar">条形图</button>
-            </div>
-          </div>
-          <canvas id="distribution-chart" height="220"></canvas>
-        </div>
-
-        <div class="panel">
-          <h2>视频预览</h2>
-          <div id="preview-grid" class="preview-grid"></div>
-        </div>
-      </section>
     </main>
 
     <dialog id="edit-dialog">
