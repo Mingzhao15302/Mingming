@@ -84,6 +84,16 @@ function formatDuration(seconds) {
   return `${mins}:${secs}`;
 }
 
+function truncateMiddle(text, maxLength = 38) {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  const separator = '…';
+  const available = maxLength - separator.length;
+  const front = Math.ceil(available / 2);
+  const back = Math.floor(available / 2);
+  return `${text.slice(0, front)}${separator}${text.slice(text.length - back)}`;
+}
+
 function populateSelect(select, options, withBlank = true) {
   if (!select) return;
   select.innerHTML = '';
@@ -175,33 +185,71 @@ function videoUrl(video) {
 function renderStatusCards(container, status) {
   if (!container) return;
   container.innerHTML = '';
+
   if (!status || status.status === 'offline') {
-    const div = document.createElement('div');
-    div.className = 'status-card';
-    div.innerHTML = `
-      <span class="label">连接状态</span>
-      <span class="value">离线</span>
-      <span class="label">请检查服务器是否已启动</span>
-    `;
-    container.appendChild(div);
+    const card = document.createElement('div');
+    card.className = 'status-card';
+
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = '连接状态';
+
+    const value = document.createElement('span');
+    value.className = 'value value--danger';
+    value.textContent = '离线';
+
+    const hint = document.createElement('span');
+    hint.className = 'label';
+    hint.textContent = '请检查服务器是否已启动';
+
+    card.append(label, value, hint);
+    container.appendChild(card);
     return;
   }
 
   const items = [
     { label: '连接状态', value: '在线' },
     { label: '视频数量', value: `${status.videoCount || 0} 个` },
-    { label: '存储占用', value: status.totalSizeReadable || formatBytes(status.totalSize) },
+    {
+      label: '存储占用',
+      value: status.totalSizeReadable || formatBytes(status.totalSize),
+    },
     { label: '更新时间', value: formatDate(status.lastUpdated) },
     { label: '服务器运行时长', value: formatDuration(status.uptime || 0) },
-  ];
+    status.storagePath
+      ? {
+          label: '视频存储路径',
+          value: truncateMiddle(status.storagePath, 44),
+          tooltip: status.storagePath,
+          mono: true,
+        }
+      : null,
+    status.metadataPath
+      ? {
+          label: '元数据路径',
+          value: truncateMiddle(status.metadataPath, 44),
+          tooltip: status.metadataPath,
+          mono: true,
+        }
+      : null,
+  ].filter(Boolean);
 
   for (const item of items) {
     const card = document.createElement('div');
     card.className = 'status-card';
-    card.innerHTML = `
-      <span class="label">${item.label}</span>
-      <span class="value">${item.value}</span>
-    `;
+
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = item.label;
+
+    const value = document.createElement('span');
+    value.className = `value${item.mono ? ' value--mono' : ''}`;
+    value.textContent = item.value;
+    if (item.tooltip) {
+      value.title = item.tooltip;
+    }
+
+    card.append(label, value);
     container.appendChild(card);
   }
 }
