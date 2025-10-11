@@ -18,10 +18,11 @@ const API_ENDPOINTS = {
 const state = {
   videos: [],
   selected: new Set(),
-  chart: null,
-  chartType: 'radar',
+  radarChart: null,
+  barChart: null,
   editingIndex: null,
   dialogMinimized: false,
+  distributionCollapsed: false,
   status: null,
   statusUpdatedAt: null,
 };
@@ -39,8 +40,11 @@ const elements = {
   importInput: document.getElementById('import-csv'),
   selectAllCheckbox: document.getElementById('select-all-checkbox'),
   dashboardFilters: document.getElementById('dashboard-filters'),
-  viewToggleButtons: Array.from(document.querySelectorAll('.view-toggle button')),
-  chartCanvas: document.getElementById('distribution-chart'),
+  distributionPanel: document.getElementById('distribution-panel'),
+  distributionMinimize: document.getElementById('distribution-minimize'),
+  distributionClose: document.getElementById('distribution-close'),
+  radarCanvas: document.getElementById('distribution-radar'),
+  barCanvas: document.getElementById('distribution-bar'),
   previewGrid: document.getElementById('preview-grid'),
   statsGrid: document.getElementById('stats-grid'),
   managementStatus: document.getElementById('management-status'),
@@ -395,49 +399,95 @@ function renderPreview(filtered) {
   }
 }
 
-function updateChart(filtered) {
-  const ctx = elements.chartCanvas.getContext('2d');
+function updateDistributionCharts(filtered) {
   const labels = CATEGORY_OPTIONS.series;
   const counts = labels.map((series) => filtered.filter((video) => video.series === series).length);
-  const dataset = {
-    labels,
-    datasets: [
-      {
-        label: '视频数量',
-        data: counts,
-        backgroundColor: 'rgba(37, 99, 235, 0.2)',
-        borderColor: 'rgba(37, 99, 235, 0.8)',
-        borderWidth: 2,
-      },
-    ],
-  };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: state.chartType === 'bar'
-      ? {
-          y: { beginAtZero: true, ticks: { stepSize: 1 } },
-        }
-      : {},
-  };
-
-  if (state.chart) {
-    state.chart.destroy();
+  if (state.radarChart) {
+    state.radarChart.destroy();
+  }
+  if (state.barChart) {
+    state.barChart.destroy();
   }
 
-  state.chart = new Chart(ctx, {
-    type: state.chartType,
-    data: dataset,
-    options,
-  });
+  if (elements.radarCanvas) {
+    const radarCtx = elements.radarCanvas.getContext('2d');
+    state.radarChart = new Chart(radarCtx, {
+      type: 'radar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: '视频数量',
+            data: counts,
+            backgroundColor: 'rgba(37, 99, 235, 0.18)',
+            borderColor: 'rgba(37, 99, 235, 0.8)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgba(37, 99, 235, 0.8)',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          r: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            angleLines: { color: 'rgba(148, 163, 184, 0.3)' },
+            grid: { color: 'rgba(148, 163, 184, 0.2)' },
+          },
+        },
+      },
+    });
+  }
+
+  if (elements.barCanvas) {
+    const barCtx = elements.barCanvas.getContext('2d');
+    state.barChart = new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: '视频数量',
+            data: counts,
+            backgroundColor: 'rgba(37, 99, 235, 0.7)',
+            borderRadius: 6,
+            maxBarThickness: 42,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            grid: { display: false },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            grid: { color: 'rgba(148, 163, 184, 0.2)' },
+          },
+        },
+      },
+    });
+  }
 }
 
 function updateDashboard() {
   const filtered = applyFilters(state.videos);
   renderStats(filtered);
   renderPreview(filtered);
-  updateChart(filtered);
+  if (
+    !state.distributionCollapsed &&
+    !elements.distributionPanel?.classList.contains('hidden')
+  ) {
+    updateDistributionCharts(filtered);
+  }
 }
 
 async function handleUpload(event) {
@@ -831,14 +881,59 @@ function setDialogMinimized(minimized) {
   }
 }
 
-function setupViewToggle() {
-  elements.viewToggleButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      state.chartType = button.dataset.chart;
-      elements.viewToggleButtons.forEach((btn) => btn.classList.toggle('active', btn === button));
-      updateDashboard();
+function setDistributionCollapsed(collapsed) {
+  state.distributionCollapsed = collapsed;
+  if (elements.distributionPanel) {
+    elements.distributionPanel.classList.toggle('collapsed', collapsed);
+  }
+  if (elements.distributionMinimize) {
+    elements.distributionMinimize.textContent = collapsed ? '▢' : '▁';
+    elements.distributionMinimize.setAttribute(
+      'aria-label',
+      collapsed ? '还原分类分布' : '最小化分类分布',
+    );
+    elements.distributionMinimize.setAttribute(
+      'title',
+      collapsed ? '还原分类分布' : '最小化分类分布',
+    );
+  }
+
+  if (collapsed) {
+    if (state.radarChart) {
+      state.radarChart.destroy();
+      state.radarChart = null;
+    }
+    if (state.barChart) {
+      state.barChart.destroy();
+      state.barChart = null;
+    }
+  } else if (!elements.distributionPanel?.classList.contains('hidden')) {
+    updateDistributionCharts(applyFilters(state.videos));
+  }
+}
+
+function setupDistributionModule() {
+  if (elements.distributionMinimize) {
+    elements.distributionMinimize.addEventListener('click', () => {
+      setDistributionCollapsed(!state.distributionCollapsed);
     });
-  });
+  }
+
+  if (elements.distributionClose) {
+    elements.distributionClose.addEventListener('click', () => {
+      elements.distributionPanel?.classList.add('hidden');
+      if (state.radarChart) {
+        state.radarChart.destroy();
+        state.radarChart = null;
+      }
+      if (state.barChart) {
+        state.barChart.destroy();
+        state.barChart = null;
+      }
+    });
+  }
+
+  setDistributionCollapsed(false);
 }
 
 function setupFilters() {
@@ -868,7 +963,7 @@ async function bootstrap() {
   setupSelectionControls();
   setupTableListeners();
   setupEditDialog();
-  setupViewToggle();
+  setupDistributionModule();
   setupFilters();
   setupStatusRefresh();
 

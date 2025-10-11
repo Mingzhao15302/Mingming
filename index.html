@@ -151,15 +151,38 @@
           </form>
         </div>
 
-        <div class="panel">
+        <div class="panel distribution-panel" id="distribution-panel">
           <div class="panel-header">
             <h2>分类分布</h2>
-            <div class="view-toggle">
-              <button data-chart="radar" class="active">雷达图</button>
-              <button data-chart="bar">条形图</button>
+            <div class="panel-window-controls">
+              <button
+                type="button"
+                id="distribution-minimize"
+                class="icon-button"
+                aria-label="最小化分类分布"
+                title="最小化分类分布"
+              >
+                ▁
+              </button>
+              <button
+                type="button"
+                id="distribution-close"
+                class="icon-button"
+                aria-label="关闭分类分布"
+                title="关闭分类分布"
+              >
+                ×
+              </button>
             </div>
           </div>
-          <canvas id="distribution-chart" height="220"></canvas>
+          <div class="distribution-body" id="distribution-body">
+            <div class="chart-surface">
+              <canvas id="distribution-radar"></canvas>
+            </div>
+            <div class="chart-surface">
+              <canvas id="distribution-bar"></canvas>
+            </div>
+          </div>
         </div>
 
         <div class="panel">

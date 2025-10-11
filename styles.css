@@ -144,6 +144,28 @@ main {
   gap: 1rem;
 }
 
+.panel.hidden {
+  display: none;
+}
+
+.panel-window-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.panel-window-controls .icon-button {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--accent-strong);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.65rem;
+  font-size: 1rem;
+}
+
+.panel-window-controls .icon-button:hover {
+  background: rgba(37, 99, 235, 0.18);
+}
+
 .panel-header {
   display: flex;
   flex-wrap: wrap;
@@ -553,6 +575,30 @@ dialog::backdrop {
 .status-legend {
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.distribution-panel.collapsed .distribution-body {
+  display: none;
+}
+
+.distribution-body {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  aspect-ratio: 4 / 1;
+  min-height: 220px;
+}
+
+.chart-surface {
+  flex: 1;
+  position: relative;
+}
+
+.chart-surface canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 dialog.minimized {
