@@ -1,7 +1,5 @@
-const { openDB } = window.idb;
-
 const CATEGORY_OPTIONS = {
-  series: ['30A', '30B', '30BG-', '30G', '30GY', 'ZSQ', 'HX200', '2T'],
+  series: ['30A系列', '30B系列', '30BG系列', '30G系列', '30GY系列', 'ZSQ系列', 'HX200系列', '2T系列'],
   weight: ['0.5~5kg', '10~20kg', '50~200kg', '1000kg'],
   capping: ['5L平板压盖', '20L平板压盖', '花篮压盖', '辊压', '助力臂拧盖', '无'],
   conveyor: ['滚筒', '板链', '无'],
@@ -10,91 +8,21 @@ const CATEGORY_OPTIONS = {
   explosion: ['防爆', '不防爆'],
 };
 
-class VideoStore {
-  static async create() {
-    const db = await openDB('hx-video-manager', 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('videos')) {
-          const store = db.createObjectStore('videos', { keyPath: 'id' });
-          store.createIndex('createdAt', 'createdAt');
-        }
-      },
-    });
-    return new VideoStore(db);
-  }
-
-  constructor(db) {
-    this.db = db;
-  }
-
-  async getAll() {
-    return await this.db.getAllFromIndex('videos', 'createdAt');
-  }
-
-  async addFiles(files) {
-    const tx = this.db.transaction('videos', 'readwrite');
-    const store = tx.store;
-    const added = [];
-    for (const file of files) {
-      const id = crypto.randomUUID();
-      const record = {
-        id,
-        name: file.name,
-        clientName: '',
-        material: '',
-        series: CATEGORY_OPTIONS.series[0] ?? '',
-        weight: CATEGORY_OPTIONS.weight[0] ?? '',
-        capping: CATEGORY_OPTIONS.capping[0] ?? '',
-        conveyor: CATEGORY_OPTIONS.conveyor[0] ?? '',
-        buffer: CATEGORY_OPTIONS.buffer[0] ?? '',
-        voc: CATEGORY_OPTIONS.voc[0] ?? '',
-        explosion: CATEGORY_OPTIONS.explosion[0] ?? '',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        blob: file,
-        size: file.size,
-        type: file.type,
-        originalName: file.name,
-      };
-      await store.put(record);
-      added.push(record);
-    }
-    await tx.done;
-    return added;
-  }
-
-  async update(id, updates) {
-    const existing = await this.db.get('videos', id);
-    if (!existing) return null;
-    const updated = {
-      ...existing,
-      ...updates,
-      updatedAt: Date.now(),
-    };
-    await this.db.put('videos', updated);
-    return updated;
-  }
-
-  async deleteMany(ids) {
-    const tx = this.db.transaction('videos', 'readwrite');
-    for (const id of ids) {
-      await tx.store.delete(id);
-    }
-    await tx.done;
-  }
-
-  async deleteAll() {
-    await this.db.clear('videos');
-  }
-}
+const API_ENDPOINTS = {
+  status: '/api/status',
+  videos: '/api/videos',
+  video: (id) => `/api/videos/${id}`,
+  deleteAll: '/api/videos/all',
+};
 
 const state = {
   videos: [],
-  objectUrls: new Map(),
   selected: new Set(),
-  editingIndex: null,
   chart: null,
   chartType: 'radar',
+  editingIndex: null,
+  status: null,
+  statusUpdatedAt: null,
 };
 
 const elements = {
@@ -113,6 +41,12 @@ const elements = {
   viewToggleButtons: Array.from(document.querySelectorAll('.view-toggle button')),
   chartCanvas: document.getElementById('distribution-chart'),
   previewGrid: document.getElementById('preview-grid'),
+  statsGrid: document.getElementById('stats-grid'),
+  managementStatus: document.getElementById('management-status'),
+  dashboardStatus: document.getElementById('dashboard-status'),
+  dashboardStatusGrid: document.getElementById('dashboard-status-grid'),
+  globalStatus: document.getElementById('global-status'),
+  refreshStatusBtn: document.getElementById('refresh-status'),
   editDialog: document.getElementById('edit-dialog'),
   editForm: document.getElementById('edit-form'),
   editPrev: document.getElementById('edit-prev'),
@@ -120,345 +54,353 @@ const elements = {
   editCancel: document.getElementById('edit-cancel'),
 };
 
-function populateSelect(select, options, includeAll = false) {
+function formatBytes(size) {
+  if (!size && size !== 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const index = Math.min(Math.floor(Math.log(Math.max(size, 1)) / Math.log(1024)), units.length - 1);
+  const value = size / 1024 ** index;
+  return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+}
+
+function formatDate(timestamp) {
+  if (!timestamp) return '—';
+  const date = new Date(timestamp);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(
+    date.getMinutes(),
+  ).padStart(2, '0')}`;
+}
+
+function formatDuration(seconds) {
+  const total = Math.floor(seconds);
+  const mins = Math.floor(total / 60).toString().padStart(2, '0');
+  const secs = (total % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
+}
+
+function populateSelect(select, options, withBlank = true) {
+  if (!select) return;
   select.innerHTML = '';
-  if (includeAll) {
+  if (withBlank) {
     const option = document.createElement('option');
     option.value = '';
     option.textContent = '全部';
-    select.append(option);
+    select.appendChild(option);
   }
   for (const value of options) {
     const option = document.createElement('option');
     option.value = value;
     option.textContent = value;
-    select.append(option);
+    select.appendChild(option);
   }
 }
 
-function initFilters() {
-  const filterForm = elements.dashboardFilters;
-  for (const [key, options] of Object.entries(CATEGORY_OPTIONS)) {
-    const select = filterForm.elements.namedItem(key);
-    if (select) {
-      populateSelect(select, options, true);
+function populateAllSelects() {
+  const filterSelects = elements.dashboardFilters.querySelectorAll('select');
+  filterSelects.forEach((select) => {
+    const key = select.name;
+    populateSelect(select, CATEGORY_OPTIONS[key], true);
+  });
+
+  const dialogSelects = elements.editForm.querySelectorAll('select');
+  dialogSelects.forEach((select) => {
+    const key = select.name;
+    populateSelect(select, CATEGORY_OPTIONS[key], false);
+  });
+}
+
+async function fetchStatus() {
+  try {
+    const response = await fetch(API_ENDPOINTS.status);
+    if (!response.ok) throw new Error('无法获取服务器状态');
+    const status = await response.json();
+    state.status = status;
+    state.statusUpdatedAt = Date.now();
+    updateStatusUI();
+  } catch (error) {
+    console.error(error);
+    state.status = { status: 'offline' };
+    updateStatusUI();
+  }
+}
+
+async function fetchVideos() {
+  try {
+    const response = await fetch(API_ENDPOINTS.videos);
+    if (!response.ok) throw new Error('无法获取视频列表');
+    const data = await response.json();
+    state.videos = Array.isArray(data.videos) ? data.videos : [];
+  } catch (error) {
+    console.error(error);
+    state.videos = [];
+  }
+  state.videos.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  state.selected.clear();
+  renderTable();
+  refreshSelectionUI();
+  updateDashboard();
+}
+
+function videoUrl(video) {
+  return `/media/${encodeURIComponent(video.storageName)}`;
+}
+
+function renderStatusCards(container, status) {
+  if (!container) return;
+  container.innerHTML = '';
+  if (!status || status.status === 'offline') {
+    const div = document.createElement('div');
+    div.className = 'status-card';
+    div.innerHTML = `
+      <span class="label">连接状态</span>
+      <span class="value">离线</span>
+      <span class="label">请检查服务器是否已启动</span>
+    `;
+    container.appendChild(div);
+    return;
+  }
+
+  const items = [
+    { label: '连接状态', value: '在线' },
+    { label: '视频数量', value: `${status.videoCount || 0} 个` },
+    { label: '存储占用', value: status.totalSizeReadable || formatBytes(status.totalSize) },
+    { label: '更新时间', value: formatDate(status.lastUpdated) },
+    { label: '服务器运行时长', value: formatDuration(status.uptime || 0) },
+  ];
+
+  for (const item of items) {
+    const card = document.createElement('div');
+    card.className = 'status-card';
+    card.innerHTML = `
+      <span class="label">${item.label}</span>
+      <span class="value">${item.value}</span>
+    `;
+    container.appendChild(card);
+  }
+}
+
+function updateStatusUI() {
+  const status = state.status;
+  const isOnline = status && status.status === 'online';
+
+  if (elements.globalStatus) {
+    elements.globalStatus.classList.toggle('offline', !isOnline);
+    const text = elements.globalStatus.querySelector('.status-text');
+    const indicator = elements.globalStatus.querySelector('.indicator');
+    if (text) {
+      text.textContent = isOnline
+        ? `服务器在线 · 更新于 ${formatDate(state.statusUpdatedAt)}`
+        : '服务器离线';
+    }
+    if (indicator) {
+      indicator.style.background = isOnline ? 'var(--success)' : 'var(--danger)';
     }
   }
 
-  const editSelects = elements.editForm.querySelectorAll('select');
-  editSelects.forEach((select) => {
-    const key = select.name;
-    populateSelect(select, CATEGORY_OPTIONS[key] ?? []);
-  });
-}
-
-function switchTab(targetId) {
-  elements.tabButtons.forEach((btn) => {
-    const active = btn.dataset.target === targetId;
-    btn.classList.toggle('active', active);
-  });
-  elements.sections.forEach((section) => {
-    section.classList.toggle('active', section.id === targetId);
-  });
-}
-
-elements.tabButtons.forEach((btn) => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.target));
-});
-
-function revokeObjectUrls() {
-  for (const url of state.objectUrls.values()) {
-    URL.revokeObjectURL(url);
+  if (elements.dashboardStatus) {
+    elements.dashboardStatus.textContent = isOnline
+      ? `在线 · ${formatBytes(status.totalSize || 0)} / ${status.videoCount || 0} 个视频`
+      : '服务器离线';
   }
-  state.objectUrls.clear();
-}
 
-function updateObjectUrl(video) {
-  if (state.objectUrls.has(video.id)) {
-    return state.objectUrls.get(video.id);
-  }
-  if (!video.blob) return '';
-  const url = URL.createObjectURL(video.blob);
-  state.objectUrls.set(video.id, url);
-  return url;
-}
-
-function formatSize(bytes) {
-  if (!bytes && bytes !== 0) return '';
-  const units = ['B', 'KB', 'MB', 'GB'];
-  let size = bytes;
-  let unit = units.shift();
-  while (size >= 1024 && units.length) {
-    size /= 1024;
-    unit = units.shift();
-  }
-  return `${size.toFixed(size >= 10 || !units.length ? 0 : 1)} ${unit}`;
+  renderStatusCards(elements.managementStatus, status);
+  renderStatusCards(elements.dashboardStatusGrid, status);
 }
 
 function renderTable() {
-  const tbody = elements.tableBody;
-  tbody.innerHTML = '';
-  const fragment = document.createDocumentFragment();
-  for (const [index, video] of state.videos.entries()) {
-    const tr = document.createElement('tr');
-    const checkboxCell = document.createElement('td');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = state.selected.has(video.id);
-    checkbox.addEventListener('change', () => {
-      if (checkbox.checked) {
-        state.selected.add(video.id);
-      } else {
-        state.selected.delete(video.id);
-      }
-      refreshSelectionUI();
-    });
-    checkboxCell.append(checkbox);
-    tr.append(checkboxCell);
-
-    const previewCell = document.createElement('td');
-    const videoEl = document.createElement('video');
-    videoEl.className = 'video-preview';
-    videoEl.src = updateObjectUrl(video);
-    videoEl.controls = true;
-    videoEl.muted = true;
-    previewCell.append(videoEl);
-    tr.append(previewCell);
-
-    const cells = [
-      video.name,
-      video.clientName,
-      video.material,
-      video.series,
-      video.weight,
-      video.capping,
-      video.conveyor,
-      video.buffer,
-      video.voc,
-      video.explosion,
-    ];
-
-    for (const value of cells) {
-      const td = document.createElement('td');
-      td.textContent = value || '—';
-      tr.append(td);
-    }
-
-    const actionsCell = document.createElement('td');
-    const sizeInfo = document.createElement('div');
-    sizeInfo.className = 'meta';
-    sizeInfo.textContent = formatSize(video.size);
-    const editButton = document.createElement('button');
-    editButton.textContent = '修改';
-    editButton.addEventListener('click', () => openEditDialog(index));
-    actionsCell.append(editButton, sizeInfo);
-    tr.append(actionsCell);
-
-    fragment.append(tr);
+  elements.tableBody.innerHTML = '';
+  for (const video of state.videos) {
+    const row = document.createElement('tr');
+    const checked = state.selected.has(video.id);
+    row.innerHTML = `
+      <td><input type="checkbox" data-id="${video.id}" ${checked ? 'checked' : ''} /></td>
+      <td>
+        <div class="preview-thumb">
+          <video src="${videoUrl(video)}" preload="metadata"></video>
+        </div>
+      </td>
+      <td>${video.name || video.storageName}</td>
+      <td>${video.clientName || '—'}</td>
+      <td>${video.material || '—'}</td>
+      <td>${video.series || '—'}</td>
+      <td>${video.weight || '—'}</td>
+      <td>${video.capping || '—'}</td>
+      <td>${video.conveyor || '—'}</td>
+      <td>${video.buffer || '—'}</td>
+      <td>${video.voc || '—'}</td>
+      <td>${video.explosion || '—'}</td>
+      <td>
+        <div class="table-actions">
+          <button class="secondary" data-action="edit" data-id="${video.id}">编辑</button>
+          <button class="danger" data-action="delete" data-id="${video.id}">删除</button>
+        </div>
+      </td>
+    `;
+    elements.tableBody.appendChild(row);
   }
-  tbody.append(fragment);
-  elements.selectAllCheckbox.checked =
-    state.videos.length > 0 && state.selected.size === state.videos.length;
 }
 
 function refreshSelectionUI() {
-  const hasSelection = state.selected.size > 0;
-  elements.clearSelectionBtn.disabled = !hasSelection;
-  elements.deleteSelectedBtn.disabled = !hasSelection;
-  elements.selectAllBtn.disabled = state.videos.length === 0;
-  elements.deleteAllBtn.disabled = state.videos.length === 0;
-  elements.exportBtn.disabled = state.videos.length === 0;
-  elements.selectAllCheckbox.indeterminate =
-    hasSelection && state.selected.size !== state.videos.length;
-  elements.selectAllCheckbox.checked =
-    state.videos.length > 0 && state.selected.size === state.videos.length;
+  const total = state.videos.length;
+  const selected = state.selected.size;
+  if (elements.selectAllCheckbox) {
+    elements.selectAllCheckbox.checked = total > 0 && selected === total;
+    elements.selectAllCheckbox.indeterminate = selected > 0 && selected < total;
+  }
 }
 
-function applyFilters() {
-  const formData = new FormData(elements.dashboardFilters);
-  const filters = Object.fromEntries(formData.entries());
-  return state.videos.filter((video) => {
-    return Object.entries(filters).every(([key, value]) => {
-      if (!value) return true;
-      return video[key] === value;
-    });
+function applyFilters(videos) {
+  const filters = new FormData(elements.dashboardFilters);
+  return videos.filter((video) => {
+    for (const [key, value] of filters.entries()) {
+      if (!value) continue;
+      if ((video[key] || '') !== value) return false;
+    }
+    return true;
   });
 }
 
-function updateChart() {
-  const filtered = applyFilters();
-  const categories = CATEGORY_OPTIONS.series;
-  const counts = categories.map(
-    (series) => filtered.filter((video) => video.series === series).length,
-  );
-  const config = {
-    type: state.chartType,
-    data: {
-      labels: categories,
-      datasets: [
-        {
-          label: '视频数量',
-          data: counts,
-          backgroundColor: state.chartType === 'bar' ? '#93c5fd' : 'rgba(37, 99, 235, 0.4)',
-          borderColor: '#2563eb',
-          borderWidth: 2,
-          pointBackgroundColor: '#2563eb',
-          pointRadius: 4,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      scales: state.chartType === 'bar'
-        ? {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                precision: 0,
-              },
-            },
-          }
-        : {},
-      plugins: {
-        legend: {
-          display: false,
-        },
+function renderStats(filtered) {
+  const total = state.videos.length;
+  const filteredCount = filtered.length;
+  const uniqueSeries = new Set(filtered.map((video) => video.series).filter(Boolean)).size;
+  const totalSize = state.videos.reduce((sum, video) => sum + (video.size || 0), 0);
+  const filteredSize = filtered.reduce((sum, video) => sum + (video.size || 0), 0);
+
+  const stats = [
+    { label: '全部视频', value: `${total} 个` },
+    { label: '筛选结果', value: `${filteredCount} 个` },
+    { label: '涉及分类', value: `${uniqueSeries} 个` },
+    { label: '总存储占用', value: formatBytes(totalSize) },
+    { label: '筛选存储', value: formatBytes(filteredSize) },
+  ];
+
+  elements.statsGrid.innerHTML = '';
+  for (const stat of stats) {
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    card.innerHTML = `
+      <span class="label">${stat.label}</span>
+      <span class="value">${stat.value}</span>
+    `;
+    elements.statsGrid.appendChild(card);
+  }
+}
+
+function renderPreview(filtered) {
+  elements.previewGrid.innerHTML = '';
+  if (!filtered.length) {
+    const empty = document.createElement('p');
+    empty.className = 'hint';
+    empty.textContent = '暂无符合条件的视频，请调整筛选条件。';
+    elements.previewGrid.appendChild(empty);
+    return;
+  }
+
+  for (const video of filtered) {
+    const card = document.createElement('div');
+    card.className = 'preview-card';
+    card.innerHTML = `
+      <video src="${videoUrl(video)}" controls preload="metadata"></video>
+      <h3>${video.name || video.storageName}</h3>
+      <div class="meta">
+        客户：${video.clientName || '—'} · 物料：${video.material || '—'}<br />
+        型号：${video.series || '—'} · 重量：${video.weight || '—'}
+      </div>
+    `;
+    elements.previewGrid.appendChild(card);
+  }
+}
+
+function updateChart(filtered) {
+  const ctx = elements.chartCanvas.getContext('2d');
+  const labels = CATEGORY_OPTIONS.series;
+  const counts = labels.map((series) => filtered.filter((video) => video.series === series).length);
+  const dataset = {
+    labels,
+    datasets: [
+      {
+        label: '视频数量',
+        data: counts,
+        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+        borderColor: 'rgba(37, 99, 235, 0.8)',
+        borderWidth: 2,
       },
-    },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: state.chartType === 'bar'
+      ? {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        }
+      : {},
   };
 
   if (state.chart) {
     state.chart.destroy();
   }
-  state.chart = new Chart(elements.chartCanvas, config);
-}
 
-function renderPreviewGrid() {
-  const filtered = applyFilters();
-  elements.previewGrid.innerHTML = '';
-  if (filtered.length === 0) {
-    const empty = document.createElement('p');
-    empty.textContent = '暂无符合条件的视频，请调整筛选条件。';
-    empty.className = 'hint';
-    elements.previewGrid.append(empty);
-    return;
-  }
-
-  const fragment = document.createDocumentFragment();
-  for (const video of filtered) {
-    const card = document.createElement('div');
-    card.className = 'preview-card';
-
-    const title = document.createElement('h3');
-    title.textContent = video.name;
-
-    const videoEl = document.createElement('video');
-    videoEl.controls = true;
-    videoEl.src = updateObjectUrl(video);
-    videoEl.setAttribute('preload', 'metadata');
-
-    const fullscreenBtn = document.createElement('button');
-    fullscreenBtn.className = 'fullscreen-btn';
-    fullscreenBtn.textContent = '全屏播放';
-    fullscreenBtn.addEventListener('click', () => {
-      if (videoEl.requestFullscreen) {
-        videoEl.requestFullscreen();
-      } else if (videoEl.webkitRequestFullscreen) {
-        videoEl.webkitRequestFullscreen();
-      }
-    });
-
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    meta.innerHTML = `
-      <span>客户：${video.clientName || '—'}</span>
-      <span>物料：${video.material || '—'}</span>
-      <span>型号系列：${video.series}</span>
-      <span>灌装重量：${video.weight}</span>
-      <span>压盖方式：${video.capping}</span>
-      <span>输送方式：${video.conveyor}</span>
-      <span>缓存方式：${video.buffer}</span>
-      <span>VOC 要求：${video.voc}</span>
-      <span>防爆要求：${video.explosion}</span>
-    `;
-
-    card.append(title, videoEl, fullscreenBtn, meta);
-    fragment.append(card);
-  }
-  elements.previewGrid.append(fragment);
+  state.chart = new Chart(ctx, {
+    type: state.chartType,
+    data: dataset,
+    options,
+  });
 }
 
 function updateDashboard() {
-  updateChart();
-  renderPreviewGrid();
+  const filtered = applyFilters(state.videos);
+  renderStats(filtered);
+  renderPreview(filtered);
+  updateChart(filtered);
 }
 
-function openEditDialog(index) {
-  state.editingIndex = index;
-  const video = state.videos[index];
-  if (!video) return;
-  const form = elements.editForm;
-  form.elements.name.value = video.name;
-  form.elements.clientName.value = video.clientName || '';
-  form.elements.material.value = video.material || '';
-  for (const key of Object.keys(CATEGORY_OPTIONS)) {
-    if (form.elements[key]) {
-      form.elements[key].value = video[key] || '';
-    }
+async function handleUpload(event) {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append('videos', file);
   }
-  elements.editPrev.disabled = index === 0;
-  elements.editNext.disabled = index === state.videos.length - 1;
-  elements.editDialog.showModal();
+
+  try {
+    const response = await fetch(API_ENDPOINTS.videos, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('上传失败');
+    }
+
+    await fetchVideos();
+    await fetchStatus();
+  } catch (error) {
+    console.error(error);
+    alert('上传失败，请检查文件大小或服务器状态。');
+  } finally {
+    elements.uploadInput.value = '';
+  }
 }
 
-function closeEditDialog() {
-  elements.editDialog.close();
-  state.editingIndex = null;
+async function handleDelete(ids) {
+  if (!ids.length) return;
+  await fetch(API_ENDPOINTS.videos, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids }),
+  });
+  await fetchVideos();
+  await fetchStatus();
 }
 
-elements.editPrev.addEventListener('click', () => {
-  if (state.editingIndex === null) return;
-  const prevIndex = Math.max(0, state.editingIndex - 1);
-  openEditDialog(prevIndex);
-});
-
-elements.editNext.addEventListener('click', () => {
-  if (state.editingIndex === null) return;
-  const nextIndex = Math.min(state.videos.length - 1, state.editingIndex + 1);
-  openEditDialog(nextIndex);
-});
-
-elements.editCancel.addEventListener('click', () => {
-  closeEditDialog();
-});
-
-elements.editForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  if (state.editingIndex === null) return;
-  const video = state.videos[state.editingIndex];
-  const formData = new FormData(elements.editForm);
-  const updates = Object.fromEntries(formData.entries());
-  updates.name = updates.name.trim();
-  await store.update(video.id, updates);
-  await hydrateState();
-  closeEditDialog();
-});
-
-elements.editDialog.addEventListener('close', () => {
-  state.editingIndex = null;
-});
-
-function createCSVRow(values) {
-  return values
-    .map((value) => {
-      if (value == null) return '';
-      const text = String(value);
-      if (/[",\n]/.test(text)) {
-        return '"' + text.replace(/"/g, '""') + '"';
-      }
-      return text;
-    })
-    .join(',');
+async function handleDeleteAll() {
+  await fetch(API_ENDPOINTS.deleteAll, { method: 'DELETE' });
+  await fetchVideos();
+  await fetchStatus();
 }
 
 function exportCSV() {
@@ -474,122 +416,138 @@ function exportCSV() {
     '缓存方式',
     'VOC要求',
     '防爆要求',
-    '原始文件名',
-    '文件大小',
   ];
-  const rows = [createCSVRow(headers)];
-  for (const video of state.videos) {
-    rows.push(
-      createCSVRow([
-        video.id,
-        video.name,
-        video.clientName,
-        video.material,
-        video.series,
-        video.weight,
-        video.capping,
-        video.conveyor,
-        video.buffer,
-        video.voc,
-        video.explosion,
-        video.originalName,
-        video.size,
-      ]),
-    );
-  }
-  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const rows = state.videos.map((video) => [
+    video.id,
+    video.name || '',
+    video.clientName || '',
+    video.material || '',
+    video.series || '',
+    video.weight || '',
+    video.capping || '',
+    video.conveyor || '',
+    video.buffer || '',
+    video.voc || '',
+    video.explosion || '',
+  ]);
+
+  const lines = [headers.join(','), ...rows.map((row) => row.map(escapeCsvCell).join(','))];
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  const timestamp = new Date().toISOString().split('T')[0];
   link.href = url;
-  link.download = `视频信息_${timestamp}.csv`;
-  document.body.append(link);
+  link.download = `辉鑫科技视频列表-${Date.now()}.csv`;
+  document.body.appendChild(link);
   link.click();
-  link.remove();
+  document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
 
-function parseCSV(text) {
-  const rows = [];
-  let current = '';
-  let inQuotes = false;
-  const pushValue = (row) => {
-    if (!rows[row]) rows[row] = [];
-    rows[row].push(current);
-    current = '';
-  };
-  let row = 0;
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (inQuotes) {
-      if (char === '"') {
-        if (text[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        current += char;
-      }
-    } else {
-      if (char === '"') {
-        inQuotes = true;
-      } else if (char === ',') {
-        pushValue(row);
-      } else if (char === '\n') {
-        pushValue(row);
-        row += 1;
-      } else if (char === '\r') {
-        // ignore
-      } else {
-        current += char;
-      }
-    }
+function escapeCsvCell(value) {
+  const stringValue = `${value ?? ''}`;
+  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
   }
-  pushValue(row);
-  return rows.filter((r) => r.length > 0);
+  return stringValue;
 }
 
 async function importCSV(file) {
   if (!file) return;
-  const text = await file.text();
-  const rows = parseCSV(text);
-  if (rows.length <= 1) return;
-  const [header, ...dataRows] = rows;
-  const headerMap = header.map((h) => h.trim());
-  for (const row of dataRows) {
-    const entry = {};
-    headerMap.forEach((key, idx) => {
-      entry[key] = row[idx];
-    });
+  const content = await file.text();
+  const rows = parseCSV(content);
+  if (!rows.length) return;
+  const headers = rows[0];
+  const updates = [];
+  for (let i = 1; i < rows.length; i += 1) {
+    const row = rows[i];
+    if (!row || !row.length) continue;
+    const entry = Object.fromEntries(headers.map((header, index) => [header, row[index] ?? '']));
     if (!entry.id) continue;
-    const updates = {
-      name: entry['文件名'],
-      clientName: entry['客户名称'],
-      material: entry['物料信息'],
-      series: entry['型号系列'],
-      weight: entry['灌装重量'],
-      capping: entry['压盖方式'],
-      conveyor: entry['输送方式'],
-      buffer: entry['缓存方式'],
-      voc: entry['VOC要求'],
-      explosion: entry['防爆要求'],
-    };
-    await store.update(entry.id, updates);
+    updates.push({
+      id: entry.id,
+      name: entry['文件名'] || '',
+      clientName: entry['客户名称'] || '',
+      material: entry['物料信息'] || '',
+      series: entry['型号系列'] || '',
+      weight: entry['灌装重量'] || '',
+      capping: entry['压盖方式'] || '',
+      conveyor: entry['输送方式'] || '',
+      buffer: entry['缓存方式'] || '',
+      voc: entry['VOC要求'] || '',
+      explosion: entry['防爆要求'] || '',
+    });
   }
-  await hydrateState();
+
+  if (!updates.length) return;
+
+  await fetch(API_ENDPOINTS.videos, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ videos: updates }),
+  });
+  await fetchVideos();
 }
 
-async function hydrateState() {
-  const videos = await store.getAll();
-  revokeObjectUrls();
-  videos.sort((a, b) => a.createdAt - b.createdAt);
-  state.videos = videos;
-  state.selected.clear();
-  renderTable();
-  refreshSelectionUI();
-  updateDashboard();
+function parseCSV(text) {
+  const rows = [];
+  let current = [];
+  let value = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        value += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === ',' && !inQuotes) {
+      current.push(value.trim());
+      value = '';
+      continue;
+    }
+
+    if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (value || current.length) {
+        current.push(value.trim());
+        rows.push(current);
+        current = [];
+        value = '';
+      }
+      if (char === '\r' && next === '\n') {
+        i += 1;
+      }
+      continue;
+    }
+
+    value += char;
+  }
+
+  if (value || current.length) {
+    current.push(value.trim());
+    rows.push(current);
+  }
+
+  return rows.filter((row) => row.some((cell) => cell !== ''));
+}
+
+function setupTabNavigation() {
+  elements.tabButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = button.dataset.target;
+      elements.tabButtons.forEach((btn) => btn.classList.toggle('active', btn === button));
+      elements.sections.forEach((section) =>
+        section.classList.toggle('active', section.id === target),
+      );
+    });
+  });
 }
 
 function setupSelectionControls() {
@@ -608,15 +566,13 @@ function setupSelectionControls() {
   elements.deleteSelectedBtn.addEventListener('click', async () => {
     if (state.selected.size === 0) return;
     if (!confirm(`确定删除选中的 ${state.selected.size} 个视频吗？`)) return;
-    await store.deleteMany(Array.from(state.selected));
-    await hydrateState();
+    await handleDelete(Array.from(state.selected));
   });
 
   elements.deleteAllBtn.addEventListener('click', async () => {
-    if (state.videos.length === 0) return;
+    if (!state.videos.length) return;
     if (!confirm('确定删除全部视频及其信息吗？此操作不可撤销。')) return;
-    await store.deleteAll();
-    await hydrateState();
+    await handleDeleteAll();
   });
 
   elements.selectAllCheckbox.addEventListener('change', (event) => {
@@ -630,59 +586,144 @@ function setupSelectionControls() {
   });
 }
 
-function setupDashboardControls() {
-  elements.dashboardFilters.addEventListener('input', () => {
-    updateDashboard();
+function setupTableListeners() {
+  elements.tableBody.addEventListener('change', async (event) => {
+    const checkbox = event.target;
+    if (!(checkbox instanceof HTMLInputElement)) return;
+    const id = checkbox.dataset.id;
+    if (!id) return;
+    if (checkbox.checked) {
+      state.selected.add(id);
+    } else {
+      state.selected.delete(id);
+    }
+    refreshSelectionUI();
   });
 
-  elements.dashboardFilters.addEventListener('reset', (event) => {
-    event.preventDefault();
-    for (const element of elements.dashboardFilters.elements) {
-      if (element.tagName === 'SELECT') {
-        element.value = '';
+  elements.tableBody.addEventListener('click', async (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const id = button.dataset.id;
+    const action = button.dataset.action;
+    if (!id || !action) return;
+
+    if (action === 'edit') {
+      openEditDialog(id);
+    } else if (action === 'delete') {
+      if (confirm('确定删除该视频吗？')) {
+        await handleDelete([id]);
       }
     }
-    updateDashboard();
+  });
+}
+
+function openEditDialog(id) {
+  const index = state.videos.findIndex((video) => video.id === id);
+  if (index === -1) return;
+  state.editingIndex = index;
+  const video = state.videos[index];
+  const form = elements.editForm;
+  form.name.value = video.name || '';
+  form.clientName.value = video.clientName || '';
+  form.material.value = video.material || '';
+  form.series.value = video.series || CATEGORY_OPTIONS.series[0];
+  form.weight.value = video.weight || CATEGORY_OPTIONS.weight[0];
+  form.capping.value = video.capping || CATEGORY_OPTIONS.capping[0];
+  form.conveyor.value = video.conveyor || CATEGORY_OPTIONS.conveyor[0];
+  form.buffer.value = video.buffer || CATEGORY_OPTIONS.buffer[0];
+  form.voc.value = video.voc || CATEGORY_OPTIONS.voc[0];
+  form.explosion.value = video.explosion || CATEGORY_OPTIONS.explosion[0];
+  if (typeof elements.editDialog.showModal === 'function') {
+    elements.editDialog.showModal();
+  }
+}
+
+function changeEditingIndex(direction) {
+  if (state.editingIndex == null) return;
+  const nextIndex = state.editingIndex + direction;
+  if (nextIndex < 0 || nextIndex >= state.videos.length) return;
+  openEditDialog(state.videos[nextIndex].id);
+}
+
+function setupEditDialog() {
+  elements.editPrev.addEventListener('click', () => changeEditingIndex(-1));
+  elements.editNext.addEventListener('click', () => changeEditingIndex(1));
+  elements.editCancel.addEventListener('click', () => {
+    elements.editDialog.close();
   });
 
+  elements.editForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const video = state.videos[state.editingIndex];
+    if (!video) return;
+    const formData = new FormData(elements.editForm);
+    const updates = Object.fromEntries(formData.entries());
+    const response = await fetch(API_ENDPOINTS.video(video.id), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    if (!response.ok) {
+      alert('保存失败，请稍后重试');
+      return;
+    }
+    elements.editDialog.close();
+    await fetchVideos();
+  });
+}
+
+function setupViewToggle() {
   elements.viewToggleButtons.forEach((button) => {
     button.addEventListener('click', () => {
       state.chartType = button.dataset.chart;
-      elements.viewToggleButtons.forEach((btn) =>
-        btn.classList.toggle('active', btn === button),
-      );
+      elements.viewToggleButtons.forEach((btn) => btn.classList.toggle('active', btn === button));
       updateDashboard();
     });
   });
 }
 
-function setupFileControls() {
-  elements.uploadInput.addEventListener('change', async (event) => {
-    const files = Array.from(event.target.files || []);
-    if (!files.length) return;
-    await store.addFiles(files);
-    elements.uploadInput.value = '';
-    await hydrateState();
+function setupFilters() {
+  elements.dashboardFilters.addEventListener('change', () => {
+    updateDashboard();
   });
 
-  elements.exportBtn.addEventListener('click', exportCSV);
-
-  elements.importInput.addEventListener('change', async (event) => {
-    const file = event.target.files?.[0];
-    await importCSV(file);
-    elements.importInput.value = '';
+  elements.dashboardFilters.addEventListener('reset', (event) => {
+    event.preventDefault();
+    for (const select of elements.dashboardFilters.querySelectorAll('select')) {
+      select.value = '';
+    }
+    updateDashboard();
   });
 }
 
-let store;
+function setupStatusRefresh() {
+  elements.refreshStatusBtn.addEventListener('click', () => {
+    fetchStatus();
+  });
+  setInterval(fetchStatus, 15000);
+}
 
 async function bootstrap() {
-  initFilters();
+  setupTabNavigation();
+  populateAllSelects();
   setupSelectionControls();
-  setupDashboardControls();
-  setupFileControls();
-  store = await VideoStore.create();
-  await hydrateState();
+  setupTableListeners();
+  setupEditDialog();
+  setupViewToggle();
+  setupFilters();
+  setupStatusRefresh();
+
+  elements.uploadInput.addEventListener('change', handleUpload);
+  elements.exportBtn.addEventListener('click', exportCSV);
+  elements.importInput.addEventListener('change', (event) => {
+    const file = event.target.files?.[0];
+    importCSV(file).finally(() => {
+      elements.importInput.value = '';
+    });
+  });
+
+  await fetchStatus();
+  await fetchVideos();
 }
 
 document.addEventListener('DOMContentLoaded', bootstrap);
