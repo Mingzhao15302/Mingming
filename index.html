@@ -172,11 +172,32 @@
     <dialog id="edit-dialog">
       <form method="dialog" id="edit-form">
         <header class="dialog-header">
-          <button type="button" id="edit-prev" class="icon-button" aria-label="上一个">
+          <button
+            type="button"
+            id="edit-prev"
+            class="edge-button edge-button--left"
+            aria-label="上一个视频"
+          >
             ◀
           </button>
-          <h3>修改视频信息</h3>
-          <button type="button" id="edit-next" class="icon-button" aria-label="下一个">
+          <div class="dialog-header-main">
+            <h3 id="edit-dialog-title">修改视频信息</h3>
+            <p class="dialog-subtitle" id="edit-dialog-subtitle">请选择要编辑的视频</p>
+          </div>
+          <div class="dialog-window-controls">
+            <button type="button" id="edit-minimize" class="icon-button" aria-label="最小化">
+              ▁
+            </button>
+            <button type="button" id="edit-close" class="icon-button" aria-label="关闭">
+              ×
+            </button>
+          </div>
+          <button
+            type="button"
+            id="edit-next"
+            class="edge-button edge-button--right"
+            aria-label="下一个视频"
+          >
             ▶
           </button>
         </header>
@@ -230,7 +251,7 @@
         </div>
 
         <footer class="dialog-footer">
-          <button type="button" id="edit-cancel" class="secondary">取消</button>
+          <button type="button" id="edit-cancel" class="secondary">关闭</button>
           <button type="submit" class="primary">保存</button>
         </footer>
       </form>
