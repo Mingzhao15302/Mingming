@@ -1,7 +1,14 @@
-const { openDB } = window.idb;
-
 const CATEGORY_OPTIONS = {
-  series: ['30A', '30B', '30BG-', '30G', '30GY', 'ZSQ', 'HX200', '2T'],
+  series: [
+    '30A系列',
+    '30B系列',
+    '30BG系列',
+    '30G系列',
+    '30GY系列',
+    'ZSQ系列',
+    'HX200系列',
+    '2T系列',
+  ],
   weight: ['0.5~5kg', '10~20kg', '50~200kg', '1000kg'],
   capping: ['5L平板压盖', '20L平板压盖', '花篮压盖', '辊压', '助力臂拧盖', '无'],
   conveyor: ['滚筒', '板链', '无'],
@@ -10,96 +17,24 @@ const CATEGORY_OPTIONS = {
   explosion: ['防爆', '不防爆'],
 };
 
-class VideoStore {
-  static async create() {
-    const db = await openDB('hx-video-manager', 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('videos')) {
-          const store = db.createObjectStore('videos', { keyPath: 'id' });
-          store.createIndex('createdAt', 'createdAt');
-        }
-      },
-    });
-    return new VideoStore(db);
-  }
-
-  constructor(db) {
-    this.db = db;
-  }
-
-  async getAll() {
-    return await this.db.getAllFromIndex('videos', 'createdAt');
-  }
-
-  async addFiles(files) {
-    const tx = this.db.transaction('videos', 'readwrite');
-    const store = tx.store;
-    const added = [];
-    for (const file of files) {
-      const id = crypto.randomUUID();
-      const record = {
-        id,
-        name: file.name,
-        clientName: '',
-        material: '',
-        series: CATEGORY_OPTIONS.series[0] ?? '',
-        weight: CATEGORY_OPTIONS.weight[0] ?? '',
-        capping: CATEGORY_OPTIONS.capping[0] ?? '',
-        conveyor: CATEGORY_OPTIONS.conveyor[0] ?? '',
-        buffer: CATEGORY_OPTIONS.buffer[0] ?? '',
-        voc: CATEGORY_OPTIONS.voc[0] ?? '',
-        explosion: CATEGORY_OPTIONS.explosion[0] ?? '',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        blob: file,
-        size: file.size,
-        type: file.type,
-        originalName: file.name,
-      };
-      await store.put(record);
-      added.push(record);
-    }
-    await tx.done;
-    return added;
-  }
-
-  async update(id, updates) {
-    const existing = await this.db.get('videos', id);
-    if (!existing) return null;
-    const updated = {
-      ...existing,
-      ...updates,
-      updatedAt: Date.now(),
-    };
-    await this.db.put('videos', updated);
-    return updated;
-  }
-
-  async deleteMany(ids) {
-    const tx = this.db.transaction('videos', 'readwrite');
-    for (const id of ids) {
-      await tx.store.delete(id);
-    }
-    await tx.done;
-  }
-
-  async deleteAll() {
-    await this.db.clear('videos');
-  }
-}
-
 const state = {
   videos: [],
-  objectUrls: new Map(),
   selected: new Set(),
-  editingIndex: null,
   chart: null,
   chartType: 'radar',
+  editingIndex: null,
+  status: {
+    online: null,
+    videoCount: 0,
+    totalSize: 0,
+    lastChecked: null,
+  },
 };
 
 const elements = {
   tabButtons: Array.from(document.querySelectorAll('.tab-button')),
   sections: Array.from(document.querySelectorAll('.tab-section')),
+  statusWidgets: Array.from(document.querySelectorAll('[data-status-widget]')),
   uploadInput: document.getElementById('video-upload'),
   tableBody: document.getElementById('video-table-body'),
   selectAllBtn: document.getElementById('select-all'),
@@ -118,6 +53,10 @@ const elements = {
   editPrev: document.getElementById('edit-prev'),
   editNext: document.getElementById('edit-next'),
   editCancel: document.getElementById('edit-cancel'),
+  metricTotal: document.getElementById('metric-total'),
+  metricFiltered: document.getElementById('metric-filtered'),
+  metricSeries: document.getElementById('metric-series'),
+  metricStorage: document.getElementById('metric-storage'),
 };
 
 function populateSelect(select, options, includeAll = false) {
@@ -137,9 +76,8 @@ function populateSelect(select, options, includeAll = false) {
 }
 
 function initFilters() {
-  const filterForm = elements.dashboardFilters;
   for (const [key, options] of Object.entries(CATEGORY_OPTIONS)) {
-    const select = filterForm.elements.namedItem(key);
+    const select = elements.dashboardFilters.elements.namedItem(key);
     if (select) {
       populateSelect(select, options, true);
     }
@@ -166,27 +104,10 @@ elements.tabButtons.forEach((btn) => {
   btn.addEventListener('click', () => switchTab(btn.dataset.target));
 });
 
-function revokeObjectUrls() {
-  for (const url of state.objectUrls.values()) {
-    URL.revokeObjectURL(url);
-  }
-  state.objectUrls.clear();
-}
-
-function updateObjectUrl(video) {
-  if (state.objectUrls.has(video.id)) {
-    return state.objectUrls.get(video.id);
-  }
-  if (!video.blob) return '';
-  const url = URL.createObjectURL(video.blob);
-  state.objectUrls.set(video.id, url);
-  return url;
-}
-
 function formatSize(bytes) {
-  if (!bytes && bytes !== 0) return '';
+  if (!bytes && bytes !== 0) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB'];
-  let size = bytes;
+  let size = Number(bytes);
   let unit = units.shift();
   while (size >= 1024 && units.length) {
     size /= 1024;
@@ -195,12 +116,57 @@ function formatSize(bytes) {
   return `${size.toFixed(size >= 10 || !units.length ? 0 : 1)} ${unit}`;
 }
 
+function updateStatusUI() {
+  const { online, videoCount, totalSize, lastChecked } = state.status;
+  elements.statusWidgets.forEach((widget) => {
+    const indicator = widget.querySelector('[data-status-indicator]');
+    const text = widget.querySelector('[data-status-text]');
+    const meta = widget.querySelector('[data-status-meta]');
+    if (!indicator || !text || !meta) return;
+    indicator.classList.toggle('online', online === true);
+    indicator.classList.toggle('offline', online === false);
+    if (online === null) {
+      text.textContent = '文件服务器状态检测中…';
+      meta.textContent = '—';
+    } else if (online) {
+      text.textContent = '文件服务器正常运行';
+      const checked = lastChecked
+        ? new Date(lastChecked).toLocaleString()
+        : new Date().toLocaleString();
+      meta.textContent = `视频：${videoCount} 条 · 存储：${formatSize(totalSize)} · 最近检测：${checked}`;
+    } else {
+      text.textContent = '文件服务器离线';
+      meta.textContent = '请检查 Node.js 服务是否启动';
+    }
+  });
+}
+
+async function fetchStatus() {
+  try {
+    const response = await fetch('/api/status', { cache: 'no-store' });
+    if (!response.ok) throw new Error('status error');
+    const data = await response.json();
+    state.status = {
+      online: true,
+      videoCount: data.videoCount,
+      totalSize: data.totalSize,
+      lastChecked: Date.now(),
+    };
+  } catch (error) {
+    state.status.online = false;
+    state.status.lastChecked = Date.now();
+  } finally {
+    updateStatusUI();
+    window.setTimeout(fetchStatus, 10000);
+  }
+}
+
 function renderTable() {
-  const tbody = elements.tableBody;
-  tbody.innerHTML = '';
+  elements.tableBody.innerHTML = '';
   const fragment = document.createDocumentFragment();
   for (const [index, video] of state.videos.entries()) {
     const tr = document.createElement('tr');
+
     const checkboxCell = document.createElement('td');
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -219,13 +185,13 @@ function renderTable() {
     const previewCell = document.createElement('td');
     const videoEl = document.createElement('video');
     videoEl.className = 'video-preview';
-    videoEl.src = updateObjectUrl(video);
+    videoEl.src = video.streamPath;
     videoEl.controls = true;
     videoEl.muted = true;
     previewCell.append(videoEl);
     tr.append(previewCell);
 
-    const cells = [
+    const fields = [
       video.name,
       video.clientName,
       video.material,
@@ -238,7 +204,7 @@ function renderTable() {
       video.explosion,
     ];
 
-    for (const value of cells) {
+    for (const value of fields) {
       const td = document.createElement('td');
       td.textContent = value || '—';
       tr.append(td);
@@ -256,7 +222,7 @@ function renderTable() {
 
     fragment.append(tr);
   }
-  tbody.append(fragment);
+  elements.tableBody.append(fragment);
   elements.selectAllCheckbox.checked =
     state.videos.length > 0 && state.selected.size === state.videos.length;
 }
@@ -277,20 +243,31 @@ function refreshSelectionUI() {
 function applyFilters() {
   const formData = new FormData(elements.dashboardFilters);
   const filters = Object.fromEntries(formData.entries());
-  return state.videos.filter((video) => {
-    return Object.entries(filters).every(([key, value]) => {
+  return state.videos.filter((video) =>
+    Object.entries(filters).every(([key, value]) => {
       if (!value) return true;
       return video[key] === value;
-    });
-  });
+    }),
+  );
+}
+
+function renderMetrics() {
+  const filtered = applyFilters();
+  const totalStorage = state.videos.reduce((sum, video) => sum + (video.size || 0), 0);
+  const uniqueSeries = new Set(state.videos.map((video) => video.series).filter(Boolean));
+  elements.metricTotal.textContent = state.videos.length;
+  elements.metricFiltered.textContent = filtered.length;
+  elements.metricSeries.textContent = uniqueSeries.size;
+  elements.metricStorage.textContent = formatSize(totalStorage);
 }
 
 function updateChart() {
   const filtered = applyFilters();
   const categories = CATEGORY_OPTIONS.series;
-  const counts = categories.map(
-    (series) => filtered.filter((video) => video.series === series).length,
+  const counts = categories.map((series) =>
+    filtered.filter((video) => video.series === series).length,
   );
+
   const config = {
     type: state.chartType,
     data: {
@@ -299,7 +276,8 @@ function updateChart() {
         {
           label: '视频数量',
           data: counts,
-          backgroundColor: state.chartType === 'bar' ? '#93c5fd' : 'rgba(37, 99, 235, 0.4)',
+          backgroundColor:
+            state.chartType === 'bar' ? '#93c5fd' : 'rgba(37, 99, 235, 0.35)',
           borderColor: '#2563eb',
           borderWidth: 2,
           pointBackgroundColor: '#2563eb',
@@ -309,16 +287,17 @@ function updateChart() {
     },
     options: {
       responsive: true,
-      scales: state.chartType === 'bar'
-        ? {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                precision: 0,
+      scales:
+        state.chartType === 'bar'
+          ? {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  precision: 0,
+                },
               },
-            },
-          }
-        : {},
+            }
+          : {},
       plugins: {
         legend: {
           display: false,
@@ -354,7 +333,7 @@ function renderPreviewGrid() {
 
     const videoEl = document.createElement('video');
     videoEl.controls = true;
-    videoEl.src = updateObjectUrl(video);
+    videoEl.src = video.streamPath;
     videoEl.setAttribute('preload', 'metadata');
 
     const fullscreenBtn = document.createElement('button');
@@ -373,13 +352,13 @@ function renderPreviewGrid() {
     meta.innerHTML = `
       <span>客户：${video.clientName || '—'}</span>
       <span>物料：${video.material || '—'}</span>
-      <span>型号系列：${video.series}</span>
-      <span>灌装重量：${video.weight}</span>
-      <span>压盖方式：${video.capping}</span>
-      <span>输送方式：${video.conveyor}</span>
-      <span>缓存方式：${video.buffer}</span>
-      <span>VOC 要求：${video.voc}</span>
-      <span>防爆要求：${video.explosion}</span>
+      <span>型号系列：${video.series || '—'}</span>
+      <span>灌装重量：${video.weight || '—'}</span>
+      <span>压盖方式：${video.capping || '—'}</span>
+      <span>输送方式：${video.conveyor || '—'}</span>
+      <span>缓存方式：${video.buffer || '—'}</span>
+      <span>VOC 要求：${video.voc || '—'}</span>
+      <span>防爆要求：${video.explosion || '—'}</span>
     `;
 
     card.append(title, videoEl, fullscreenBtn, meta);
@@ -389,16 +368,17 @@ function renderPreviewGrid() {
 }
 
 function updateDashboard() {
+  renderMetrics();
   updateChart();
   renderPreviewGrid();
 }
 
 function openEditDialog(index) {
-  state.editingIndex = index;
   const video = state.videos[index];
   if (!video) return;
+  state.editingIndex = index;
   const form = elements.editForm;
-  form.elements.name.value = video.name;
+  form.elements.name.value = video.name || '';
   form.elements.clientName.value = video.clientName || '';
   form.elements.material.value = video.material || '';
   for (const key of Object.keys(CATEGORY_OPTIONS)) {
@@ -417,13 +397,13 @@ function closeEditDialog() {
 }
 
 elements.editPrev.addEventListener('click', () => {
-  if (state.editingIndex === null) return;
+  if (state.editingIndex == null) return;
   const prevIndex = Math.max(0, state.editingIndex - 1);
   openEditDialog(prevIndex);
 });
 
 elements.editNext.addEventListener('click', () => {
-  if (state.editingIndex === null) return;
+  if (state.editingIndex == null) return;
   const nextIndex = Math.min(state.videos.length - 1, state.editingIndex + 1);
   openEditDialog(nextIndex);
 });
@@ -432,20 +412,29 @@ elements.editCancel.addEventListener('click', () => {
   closeEditDialog();
 });
 
-elements.editForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  if (state.editingIndex === null) return;
-  const video = state.videos[state.editingIndex];
-  const formData = new FormData(elements.editForm);
-  const updates = Object.fromEntries(formData.entries());
-  updates.name = updates.name.trim();
-  await store.update(video.id, updates);
-  await hydrateState();
-  closeEditDialog();
-});
-
 elements.editDialog.addEventListener('close', () => {
   state.editingIndex = null;
+});
+
+elements.editForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (state.editingIndex == null) return;
+  const video = state.videos[state.editingIndex];
+  const formData = new FormData(elements.editForm);
+  const payload = Object.fromEntries(formData.entries());
+  payload.name = payload.name.trim();
+  try {
+    const response = await fetch(`/api/videos/${video.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) throw new Error('更新失败');
+    await hydrateState();
+    closeEditDialog();
+  } catch (error) {
+    alert(error.message || '更新失败，请重试');
+  }
 });
 
 function createCSVRow(values) {
@@ -558,38 +547,38 @@ async function importCSV(file) {
   if (rows.length <= 1) return;
   const [header, ...dataRows] = rows;
   const headerMap = header.map((h) => h.trim());
+  const updates = [];
   for (const row of dataRows) {
     const entry = {};
     headerMap.forEach((key, idx) => {
       entry[key] = row[idx];
     });
     if (!entry.id) continue;
-    const updates = {
-      name: entry['文件名'],
-      clientName: entry['客户名称'],
-      material: entry['物料信息'],
-      series: entry['型号系列'],
-      weight: entry['灌装重量'],
-      capping: entry['压盖方式'],
-      conveyor: entry['输送方式'],
-      buffer: entry['缓存方式'],
-      voc: entry['VOC要求'],
-      explosion: entry['防爆要求'],
-    };
-    await store.update(entry.id, updates);
+    updates.push({
+      id: entry.id,
+      name: entry['文件名'] ?? '',
+      clientName: entry['客户名称'] ?? '',
+      material: entry['物料信息'] ?? '',
+      series: entry['型号系列'] ?? '',
+      weight: entry['灌装重量'] ?? '',
+      capping: entry['压盖方式'] ?? '',
+      conveyor: entry['输送方式'] ?? '',
+      buffer: entry['缓存方式'] ?? '',
+      voc: entry['VOC要求'] ?? '',
+      explosion: entry['防爆要求'] ?? '',
+    });
   }
-  await hydrateState();
-}
-
-async function hydrateState() {
-  const videos = await store.getAll();
-  revokeObjectUrls();
-  videos.sort((a, b) => a.createdAt - b.createdAt);
-  state.videos = videos;
-  state.selected.clear();
-  renderTable();
-  refreshSelectionUI();
-  updateDashboard();
+  try {
+    const response = await fetch('/api/videos/bulk-update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ updates }),
+    });
+    if (!response.ok) throw new Error('导入失败');
+    await hydrateState();
+  } catch (error) {
+    alert(error.message || '导入 CSV 失败，请重试');
+  }
 }
 
 function setupSelectionControls() {
@@ -608,15 +597,29 @@ function setupSelectionControls() {
   elements.deleteSelectedBtn.addEventListener('click', async () => {
     if (state.selected.size === 0) return;
     if (!confirm(`确定删除选中的 ${state.selected.size} 个视频吗？`)) return;
-    await store.deleteMany(Array.from(state.selected));
-    await hydrateState();
+    try {
+      const response = await fetch('/api/videos', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(state.selected) }),
+      });
+      if (!response.ok) throw new Error('删除失败');
+      await hydrateState();
+    } catch (error) {
+      alert(error.message || '删除失败，请重试');
+    }
   });
 
   elements.deleteAllBtn.addEventListener('click', async () => {
     if (state.videos.length === 0) return;
     if (!confirm('确定删除全部视频及其信息吗？此操作不可撤销。')) return;
-    await store.deleteAll();
-    await hydrateState();
+    try {
+      const response = await fetch('/api/videos/all', { method: 'DELETE' });
+      if (!response.ok) throw new Error('删除失败');
+      await hydrateState();
+    } catch (error) {
+      alert(error.message || '删除失败，请重试');
+    }
   });
 
   elements.selectAllCheckbox.addEventListener('change', (event) => {
@@ -660,9 +663,19 @@ function setupFileControls() {
   elements.uploadInput.addEventListener('change', async (event) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
-    await store.addFiles(files);
-    elements.uploadInput.value = '';
-    await hydrateState();
+    const formData = new FormData();
+    files.forEach((file) => formData.append('videos', file));
+    try {
+      const response = await fetch('/api/videos/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('上传失败');
+      elements.uploadInput.value = '';
+      await hydrateState();
+    } catch (error) {
+      alert(error.message || '上传失败，请重试');
+    }
   });
 
   elements.exportBtn.addEventListener('click', exportCSV);
@@ -674,15 +687,30 @@ function setupFileControls() {
   });
 }
 
-let store;
+async function hydrateState() {
+  try {
+    const response = await fetch('/api/videos');
+    if (!response.ok) throw new Error('加载失败');
+    const videos = await response.json();
+    videos.sort((a, b) => a.createdAt - b.createdAt);
+    state.videos = videos;
+    state.selected.clear();
+    renderTable();
+    refreshSelectionUI();
+    updateDashboard();
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 async function bootstrap() {
   initFilters();
   setupSelectionControls();
   setupDashboardControls();
   setupFileControls();
-  store = await VideoStore.create();
   await hydrateState();
+  updateStatusUI();
+  fetchStatus();
 }
 
 document.addEventListener('DOMContentLoaded', bootstrap);

@@ -12,12 +12,21 @@
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js" defer></script>
     <script src="app.js" type="module" defer></script>
   </head>
   <body>
     <header class="app-header">
-      <h1>辉鑫科技视频管理器</h1>
+      <div class="brand">
+        <h1>辉鑫科技视频管理器</h1>
+        <p class="brand-subtitle">企业级本地部署 · 文件自建更安全</p>
+      </div>
+      <div class="status-banner" data-status-widget>
+        <span class="status-indicator" data-status-indicator></span>
+        <div>
+          <p class="status-title" data-status-text>文件服务器状态检测中…</p>
+          <p class="status-meta" data-status-meta>—</p>
+        </div>
+      </div>
       <nav class="tab-nav">
         <button class="tab-button active" data-target="management">视频管理</button>
         <button class="tab-button" data-target="dashboard">仪表板</button>
@@ -26,10 +35,18 @@
 
     <main>
       <section id="management" class="tab-section active">
+        <div class="status-inline" data-status-widget>
+          <span class="status-indicator" data-status-indicator></span>
+          <div>
+            <p class="status-title" data-status-text>文件服务器状态检测中…</p>
+            <p class="status-meta" data-status-meta>—</p>
+          </div>
+        </div>
+
         <div class="panel">
           <h2>批量上传视频</h2>
           <p class="hint">
-            支持 1 ~ 300MB 以内的视频文件，上传数量不限。文件将被持久保存，下一次打开仍可使用。
+            支持批量导入 500 条以上视频，单个文件大小 1 ~ 200MB，上传后自动存储至本地文件服务器并长期保存。
           </p>
           <label class="upload-label">
             <input id="video-upload" type="file" accept="video/*" multiple hidden />
@@ -81,6 +98,52 @@
       </section>
 
       <section id="dashboard" class="tab-section">
+        <div class="status-inline" data-status-widget>
+          <span class="status-indicator" data-status-indicator></span>
+          <div>
+            <p class="status-title" data-status-text>文件服务器状态检测中…</p>
+            <p class="status-meta" data-status-meta>—</p>
+          </div>
+        </div>
+
+        <div class="dashboard-banner">
+          <h2>辉鑫科技智能灌装全流程可视化</h2>
+          <p>
+            实时掌控灌装项目影像资料，利用自建文件服务器保障数据安全，为生产、售后与客户演示提供统一视频中台。
+          </p>
+        </div>
+
+        <div class="panel metrics-panel">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">总视频数</span>
+              <span class="metric-value" id="metric-total">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">筛选结果</span>
+              <span class="metric-value" id="metric-filtered">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">分类数量</span>
+              <span class="metric-value" id="metric-series">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">总存储</span>
+              <span class="metric-value" id="metric-storage">0 MB</span>
+            </div>
+          </div>
+          <div class="chart-panel">
+            <div class="panel-subheader">
+              <h3>系列分布概览</h3>
+              <div class="view-toggle">
+                <button data-chart="radar" class="active">雷达图</button>
+                <button data-chart="bar">条形图</button>
+              </div>
+            </div>
+            <canvas id="distribution-chart" height="220"></canvas>
+          </div>
+        </div>
+
         <div class="panel">
           <h2>筛选条件</h2>
           <form id="dashboard-filters" class="filters">
@@ -114,17 +177,6 @@
             </label>
             <button type="reset" class="secondary">重置筛选</button>
           </form>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header">
-            <h2>进度分布</h2>
-            <div class="view-toggle">
-              <button data-chart="radar" class="active">雷达图</button>
-              <button data-chart="bar">条形图</button>
-            </div>
-          </div>
-          <canvas id="distribution-chart" height="220"></canvas>
         </div>
 
         <div class="panel">
