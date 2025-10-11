@@ -391,7 +391,7 @@ tbody tr:hover {
 
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
 }
 
@@ -420,14 +420,87 @@ tbody tr:hover {
   box-shadow: 0 12px 18px rgba(15, 23, 42, 0.12);
 }
 
+
+dialog {
+  border: none;
+  padding: 0;
+  border-radius: 1.5rem;
+  max-width: 760px;
+  width: min(95vw, 760px);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+dialog[open] {
+  animation: dialog-pop 0.2s ease-out;
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
 .dialog-header {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   background: var(--accent);
   color: #fff;
-  padding: 1rem 1.5rem;
+  padding: 1rem 3.75rem;
   border-radius: 1.5rem 1.5rem 0 0;
+  min-height: 4.5rem;
+}
+
+.dialog-header-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.dialog-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dialog-window-controls {
+  position: absolute;
+  top: 0.8rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.edge-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 1.1rem;
+  display: grid;
+  place-items: center;
+}
+
+.edge-button:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.edge-button:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.edge-button--left {
+  left: 1rem;
+}
+
+.edge-button--right {
+  right: 1rem;
 }
 
 .dialog-body {
@@ -466,8 +539,8 @@ tbody tr:hover {
   background: rgba(255, 255, 255, 0.2);
   color: inherit;
   border-radius: 999px;
-  width: 2rem;
-  height: 2rem;
+  width: 2.2rem;
+  height: 2.2rem;
   display: grid;
   place-items: center;
   font-size: 1.1rem;
@@ -480,6 +553,62 @@ tbody tr:hover {
 .status-legend {
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+dialog.minimized {
+  position: fixed;
+  inset: auto 2rem 2rem auto;
+  margin: 0;
+  width: 320px;
+  min-width: 280px;
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+dialog.minimized::backdrop {
+  background: transparent;
+}
+
+dialog.minimized .dialog-body,
+dialog.minimized .dialog-footer {
+  display: none;
+}
+
+dialog.minimized .dialog-header {
+  border-radius: 1.5rem;
+  cursor: pointer;
+  padding: 0.75rem 3.75rem;
+}
+
+dialog.minimized .dialog-subtitle {
+  display: none;
+}
+
+dialog.minimized .edge-button {
+  display: none;
+}
+
+@keyframes dialog-pop {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1200px) {
+  .preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .preview-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 960px) {

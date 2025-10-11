@@ -21,6 +21,7 @@ const state = {
   chart: null,
   chartType: 'radar',
   editingIndex: null,
+  dialogMinimized: false,
   status: null,
   statusUpdatedAt: null,
 };
@@ -52,6 +53,10 @@ const elements = {
   editPrev: document.getElementById('edit-prev'),
   editNext: document.getElementById('edit-next'),
   editCancel: document.getElementById('edit-cancel'),
+  editMinimize: document.getElementById('edit-minimize'),
+  editClose: document.getElementById('edit-close'),
+  editSubtitle: document.getElementById('edit-dialog-subtitle'),
+  dialogHeader: document.querySelector('#edit-dialog .dialog-header'),
 };
 
 function formatBytes(size) {
@@ -96,6 +101,14 @@ function populateSelect(select, options, withBlank = true) {
   }
 }
 
+function ensureOption(key, value) {
+  const options = CATEGORY_OPTIONS[key] || [];
+  if (value && options.includes(value)) {
+    return value;
+  }
+  return options[0] || '';
+}
+
 function populateAllSelects() {
   const filterSelects = elements.dashboardFilters.querySelectorAll('select');
   filterSelects.forEach((select) => {
@@ -126,6 +139,10 @@ async function fetchStatus() {
 }
 
 async function fetchVideos() {
+  const currentEditingId =
+    elements.editDialog?.open && state.editingIndex != null
+      ? state.videos[state.editingIndex]?.id
+      : null;
   try {
     const response = await fetch(API_ENDPOINTS.videos);
     if (!response.ok) throw new Error('无法获取视频列表');
@@ -140,6 +157,15 @@ async function fetchVideos() {
   renderTable();
   refreshSelectionUI();
   updateDashboard();
+
+  if (currentEditingId && elements.editDialog?.open) {
+    const newIndex = state.videos.findIndex((video) => video.id === currentEditingId);
+    if (newIndex !== -1) {
+      setEditingIndex(newIndex);
+    } else {
+      elements.editDialog.close();
+    }
+  }
 }
 
 function videoUrl(video) {
@@ -247,6 +273,23 @@ function refreshSelectionUI() {
   if (elements.selectAllCheckbox) {
     elements.selectAllCheckbox.checked = total > 0 && selected === total;
     elements.selectAllCheckbox.indeterminate = selected > 0 && selected < total;
+  }
+}
+
+function updateEditDialogSummary() {
+  if (state.editingIndex == null) return;
+  const index = state.editingIndex;
+  const video = state.videos[index];
+  if (!video) return;
+  if (elements.editSubtitle) {
+    const title = video.name || video.storageName;
+    elements.editSubtitle.textContent = `第 ${index + 1} / ${state.videos.length} 个 · ${title}`;
+  }
+  if (elements.editPrev) {
+    elements.editPrev.disabled = index <= 0;
+  }
+  if (elements.editNext) {
+    elements.editNext.disabled = index >= state.videos.length - 1;
   }
 }
 
@@ -620,21 +663,11 @@ function setupTableListeners() {
 function openEditDialog(id) {
   const index = state.videos.findIndex((video) => video.id === id);
   if (index === -1) return;
-  state.editingIndex = index;
-  const video = state.videos[index];
-  const form = elements.editForm;
-  form.name.value = video.name || '';
-  form.clientName.value = video.clientName || '';
-  form.material.value = video.material || '';
-  form.series.value = video.series || CATEGORY_OPTIONS.series[0];
-  form.weight.value = video.weight || CATEGORY_OPTIONS.weight[0];
-  form.capping.value = video.capping || CATEGORY_OPTIONS.capping[0];
-  form.conveyor.value = video.conveyor || CATEGORY_OPTIONS.conveyor[0];
-  form.buffer.value = video.buffer || CATEGORY_OPTIONS.buffer[0];
-  form.voc.value = video.voc || CATEGORY_OPTIONS.voc[0];
-  form.explosion.value = video.explosion || CATEGORY_OPTIONS.explosion[0];
-  if (typeof elements.editDialog.showModal === 'function') {
-    elements.editDialog.showModal();
+  setDialogMinimized(false);
+  if (setEditingIndex(index) && typeof elements.editDialog.showModal === 'function') {
+    if (!elements.editDialog.open) {
+      elements.editDialog.showModal();
+    }
   }
 }
 
@@ -642,7 +675,7 @@ function changeEditingIndex(direction) {
   if (state.editingIndex == null) return;
   const nextIndex = state.editingIndex + direction;
   if (nextIndex < 0 || nextIndex >= state.videos.length) return;
-  openEditDialog(state.videos[nextIndex].id);
+  setEditingIndex(nextIndex);
 }
 
 function setupEditDialog() {
@@ -652,24 +685,110 @@ function setupEditDialog() {
     elements.editDialog.close();
   });
 
+  elements.editMinimize.addEventListener('click', () => {
+    setDialogMinimized(!state.dialogMinimized);
+  });
+
+  elements.editClose.addEventListener('click', () => {
+    elements.editDialog.close();
+  });
+
+  if (elements.dialogHeader) {
+    elements.dialogHeader.addEventListener('click', (event) => {
+      if (!state.dialogMinimized) return;
+      if (event.target.closest('.dialog-window-controls')) return;
+      setDialogMinimized(false);
+    });
+  }
+
+  elements.editDialog.addEventListener('close', () => {
+    state.editingIndex = null;
+    setDialogMinimized(false);
+    if (elements.editSubtitle) {
+      elements.editSubtitle.textContent = '请选择要编辑的视频';
+    }
+  });
+
   elements.editForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const video = state.videos[state.editingIndex];
+    const index = state.editingIndex;
+    if (index == null) return;
+    const video = state.videos[index];
     if (!video) return;
     const formData = new FormData(elements.editForm);
     const updates = Object.fromEntries(formData.entries());
-    const response = await fetch(API_ENDPOINTS.video(video.id), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(API_ENDPOINTS.video(video.id), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) {
+        throw new Error('保存失败');
+      }
+      const data = await response.json();
+      const updatedVideo = data.video || { ...video, ...updates };
+      const stateIndex = state.videos.findIndex((item) => item.id === video.id);
+      if (stateIndex !== -1) {
+        state.videos[stateIndex] = {
+          ...state.videos[stateIndex],
+          ...updatedVideo,
+        };
+      }
+      renderTable();
+      refreshSelectionUI();
+      updateDashboard();
+      if (stateIndex !== -1 && elements.editDialog?.open) {
+        setEditingIndex(stateIndex);
+      }
+      fetchStatus();
+    } catch (error) {
+      console.error(error);
       alert('保存失败，请稍后重试');
-      return;
     }
-    elements.editDialog.close();
-    await fetchVideos();
   });
+}
+
+function setEditingIndex(index) {
+  if (index == null || index < 0 || index >= state.videos.length) {
+    return false;
+  }
+  state.editingIndex = index;
+  const video = state.videos[index];
+  if (!video) {
+    return false;
+  }
+  const form = elements.editForm;
+  form.name.value = video.name || '';
+  form.clientName.value = video.clientName || '';
+  form.material.value = video.material || '';
+  form.series.value = ensureOption('series', video.series);
+  form.weight.value = ensureOption('weight', video.weight);
+  form.capping.value = ensureOption('capping', video.capping);
+  form.conveyor.value = ensureOption('conveyor', video.conveyor);
+  form.buffer.value = ensureOption('buffer', video.buffer);
+  form.voc.value = ensureOption('voc', video.voc);
+  form.explosion.value = ensureOption('explosion', video.explosion);
+  updateEditDialogSummary();
+  return true;
+}
+
+function setDialogMinimized(minimized) {
+  state.dialogMinimized = minimized;
+  if (elements.editDialog) {
+    elements.editDialog.classList.toggle('minimized', minimized);
+  }
+  if (elements.editMinimize) {
+    elements.editMinimize.textContent = minimized ? '▢' : '▁';
+    elements.editMinimize.setAttribute(
+      'aria-label',
+      minimized ? '还原编辑窗口' : '最小化编辑窗口',
+    );
+    elements.editMinimize.setAttribute(
+      'title',
+      minimized ? '还原编辑窗口' : '最小化编辑窗口',
+    );
+  }
 }
 
 function setupViewToggle() {
