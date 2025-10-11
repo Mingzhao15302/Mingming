@@ -52,6 +52,10 @@ const elements = {
   editPrev: document.getElementById('edit-prev'),
   editNext: document.getElementById('edit-next'),
   editCancel: document.getElementById('edit-cancel'),
+  editMinimize: document.getElementById('edit-minimize'),
+  editClose: document.getElementById('edit-close'),
+  editStatus: document.getElementById('edit-status'),
+  editSubtitle: document.getElementById('edit-subtitle'),
 };
 
 function formatBytes(size) {
@@ -94,6 +98,16 @@ function populateSelect(select, options, withBlank = true) {
     option.textContent = value;
     select.appendChild(option);
   }
+}
+
+function ensureSelectValue(select, value, fallback) {
+  if (!select) return;
+  const existing = Array.from(select.options || []);
+  if (value && !existing.some((option) => option.value === value)) {
+    const option = new Option(value, value, true, true);
+    select.appendChild(option);
+  }
+  select.value = value || fallback;
 }
 
 function populateAllSelects() {
@@ -180,6 +194,36 @@ function renderStatusCards(container, status) {
   }
 }
 
+function setDialogMinimized(minimized) {
+  if (!elements.editDialog) return;
+  elements.editDialog.classList.toggle('minimized', minimized);
+  if (elements.editMinimize) {
+    elements.editMinimize.textContent = minimized ? '▢' : '▁';
+    elements.editMinimize.setAttribute('aria-pressed', minimized ? 'true' : 'false');
+    elements.editMinimize.setAttribute('title', minimized ? '还原' : '最小化');
+    elements.editMinimize.setAttribute(
+      'aria-label',
+      minimized ? '还原编辑框' : '最小化编辑框',
+    );
+  }
+}
+
+function updateEditStatus(message, variant = 'info') {
+  if (!elements.editStatus) return;
+  elements.editStatus.textContent = message || '';
+  elements.editStatus.classList.remove('error', 'success', 'loading');
+  if (!message) {
+    return;
+  }
+  if (variant === 'error') {
+    elements.editStatus.classList.add('error');
+  } else if (variant === 'success') {
+    elements.editStatus.classList.add('success');
+  } else if (variant === 'loading') {
+    elements.editStatus.classList.add('loading');
+  }
+}
+
 function updateStatusUI() {
   const status = state.status;
   const isOnline = status && status.status === 'online';
@@ -206,6 +250,13 @@ function updateStatusUI() {
 
   renderStatusCards(elements.managementStatus, status);
   renderStatusCards(elements.dashboardStatusGrid, status);
+}
+
+function updateEditNavigationButtons() {
+  if (!elements.editPrev || !elements.editNext) return;
+  elements.editPrev.disabled = state.editingIndex <= 0;
+  elements.editNext.disabled =
+    state.editingIndex == null || state.editingIndex >= state.videos.length - 1;
 }
 
 function renderTable() {
@@ -618,6 +669,7 @@ function setupTableListeners() {
 }
 
 function openEditDialog(id) {
+  if (!elements.editDialog || !elements.editForm) return;
   const index = state.videos.findIndex((video) => video.id === id);
   if (index === -1) return;
   state.editingIndex = index;
@@ -626,13 +678,25 @@ function openEditDialog(id) {
   form.name.value = video.name || '';
   form.clientName.value = video.clientName || '';
   form.material.value = video.material || '';
-  form.series.value = video.series || CATEGORY_OPTIONS.series[0];
-  form.weight.value = video.weight || CATEGORY_OPTIONS.weight[0];
-  form.capping.value = video.capping || CATEGORY_OPTIONS.capping[0];
-  form.conveyor.value = video.conveyor || CATEGORY_OPTIONS.conveyor[0];
-  form.buffer.value = video.buffer || CATEGORY_OPTIONS.buffer[0];
-  form.voc.value = video.voc || CATEGORY_OPTIONS.voc[0];
-  form.explosion.value = video.explosion || CATEGORY_OPTIONS.explosion[0];
+  ensureSelectValue(form.series, video.series, CATEGORY_OPTIONS.series[0]);
+  ensureSelectValue(form.weight, video.weight, CATEGORY_OPTIONS.weight[0]);
+  ensureSelectValue(form.capping, video.capping, CATEGORY_OPTIONS.capping[0]);
+  ensureSelectValue(form.conveyor, video.conveyor, CATEGORY_OPTIONS.conveyor[0]);
+  ensureSelectValue(form.buffer, video.buffer, CATEGORY_OPTIONS.buffer[0]);
+  ensureSelectValue(form.voc, video.voc, CATEGORY_OPTIONS.voc[0]);
+  ensureSelectValue(form.explosion, video.explosion, CATEGORY_OPTIONS.explosion[0]);
+  if (elements.editSubtitle) {
+    elements.editSubtitle.textContent = video.name || video.storageName || '未命名视频';
+  }
+  updateEditStatus('');
+  setDialogMinimized(false);
+  elements.editDialog.dataset.videoId = video.id;
+  const submitButton = elements.editForm.querySelector('button[type="submit"]');
+  if (submitButton) {
+    submitButton.disabled = false;
+    submitButton.textContent = '保存';
+  }
+  updateEditNavigationButtons();
   if (typeof elements.editDialog.showModal === 'function') {
     elements.editDialog.showModal();
   }
@@ -646,11 +710,37 @@ function changeEditingIndex(direction) {
 }
 
 function setupEditDialog() {
-  elements.editPrev.addEventListener('click', () => changeEditingIndex(-1));
-  elements.editNext.addEventListener('click', () => changeEditingIndex(1));
-  elements.editCancel.addEventListener('click', () => {
-    elements.editDialog.close();
-  });
+  if (!elements.editForm || !elements.editDialog) return;
+  if (elements.editPrev) {
+    elements.editPrev.addEventListener('click', () => changeEditingIndex(-1));
+  }
+  if (elements.editNext) {
+    elements.editNext.addEventListener('click', () => changeEditingIndex(1));
+  }
+  if (elements.editCancel) {
+    elements.editCancel.addEventListener('click', () => {
+      elements.editDialog.close();
+    });
+  }
+  if (elements.editClose) {
+    elements.editClose.addEventListener('click', () => {
+      elements.editDialog.close();
+    });
+  }
+  if (elements.editMinimize) {
+    elements.editMinimize.addEventListener('click', () => {
+      const minimized = !elements.editDialog.classList.contains('minimized');
+      setDialogMinimized(minimized);
+    });
+  }
+
+  if (elements.editDialog) {
+    elements.editDialog.addEventListener('close', () => {
+      state.editingIndex = null;
+      setDialogMinimized(false);
+      updateEditStatus('');
+    });
+  }
 
   elements.editForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -658,17 +748,49 @@ function setupEditDialog() {
     if (!video) return;
     const formData = new FormData(elements.editForm);
     const updates = Object.fromEntries(formData.entries());
-    const response = await fetch(API_ENDPOINTS.video(video.id), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    });
-    if (!response.ok) {
-      alert('保存失败，请稍后重试');
-      return;
+    const submitButton = elements.editForm.querySelector('button[type="submit"]');
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = '保存中...';
     }
-    elements.editDialog.close();
-    await fetchVideos();
+    updateEditStatus('保存中，请稍候...', 'loading');
+
+    try {
+      const response = await fetch(API_ENDPOINTS.video(video.id), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) {
+        throw new Error('保存失败');
+      }
+      const payload = await response.json().catch(() => ({ video: null }));
+      const updatedVideo = payload.video ? { ...video, ...payload.video } : { ...video, ...updates };
+      const index = state.videos.findIndex((item) => item.id === video.id);
+      if (index !== -1) {
+        state.videos[index] = {
+          ...state.videos[index],
+          ...updatedVideo,
+        };
+        if (elements.editSubtitle) {
+          const refreshed = state.videos[index];
+          elements.editSubtitle.textContent = refreshed.name || refreshed.storageName || '未命名视频';
+        }
+      }
+      renderTable();
+      refreshSelectionUI();
+      updateDashboard();
+      updateEditStatus('保存成功，信息已同步到服务器。', 'success');
+      updateEditNavigationButtons();
+    } catch (error) {
+      console.error(error);
+      updateEditStatus('保存失败，请稍后重试。', 'error');
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = '保存';
+      }
+    }
   });
 }
 

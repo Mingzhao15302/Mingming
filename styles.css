@@ -46,6 +46,12 @@ input {
   font: inherit;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 .app-header {
   background: var(--panel);
   box-shadow: var(--shadow);
@@ -420,14 +426,67 @@ tbody tr:hover {
   box-shadow: 0 12px 18px rgba(15, 23, 42, 0.12);
 }
 
+dialog {
+  border: none;
+  border-radius: 1.5rem;
+  padding: 0;
+  width: min(90vw, 760px);
+  max-width: 760px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.35);
+}
+
 .dialog-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   background: var(--accent);
   color: #fff;
-  padding: 1rem 1.5rem;
+  padding: 1rem 3.5rem;
   border-radius: 1.5rem 1.5rem 0 0;
+  position: relative;
+}
+
+.dialog-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+  text-align: center;
+}
+
+.dialog-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dialog-header-actions {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  display: flex;
+  gap: 0.35rem;
+  transform: translateY(-50%);
+}
+
+.dialog-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dialog-nav-left {
+  left: -1rem;
+}
+
+.dialog-nav-right {
+  right: -1rem;
 }
 
 .dialog-body {
@@ -462,6 +521,25 @@ tbody tr:hover {
   padding: 1rem 1.5rem 1.5rem;
 }
 
+.form-status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  min-height: 1.2rem;
+}
+
+.form-status.success {
+  color: var(--success);
+}
+
+.form-status.error {
+  color: var(--danger);
+}
+
+.form-status.loading {
+  color: var(--accent-strong);
+}
+
 .icon-button {
   background: rgba(255, 255, 255, 0.2);
   color: inherit;
@@ -475,6 +553,20 @@ tbody tr:hover {
 
 .icon-button:hover {
   background: rgba(255, 255, 255, 0.35);
+}
+
+dialog.minimized {
+  width: auto;
+}
+
+dialog.minimized .dialog-body,
+dialog.minimized .dialog-footer {
+  display: none;
+}
+
+dialog.minimized .dialog-header {
+  border-radius: 1.5rem;
+  padding-right: 2.75rem;
 }
 
 .status-legend {
@@ -519,5 +611,17 @@ tbody tr:hover {
 
   table {
     font-size: 0.88rem;
+  }
+
+  .dialog-header {
+    padding: 1rem 2.5rem;
+  }
+
+  .dialog-nav-left {
+    left: 0.25rem;
+  }
+
+  .dialog-nav-right {
+    right: 0.25rem;
   }
 }
