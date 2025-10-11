@@ -1,0 +1,4 @@
+node_modules/
+uploads/videos/*
+!uploads/videos/.gitkeep
+npm-debug.log*
