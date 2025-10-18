@@ -1,18 +1,28 @@
 {
   "miniprogramRoot": "./",
+  "cloudfunctionRoot": "cloudfunctions/",
   "projectname": "HuiYunOS",
   "description": "辉云OS 小程序",
   "appid": "touristappid",
+  "compileType": "miniprogram",
+  "libVersion": "3.10.3",
   "setting": {
     "urlCheck": false,
     "es6": true,
-    "enhance": true
+    "enhance": true,
+    "postcss": true,
+    "minified": true
   },
-  "compileType": "miniprogram",
-  "libVersion": "2.33.3",
   "packOptions": {
     "ignore": [],
-    "include": []
+    "include": [],
+    "subPackages": []
   },
-  "condition": {}
+  "simulatorType": "wechat",
+  "simulatorPluginLibVersion": {},
+  "condition": {
+    "miniprogram": {
+      "list": []
+    }
+  }
 }

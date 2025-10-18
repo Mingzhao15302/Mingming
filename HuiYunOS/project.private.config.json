@@ -1,5 +1,9 @@
 {
+  "projectname": "HuiYunOS",
   "setting": {
-    "compileHotReLoad": true
-  }
+    "compileHotReLoad": true,
+    "coverView": true
+  },
+  "appid": "touristappid",
+  "description": "private config for HuiYunOS"
 }
