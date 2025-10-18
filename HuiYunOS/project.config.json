@@ -1,0 +1,18 @@
+{
+  "miniprogramRoot": "./",
+  "projectname": "HuiYunOS",
+  "description": "辉云OS 小程序",
+  "appid": "touristappid",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "2.33.3",
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "condition": {}
+}
