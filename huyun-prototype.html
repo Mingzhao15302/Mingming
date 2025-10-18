@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>辉云易达 OS 高保真原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2Pk0cFBVZ8xOceVjH9MuNoMNFk0N+XJ0dR1M/2e6R9kZZTItZwT+l3c2Q=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+    />
+    <style>
+      body {
+        font-family: 'Inter', 'HarmonyOS Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background: #0f172a;
+      }
+      .device-frame {
+        background: linear-gradient(160deg, #1e293b, #0f172a);
+      }
+      .glass-card {
+        background: linear-gradient(155deg, rgba(255, 255, 255, 0.11), rgba(15, 23, 42, 0.65));
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        backdrop-filter: blur(18px);
+      }
+      .status-dot {
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18);
+      }
+      .proto-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2.25rem;
+      }
+      @media (max-width: 1600px) {
+        .proto-grid {
+          gap: 1.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body class="h-full text-slate-100">
+    <header class="max-w-7xl mx-auto px-8 py-12">
+      <div class="flex flex-col lg:flex-row lg:items-end gap-6">
+        <div class="flex-1 space-y-4">
+          <div class="inline-flex items-center px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-300 text-sm font-medium">
+            <i class="fa-solid fa-cloud me-2"></i>
+            辉云易达 OS · 小程序设计语言
+          </div>
+          <h1 class="text-4xl lg:text-5xl font-semibold tracking-tight text-white">
+            辉云易达 OS 高保真界面原型体系
+          </h1>
+          <p class="text-slate-300 leading-relaxed text-lg max-w-3xl">
+            本原型覆盖云播、云易达与个人中心核心流程，遵循微信小程序设计规范与辉鑫科技品牌调性。页面原子组件统一样式变量，确保研发可快速对接实现。所有原型以 3 列网格排布，移动端 750px 视觉宽度模拟，支持管理员/员工登录、资产筛选、话术调用及订单生成等关键业务场景。
+          </p>
+        </div>
+        <div class="glass-card rounded-3xl px-6 py-5 shadow-2xl w-full max-w-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-sm text-slate-300">版本 1.0</p>
+              <p class="text-2xl font-semibold text-white mt-1">交互体验检查清单</p>
+            </div>
+            <span class="flex h-10 w-10 rounded-full bg-emerald-500/15 items-center justify-center text-emerald-300">
+              <i class="ri-shield-check-line text-xl"></i>
+            </span>
+          </div>
+          <ul class="mt-6 space-y-3 text-sm text-slate-200">
+            <li class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-emerald-400 status-dot"></span>72 小时会话有效期提示</li>
+            <li class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-emerald-400 status-dot"></span>批量导入/导出与防乱码处理</li>
+            <li class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-emerald-400 status-dot"></span>多角色入口与权限隔离</li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-8 pb-24">
+      <section class="proto-grid">
+        <!-- Personal Center Login -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>我的 · 登录入口</span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-wifi text-emerald-400"></i> 09:45</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/65 border border-slate-800 px-6 py-8 space-y-8">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-white text-2xl font-semibold">辉云易达 OS</h2>
+                <p class="text-sm text-slate-400 mt-1">统一账号体系 · 员工/管理员 50 人并发</p>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-emerald-400/10 text-emerald-300 text-xs font-medium">72 小时有效</span>
+            </div>
+            <form class="space-y-5">
+              <div>
+                <label class="text-xs text-slate-400">账号</label>
+                <div class="mt-1 flex items-center gap-2 bg-slate-800/80 rounded-2xl px-4 py-3">
+                  <i class="ri-user-3-line text-slate-400"></i>
+                  <input
+                    class="bg-transparent w-full text-base focus:outline-none text-white placeholder:text-slate-500"
+                    placeholder="huixintech / hxadmin"
+                  />
+                </div>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400">密码</label>
+                <div class="mt-1 flex items-center gap-2 bg-slate-800/80 rounded-2xl px-4 py-3">
+                  <i class="ri-lock-password-line text-slate-400"></i>
+                  <input
+                    type="password"
+                    class="bg-transparent w-full text-base focus:outline-none text-white placeholder:text-slate-500"
+                    placeholder="HX123456"
+                  />
+                  <button type="button" class="text-xs text-emerald-300">显示</button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="flex items-center gap-2"><i class="ri-team-line text-base text-emerald-300"></i> 50 人在线授权</span>
+                <a href="#" class="text-emerald-300">忘记密码?</a>
+              </div>
+              <button class="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-900 font-semibold rounded-2xl py-3 text-base">
+                登录并解锁云播 & 云易达
+              </button>
+            </form>
+            <p class="text-xs text-slate-500 leading-relaxed">
+              登录即视为同意《隐私政策》。登录后 72 小时内无需重复验证，将在到期前 6 小时提醒重新认证。
+            </p>
+          </div>
+        </article>
+
+        <!-- Personal Center Logged In -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>我的 · 使用记录</span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-battery-three-quarters text-emerald-400"></i> 58%</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-6 py-8 space-y-6">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-slate-900 text-xl font-bold">
+                HT
+              </div>
+              <div>
+                <p class="text-sm text-emerald-300">员工身份 · 在线</p>
+                <h2 class="text-xl font-semibold text-white">Huixintech</h2>
+              </div>
+              <span class="ms-auto text-xs text-slate-400">登录有效期剩余 68 小时</span>
+            </div>
+            <div class="rounded-2xl bg-slate-800/80 border border-slate-700/60 p-4">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>今日概览</span>
+                <span class="flex items-center gap-2 text-emerald-300"><i class="ri-arrow-go-forward-line"></i> 快速跳转</span>
+              </div>
+              <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+                <button class="rounded-xl bg-slate-900/80 py-4 space-y-2 border border-slate-700/50">
+                  <i class="fa-solid fa-play-circle text-emerald-300 text-xl"></i>
+                  <div class="text-sm text-slate-200">视频播放</div>
+                  <div class="text-lg font-semibold text-white">12 次</div>
+                </button>
+                <button class="rounded-xl bg-slate-900/80 py-4 space-y-2 border border-slate-700/50">
+                  <i class="fa-solid fa-comment-dots text-sky-300 text-xl"></i>
+                  <div class="text-sm text-slate-200">业务话术</div>
+                  <div class="text-lg font-semibold text-white">5 次</div>
+                </button>
+                <button class="rounded-xl bg-slate-900/80 py-4 space-y-2 border border-slate-700/50">
+                  <i class="fa-solid fa-microphone-lines text-violet-300 text-xl"></i>
+                  <div class="text-sm text-slate-200">直播话术</div>
+                  <div class="text-lg font-semibold text-white">3 次</div>
+                </button>
+              </div>
+            </div>
+            <div class="space-y-4 text-sm">
+              <div class="flex items-center justify-between text-slate-400">
+                <span>登录日期</span>
+                <span class="text-slate-200">2024-05-16 09:41</span>
+              </div>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-800/70 border border-slate-700/60">
+                  <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300 text-lg"><i class="ri-vidicon-line"></i></span>
+                  <div class="flex-1">
+                    <p class="text-slate-200 font-medium">《自动灌装线 - HX200 解决方案》</p>
+                    <p class="text-xs text-slate-500">今日播放 4 次 · 点击查看视频画布定位</p>
+                  </div>
+                  <button class="text-xs text-emerald-300">跳转</button>
+                </div>
+                <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-800/70 border border-slate-700/60">
+                  <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/15 text-sky-300 text-lg"><i class="ri-markdown-line"></i></span>
+                  <div class="flex-1">
+                    <p class="text-slate-200 font-medium">场景 · 化工厂年度采购</p>
+                    <p class="text-xs text-slate-500">调用业务话术 2 次 · 一键跳转至 Markdown 卡片</p>
+                  </div>
+                  <button class="text-xs text-emerald-300">跳转</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Personal Center Admin -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>管理员 · 数据总览</span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-cloud-arrow-down text-sky-300"></i> 导出 CSV</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/65 border border-slate-800 px-5 py-7 space-y-5">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-slate-900 text-xl font-bold">
+                AD
+              </div>
+              <div>
+                <p class="text-sm text-rose-300">超级管理员</p>
+                <h2 class="text-xl font-semibold text-white">hxadmin</h2>
+              </div>
+              <button class="ms-auto text-xs text-emerald-300">切换至员工视角</button>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 space-y-4">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>员工在线情况</span>
+                <span class="flex items-center gap-2 text-emerald-300"><i class="ri-refresh-line"></i> 实时同步</span>
+              </div>
+              <div class="space-y-3 max-h-44 overflow-y-auto pr-1">
+                <div class="flex items-center gap-3 text-sm text-slate-200">
+                  <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 status-dot"></span>
+                  Huixintech-01 · 登录时间 09:12 · 视频播放 8 · 话术 3 · 订单 1
+                  <button class="ms-auto text-xs text-emerald-300">导出记录</button>
+                </div>
+                <div class="flex items-center gap-3 text-sm text-slate-200">
+                  <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 status-dot"></span>
+                  Huixintech-15 · 登录时间 08:54 · 视频播放 12 · 话术 6 · 订单 0
+                  <button class="ms-auto text-xs text-emerald-300">导出记录</button>
+                </div>
+                <div class="flex items-center gap-3 text-sm text-slate-200">
+                  <span class="h-2.5 w-2.5 rounded-full bg-amber-400 status-dot" style="box-shadow:0 0 0 6px rgba(251,191,36,0.18);"></span>
+                  Huixintech-21 · 离线 30 分钟 · 视频播放 2 · 话术 1 · 订单 0
+                  <button class="ms-auto text-xs text-emerald-300">导出记录</button>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 space-y-3">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>功能模块使用统计</span>
+                <span class="flex items-center gap-1 text-slate-500">UTF-8 CSV 防乱码</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 text-xs text-slate-300">
+                <div class="rounded-xl bg-slate-900/80 border border-slate-700/50 p-3 space-y-2">
+                  <div class="flex items-center gap-2 text-slate-200"><i class="ri-vidicon-2-fill text-emerald-300"></i> 云播访问</div>
+                  <p class="text-2xl font-semibold text-white">186 次</p>
+                </div>
+                <div class="rounded-xl bg-slate-900/80 border border-slate-700/50 p-3 space-y-2">
+                  <div class="flex items-center gap-2 text-slate-200"><i class="ri-book-2-fill text-sky-300"></i> 话术调用</div>
+                  <p class="text-2xl font-semibold text-white">97 次</p>
+                </div>
+                <div class="rounded-xl bg-slate-900/80 border border-slate-700/50 p-3 space-y-2">
+                  <div class="flex items-center gap-2 text-slate-200"><i class="ri-file-paper-2-fill text-violet-300"></i> 订单生成</div>
+                  <p class="text-2xl font-semibold text-white">34 份</p>
+                </div>
+                <div class="rounded-xl bg-slate-900/80 border border-slate-700/50 p-3 space-y-2">
+                  <div class="flex items-center gap-2 text-slate-200"><i class="ri-gift-fill text-rose-300"></i> 礼品区兑换</div>
+                  <p class="text-2xl font-semibold text-white">18 次</p>
+                </div>
+              </div>
+              <button class="w-full border border-emerald-400/60 text-emerald-300 font-medium rounded-2xl py-3">
+                导出当日使用记录（CSV）
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Cloud Play Main -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云播 · 视频资产中心</span>
+            <span class="flex items-center gap-1"><i class="ri-filter-3-line text-emerald-300"></i> 智能筛选</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-6">
+            <div class="rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/10 border border-emerald-400/30 px-5 py-4 flex items-center justify-between">
+              <div>
+                <p class="text-xs text-emerald-300 uppercase tracking-[0.28em]">辉鑫科技</p>
+                <h2 class="text-2xl font-semibold text-white mt-1">视频资产中心</h2>
+                <p class="text-xs text-slate-300 mt-2">云播入口需登录，支持实时预览、暂停、全屏</p>
+              </div>
+              <button class="px-4 py-2 rounded-xl bg-emerald-400/20 text-emerald-200 text-xs font-medium">上传新素材</button>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 space-y-3 text-sm text-slate-300">
+              <div class="flex items-center justify-between">
+                <span class="flex items-center gap-2 text-white font-medium"><i class="ri-equalizer-line text-emerald-300"></i> 筛选条件</span>
+                <button class="text-xs text-emerald-300 flex items-center gap-1"><i class="ri-corner-down-s-line"></i> 收起</button>
+              </div>
+              <div class="grid grid-cols-3 gap-3">
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>产品类型</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>灌装机</option>
+                    <option>半自动线</option>
+                    <option>自动线</option>
+                    <option>码垛机</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>自动灌装机</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>30A</option>
+                    <option>30B/BG</option>
+                    <option>30G/GY</option>
+                    <option>ZSQ</option>
+                    <option>HX200</option>
+                    <option>2T</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>自动灌装线</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>1~5L 方桶灌装自动线</option>
+                    <option>1~5L 圆桶灌装自动线</option>
+                    <option>15~25L 铁桶灌装自动线</option>
+                    <option>15~25L 塑料桶灌装自动线</option>
+                    <option>15~25L 偏心口桶灌装自动线</option>
+                    <option>50~200L 桶灌装自动线</option>
+                    <option>IBC 桶灌装自动线</option>
+                    <option>袋式灌装</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>桶盖</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>塑料盖</option>
+                    <option>花篮盖</option>
+                    <option>小口桶盖</option>
+                    <option>圆形铁盖</option>
+                    <option>内外盖</option>
+                    <option>偏心口桶盖</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>容量</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>0.5~5L</option>
+                    <option>15~25L</option>
+                    <option>50L</option>
+                    <option>200L</option>
+                    <option>1000L</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>防爆要求</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>防爆</option>
+                    <option>不防爆</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>灌装方式</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>单头</option>
+                    <option>双头</option>
+                    <option>三头</option>
+                    <option>四头</option>
+                    <option>五头</option>
+                    <option>六头</option>
+                    <option>八头</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>压盖方式</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>5L 平板压</option>
+                    <option>20L 平板压</option>
+                    <option>花篮压盖</option>
+                    <option>自动辊压</option>
+                    <option>自动拧盖</option>
+                    <option>助力拧盖</option>
+                    <option>自动封盖</option>
+                    <option>自动捶盖</option>
+                    <option>自动封袋</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>输送方式</span>
+                  <select class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-sm">
+                    <option>滚筒</option>
+                    <option>板链</option>
+                    <option>步进</option>
+                    <option>无</option>
+                  </select>
+                </label>
+              </div>
+              <div class="flex justify-end gap-2 text-xs">
+                <button class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300">重置</button>
+                <button class="px-4 py-2 rounded-xl bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">应用筛选</button>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between text-sm text-slate-300">
+                <span>12 个结果 · 画布自动扩展</span>
+                <span class="flex items-center gap-2"><i class="ri-layout-grid-line text-slate-500"></i> 4:3 统一尺寸</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-700/60">
+                  <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=80" class="h-full w-full object-cover" alt="video" />
+                  <div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                    <button class="h-12 w-12 rounded-full bg-emerald-500/80 text-slate-900 text-xl"><i class="fa-solid fa-play"></i></button>
+                  </div>
+                  <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-sm">
+                    <p class="text-white font-medium">HX200 自动灌装线演示</p>
+                    <div class="flex items-center text-xs text-slate-300 gap-2">
+                      <span><i class="ri-time-line"></i> 03:21</span>
+                      <span><i class="ri-fullscreen-line"></i> 全屏</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-700/60">
+                  <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=400&q=80" class="h-full w-full object-cover" alt="video" />
+                  <div class="absolute inset-0 flex items-center justify-center gap-3 opacity-0 hover:opacity-100 transition">
+                    <button class="h-12 w-12 rounded-full bg-emerald-500/80 text-slate-900 text-xl"><i class="fa-solid fa-pause"></i></button>
+                    <button class="h-12 w-12 rounded-full bg-slate-900/80 border border-white/20 text-white text-lg"><i class="ri-fullscreen-line"></i></button>
+                  </div>
+                  <div class="absolute top-3 right-3 flex gap-2 text-xs">
+                    <span class="px-2 py-1 bg-black/60 rounded-full">IBC 桶</span>
+                    <span class="px-2 py-1 bg-black/60 rounded-full">防爆</span>
+                  </div>
+                </div>
+                <div class="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-700/60">
+                  <img src="https://images.unsplash.com/photo-1580894908361-967195033215?auto=format&fit=crop&w=400&q=80" class="h-full w-full object-cover" alt="video" />
+                  <div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center text-sm text-white">
+                    <div class="space-y-2 text-center">
+                      <span class="px-3 py-1 bg-emerald-500/20 rounded-full text-emerald-200 text-xs">预加载中...</span>
+                      <button class="px-4 py-2 rounded-xl border border-white/20">取消</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-700/60 bg-slate-900/60 flex items-center justify-center">
+                  <div class="text-center space-y-2 text-slate-300 text-sm">
+                    <i class="ri-error-warning-line text-rose-300 text-2xl"></i>
+                    <p>筛选条件过多，建议减少条件或重置</p>
+                    <button class="px-4 py-2 rounded-xl bg-rose-500/20 text-rose-200 border border-rose-400/30">重置筛选</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Cloud Play Collapsed Filters -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云播 · 高级筛选</span>
+            <span class="flex items-center gap-1"><i class="ri-arrow-up-down-line text-emerald-300"></i> 收缩状态</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-6">
+            <div class="rounded-2xl border border-slate-700/60 bg-slate-800/70">
+              <button class="w-full flex items-center justify-between px-4 py-3 text-xs text-slate-300">
+                <span class="flex items-center gap-2 text-white font-medium"><i class="ri-equalizer-2-line text-emerald-300"></i> 快速筛选</span>
+                <span class="flex items-center gap-2 text-emerald-300">展开全部 <i class="ri-arrow-down-s-line"></i></span>
+              </button>
+              <div class="grid grid-cols-3 gap-2 px-4 pb-4 text-xs text-slate-200">
+                <button class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/60">
+                  产品类型 · 灌装机
+                  <i class="ri-close-line text-slate-500"></i>
+                </button>
+                <button class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/60">
+                  自动灌装机 · HX200
+                  <i class="ri-close-line text-slate-500"></i>
+                </button>
+                <button class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/60">
+                  灌装方式 · 四头
+                  <i class="ri-close-line text-slate-500"></i>
+                </button>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-slate-800/60 border border-slate-700/60 p-4 text-sm text-slate-200 space-y-4">
+              <div class="flex items-center justify-between">
+                <span>额外分类</span>
+                <button class="text-xs text-emerald-300">批量勾选</button>
+              </div>
+              <div class="grid grid-cols-2 gap-3 text-xs text-slate-300">
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" checked />
+                  来料方式 · 泵送
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" />
+                  来料方式 · 角座阀
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" checked />
+                  防爆要求 · 防爆
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" />
+                  分桶方式 · 自动卸桶
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" />
+                  理盖方式 · 自动补盖
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" checked />
+                  托盘方式 · 托盘库
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" />
+                  装箱方式 · 自动开箱
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" />
+                  其他功能 · 自动喷码
+                </label>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-sm text-slate-300">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>最近观看</span>
+                <button class="text-emerald-300">查看全部</button>
+              </div>
+              <div class="mt-3 space-y-3">
+                <div class="flex items-center gap-3">
+                  <div class="h-14 w-20 rounded-xl overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1580894908361-967195033215?auto=format&fit=crop&w=200&q=80" class="h-full w-full object-cover" alt="thumb" />
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-white text-sm font-medium">30G 灌装线 智能检测</p>
+                    <p class="text-xs text-slate-500">上次播放：2024-05-15 16:24</p>
+                  </div>
+                  <button class="text-xs text-emerald-300">继续</button>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="h-14 w-20 rounded-xl overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=200&q=80" class="h-full w-full object-cover" alt="thumb" />
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-white text-sm font-medium">IBC 桶灌装 机器人码垛</p>
+                    <p class="text-xs text-slate-500">上次播放：2024-05-16 09:02</p>
+                  </div>
+                  <button class="text-xs text-emerald-300">继续</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+        </article>
+
+        <!-- Cloud Play Video Detail -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云播 · 视频预览</span>
+            <span class="flex items-center gap-1"><i class="ri-sparkling-line text-emerald-300"></i> 场景详情</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-6">
+            <div class="relative rounded-2xl overflow-hidden border border-slate-700/60 aspect-[4/3]">
+              <img src="https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=480&q=80" class="h-full w-full object-cover" alt="video detail" />
+              <div class="absolute inset-0 flex flex-col justify-between">
+                <div class="flex items-center justify-between px-4 py-3 text-xs text-white">
+                  <span class="px-3 py-1 rounded-full bg-black/50">HX200 自动灌装线</span>
+                  <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200">4K · 60fps</span>
+                </div>
+                <div class="bg-gradient-to-t from-black/80 to-transparent px-5 pb-5 pt-16 text-white space-y-3">
+                  <div class="flex items-center gap-4">
+                    <button class="h-12 w-12 rounded-full bg-emerald-500 text-slate-900 text-lg"><i class="fa-solid fa-play"></i></button>
+                    <button class="h-12 w-12 rounded-full bg-white/20 text-white text-lg"><i class="ri-pause-mini-fill"></i></button>
+                    <button class="h-12 w-12 rounded-full bg-white/20 text-white text-lg"><i class="ri-fullscreen-line"></i></button>
+                  </div>
+                  <div class="flex items-center justify-between text-xs text-slate-200">
+                    <span>播放进度 01:22 / 03:21</span>
+                    <span class="flex items-center gap-2"><i class="ri-speed-mini-line"></i> 倍速 1.25x</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 space-y-3 text-sm text-slate-200">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-white">场景标签</span>
+                <button class="text-xs text-emerald-300">关联话术</button>
+              </div>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <span class="px-3 py-1 rounded-full bg-slate-900/70 border border-slate-700/60">15~25L 偏心口桶</span>
+                <span class="px-3 py-1 rounded-full bg-slate-900/70 border border-slate-700/60">防爆</span>
+                <span class="px-3 py-1 rounded-full bg-slate-900/70 border border-slate-700/60">自动集桶平台</span>
+                <span class="px-3 py-1 rounded-full bg-slate-900/70 border border-slate-700/60">自动封盖</span>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-sm text-slate-200 space-y-3">
+              <div class="flex items-center justify-between">
+                <span>关联话术卡片</span>
+                <button class="text-xs text-emerald-300">跳转至 Markdown</button>
+              </div>
+              <div class="space-y-3 text-xs text-slate-300">
+                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-700/60">
+                  <p class="text-emerald-200 font-semibold">场景 · 智能工厂</p>
+                  <p class="mt-2 leading-relaxed">
+                    - **开场**：「欢迎来到辉鑫科技自动灌装解决方案现场...」<br />
+                    - **卖点**：四头同步灌装、智能检重剔除 + VOC 集气系统<br />
+                    - **促单**：下单即享...（Markdown 渲染示意）
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Cloud Play Access Guard -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云播 · 登录拦截</span>
+            <span class="flex items-center gap-1"><i class="ri-lock-2-line text-rose-300"></i> 未登录</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-5 text-center space-y-4">
+              <div class="h-16 w-16 mx-auto rounded-full bg-rose-500/20 text-rose-200 flex items-center justify-center text-2xl">
+                <i class="ri-shield-keyhole-line"></i>
+              </div>
+              <h2 class="text-white text-lg font-semibold">请先完成登录</h2>
+              <p class="text-xs text-slate-300 leading-relaxed">登录后才能查看辉鑫科技视频资产中心。支持 huixintech 员工账号与 hxadmin 管理员账号，登录成功后 72 小时内免验证。</p>
+              <div class="flex gap-3 text-sm">
+                <button class="flex-1 px-4 py-2 rounded-xl border border-slate-600 text-slate-300">返回首页</button>
+                <button class="flex-1 px-4 py-2 rounded-xl bg-emerald-500 text-slate-900 font-semibold">立即登录</button>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-xs text-slate-300 space-y-2">
+              <div class="flex items-center justify-between">
+                <span>可访问模块</span>
+                <span class="text-slate-500">登录后自动解锁</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <span class="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/60 text-center">视频预览</span>
+                <span class="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/60 text-center">筛选条件</span>
+                <span class="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/60 text-center">关联话术</span>
+                <span class="px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-700/60 text-center">下载素材</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Cloud Yida Main -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云易达 · 功能广场</span>
+            <span class="flex items-center gap-1"><i class="ri-apps-2-line text-emerald-300"></i> 四大模块</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-2xl font-semibold text-white">一键启用业务引擎</h2>
+                <p class="text-xs text-slate-400 mt-1">需登录后使用，支持管理员批量导入话术</p>
+              </div>
+              <button class="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-200 text-xs font-medium">查看导入记录</button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm text-slate-200">
+              <button class="rounded-2xl bg-gradient-to-br from-emerald-500/20 to-sky-500/10 border border-emerald-400/30 p-5 text-left space-y-3">
+                <div class="flex items-center gap-3">
+                  <i class="ri-stack-line text-emerald-300 text-xl"></i>
+                  <h3 class="text-lg font-semibold text-white">业务话术库</h3>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">场景/塑品/品牌/卖点/背书/人设/报价/促单/福利九大模板</p>
+              </button>
+              <button class="rounded-2xl bg-gradient-to-br from-sky-500/20 to-violet-500/10 border border-sky-400/30 p-5 text-left space-y-3">
+                <div class="flex items-center gap-3">
+                  <i class="ri-broadcast-line text-sky-300 text-xl"></i>
+                  <h3 class="text-lg font-semibold text-white">直播话术库</h3>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">支持 Markdown 呈现，直播团队同步使用</p>
+              </button>
+              <button class="rounded-2xl bg-gradient-to-br from-violet-500/20 to-rose-500/10 border border-violet-400/30 p-5 text-left space-y-3">
+                <div class="flex items-center gap-3">
+                  <i class="ri-file-list-3-line text-violet-300 text-xl"></i>
+                  <h3 class="text-lg font-semibold text-white">订单生成系统</h3>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">多行文本输入自动生成订单并导出 PDF</p>
+              </button>
+              <button class="rounded-2xl bg-gradient-to-br from-orange-500/20 to-rose-500/10 border border-orange-400/30 p-5 text-left space-y-3">
+                <div class="flex items-center gap-3">
+                  <i class="ri-gift-line text-orange-300 text-xl"></i>
+                  <h3 class="text-lg font-semibold text-white">礼品区</h3>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed">活动礼品一键兑换，支持库存提醒</p>
+              </button>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-xs text-slate-300 space-y-3">
+              <div class="flex items-center justify-between text-slate-400">
+                <span>最新导入记录</span>
+                <button class="text-emerald-300">导入模板下载</button>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span>业务话术库 · 2024-05-15</span>
+                  <span>由 hxadmin 上传 · UTF-8</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>直播话术库 · 2024-05-14</span>
+                  <span>由 hxadmin 上传 · UTF-8</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Business Script Library Detail -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云易达 · 业务话术库</span>
+            <span class="flex items-center gap-1"><i class="ri-markdown-line text-emerald-300"></i> Markdown 渲染</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-sm text-slate-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <i class="ri-stack-line text-emerald-300 text-xl"></i>
+                  <div>
+                    <h2 class="text-lg font-semibold text-white">场景</h2>
+                    <p class="text-xs text-slate-400">化工厂年度集采</p>
+                  </div>
+                </div>
+                <button class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-200 text-xs">展开全部</button>
+              </div>
+              <div class="mt-3 text-xs leading-relaxed text-slate-200 bg-slate-900/70 border border-slate-700/60 rounded-2xl p-4">
+                <pre class="whitespace-pre-wrap font-sans">**开场破冰**
+- 您好，我是辉鑫科技的解决方案顾问...
+
+**痛点挖掘**
+1. 当前 15~25L 偏心口桶灌装环节存在泄漏风险
+2. 人工压盖效率低，难以保障 VOC 排放
+
+**解决方案亮点**
+- 配置【自动封盖 + 机器人码垛】，单班节省 4 人
+- 防爆等级 Ex d IIB T4，满足化工厂安全审查
+
+**行动号召**
+> 现在下单赠送 3 年远程巡检服务
+</pre>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs text-slate-300">
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-lightbulb-flash-line text-emerald-300"></i> 塑品</div>
+                <p>HX200 全自动灌装线</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-vip-diamond-line text-sky-300"></i> 品牌</div>
+                <p>辉鑫科技核心旗舰</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-star-smile-line text-violet-300"></i> 卖点</div>
+                <p>自动检测 + 智能检重剔除</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-user-voice-line text-rose-300"></i> 人设</div>
+                <p>资深工艺顾问</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-copper-coin-line text-amber-300"></i> 报价</div>
+                <p>交付价 ¥1,280,000 起</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-thumb-up-line text-green-300"></i> 促单</div>
+                <p>下单即返 5% 物料券</p>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Live Script Library Detail -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云易达 · 直播话术库</span>
+            <span class="flex items-center gap-1"><i class="ri-broadcast-fill text-sky-300"></i> 辉鑫直播间</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="rounded-2xl bg-gradient-to-r from-sky-500/20 to-violet-500/10 border border-sky-400/30 p-4 text-sm text-slate-200 space-y-4">
+              <div class="flex items-center justify-between text-xs text-white">
+                <span>直播脚本 · 「工业智造专场」</span>
+                <span class="flex items-center gap-2 text-emerald-200"><i class="ri-upload-2-line"></i> 批量导入</span>
+              </div>
+              <div class="rounded-2xl bg-slate-900/70 border border-slate-700/60 p-4 text-xs leading-relaxed">
+                <pre class="whitespace-pre-wrap font-sans">## 开场暖场
+- 🎬 主持人：欢迎来到辉鑫科技工业智造直播间...
+
+## 卖点拆解
+1. **智能感应**：桶位自动识别，保障灌装精度 ±0.02kg
+2. **防爆认证**：通过 ATEX/CCC 防爆双认证
+
+## 互动福利
+> 弹幕抽奖：送出 20 份 HX 专属礼盒
+
+## 成交话术
+- 立即点击小程序下单，享受**免运费 + 专属顾问对接**
+</pre>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-xs text-slate-300">
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-pin-distance-line text-sky-300"></i> 场景</div>
+                <p>工业智造开放日</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-ancient-pavilion-line text-violet-300"></i> 背书</div>
+                <p>国家级防爆认证实验室</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-empathize-line text-emerald-300"></i> 人设</div>
+                <p>安全工程师主播</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-copper-coin-line text-amber-300"></i> 报价</div>
+                <p>直播专享价 ¥1,180,000</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-hand-coin-line text-rose-300"></i> 福利</div>
+                <p>限时送价值 ¥30,000 工程辅导</p>
+              </button>
+              <button class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-left space-y-2">
+                <div class="flex items-center gap-2 text-white"><i class="ri-rocket-2-line text-green-300"></i> 促单</div>
+                <p>直播倒计时提醒 + 微信推送</p>
+              </button>
+            </div>
+          </div>
+        </article>
+        <!-- Order Generation -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云易达 · 订单生成</span>
+            <span class="flex items-center gap-1"><i class="ri-printer-cloud-line text-violet-300"></i> PDF 导出</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-sm text-slate-200 space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-white">订单生成器</span>
+                <button class="text-xs text-emerald-300">导入模板</button>
+              </div>
+              <label class="text-xs text-slate-400">需求信息</label>
+              <textarea rows="6" class="w-full bg-slate-900/80 border border-slate-700/60 rounded-2xl px-4 py-3 text-sm" placeholder="请输入客户需求、设备配置、交付时间等关键信息..."></textarea>
+              <div class="grid grid-cols-2 gap-3 text-xs text-slate-300">
+                <label class="flex flex-col gap-1">
+                  <span>客户名称</span>
+                  <input class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2" placeholder="例如：苏州某化工集团" />
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span>联系人</span>
+                  <input class="bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2" placeholder="张工 138****6801" />
+                </label>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span>生成方式：智能模板 + Markdown 渲染</span>
+                <span class="flex items-center gap-2 text-emerald-300"><i class="ri-time-line"></i> 约 1.5s</span>
+              </div>
+              <button class="w-full bg-gradient-to-r from-violet-500 to-sky-400 text-slate-900 font-semibold rounded-2xl py-3 text-base">
+                生成订单预览
+              </button>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-xs text-slate-300 space-y-3">
+              <div class="flex items-center justify-between text-slate-400">
+                <span>订单预览</span>
+                <button class="flex items-center gap-1 text-emerald-300"><i class="ri-share-forward-line"></i> 分享到微信</button>
+              </div>
+              <div class="rounded-xl bg-slate-900/80 border border-slate-700/60 p-3 space-y-2">
+                <p class="text-white font-medium text-sm">辉云易达订单 #HX20240516001</p>
+                <p>客户：苏州某化工集团 · 交付期：2024-06-30</p>
+                <p>方案：HX200 自动灌装线 + 机器人码垛 + VOC 集气系统</p>
+                <p>总价：¥1,280,000（含税）</p>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <button class="px-4 py-2 rounded-xl border border-slate-600">保存草稿</button>
+                <button class="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">导出 PDF</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Gift Center -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>云易达 · 礼品区</span>
+            <span class="flex items-center gap-1"><i class="ri-gift-2-line text-orange-300"></i> 活动兑换</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-sm text-slate-200 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="text-lg font-semibold text-white">直播福利兑换</h2>
+                  <p class="text-xs text-slate-400">兑换记录同步至管理员 · 防超领提示</p>
+                </div>
+                <button class="px-3 py-1 rounded-lg bg-orange-500/20 text-orange-200 text-xs">查看库存</button>
+              </div>
+              <div class="grid grid-cols-2 gap-3 text-xs text-slate-300">
+                <div class="rounded-2xl bg-slate-900/80 border border-slate-700/60 p-3 space-y-2">
+                  <div class="flex items-center gap-2 text-white"><i class="ri-medal-line text-amber-300"></i> 智能工厂参观券</div>
+                  <p>库存 18 · 兑换需 500 积分</p>
+                  <button class="w-full px-3 py-2 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">立即兑换</button>
+                </div>
+                <div class="rounded-2xl bg-slate-900/80 border border-slate-700/60 p-3 space-y-2">
+                  <div class="flex items-center gap-2 text-white"><i class="ri-coupon-line text-rose-300"></i> 年度保养券</div>
+                  <p>库存 12 · 兑换需 800 积分</p>
+                  <button class="w-full px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700/60 text-slate-400">库存紧张</button>
+                </div>
+                <div class="rounded-2xl bg-slate-900/80 border border-slate-700/60 p-3 space-y-2">
+                  <div class="flex items-center gap-2 text-white"><i class="ri-hand-heart-line text-sky-300"></i> 技术顾问 1v1</div>
+                  <p>库存 30 · 兑换需 300 积分</p>
+                  <button class="w-full px-3 py-2 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">立即预约</button>
+                </div>
+                <div class="rounded-2xl bg-slate-900/80 border border-slate-700/60 p-3 space-y-2">
+                  <div class="flex items-center gap-2 text-white"><i class="ri-send-plane-line text-violet-300"></i> 微信分享红包</div>
+                  <p>库存 40 · 兑换需 200 积分</p>
+                  <button class="w-full px-3 py-2 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">生成分享码</button>
+                </div>
+              </div>
+              <div class="rounded-xl bg-slate-900/80 border border-slate-700/60 p-3 text-xs text-slate-400">
+                <p>兑换提醒：管理员可实时查看每个员工的礼品兑换数据，可导出 CSV 并与使用记录打通。</p>
+              </div>
+            </div>
+          </div>
+        </article>
+        <!-- Access Control Flow -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>全局 · 登录校验</span>
+            <span class="flex items-center gap-1"><i class="ri-pass-valid-line text-emerald-300"></i> 权限控制</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-sm text-slate-200 space-y-4">
+              <div class="flex items-center gap-3">
+                <span class="h-10 w-10 rounded-full bg-emerald-500/20 text-emerald-200 flex items-center justify-center"><i class="ri-time-line"></i></span>
+                <div>
+                  <p class="text-xs text-slate-400">当前登录状态</p>
+                  <p class="text-white font-medium">员工账号 · Huixintech</p>
+                </div>
+                <span class="ms-auto text-xs text-emerald-300">剩余 68 小时</span>
+              </div>
+              <div class="rounded-xl bg-slate-900/70 border border-slate-700/60 p-3 text-xs text-slate-300">
+                <p>为了保障资产安全，72 小时后需重新验证。管理员可手动失效指定账号，立即阻断云播/云易达访问。</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3 text-xs text-slate-300">
+                <button class="rounded-xl bg-slate-900/80 border border-slate-700/60 p-3 text-left">
+                  <p class="text-white font-medium">访问云播</p>
+                  <p class="text-slate-500 mt-1">需保持登录态</p>
+                </button>
+                <button class="rounded-xl bg-slate-900/80 border border-slate-700/60 p-3 text-left">
+                  <p class="text-white font-medium">访问云易达</p>
+                  <p class="text-slate-500 mt-1">需保持登录态</p>
+                </button>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-rose-500/10 border border-rose-400/30 p-4 text-xs text-rose-200 space-y-3">
+              <div class="flex items-center gap-2">
+                <i class="ri-alarm-warning-line text-lg"></i>
+                <span>管理员提示</span>
+              </div>
+              <p>检测到 2 个账号已超过 72 小时，系统将在 15 分钟内自动登出。点击下方即可提前强制下线。</p>
+              <div class="flex gap-2 text-xs">
+                <button class="flex-1 px-3 py-2 rounded-xl bg-rose-500/20 border border-rose-400/40">批量下线</button>
+                <button class="flex-1 px-3 py-2 rounded-xl bg-transparent border border-rose-400/30 text-rose-200">查看详情</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Login Reminder Modal -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>我的 · 登录提醒</span>
+            <span class="flex items-center gap-1"><i class="ri-notification-3-line text-amber-300"></i> 即将到期</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="relative rounded-2xl bg-slate-800/80 border border-slate-700/60 p-5 text-center space-y-4">
+              <div class="absolute -top-6 left-1/2 -translate-x-1/2 h-12 w-12 rounded-full bg-amber-500/80 flex items-center justify-center text-slate-900 text-xl shadow-lg">
+                <i class="ri-time-line"></i>
+              </div>
+              <h2 class="text-white text-lg font-semibold mt-4">登录即将过期</h2>
+              <p class="text-xs text-slate-300 leading-relaxed">您的登录将在 6 小时后失效，为避免云播与云易达功能受限，请提前续期或联系管理员延长授权。</p>
+              <div class="flex gap-3 text-sm">
+                <button class="flex-1 px-4 py-2 rounded-xl border border-slate-600 text-slate-300">稍后提醒</button>
+                <button class="flex-1 px-4 py-2 rounded-xl bg-emerald-500 text-slate-900 font-semibold">立即续期</button>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-xs text-slate-300 space-y-2">
+              <div class="flex items-center justify-between">
+                <span>最近使用</span>
+                <button class="text-emerald-300">查看详情</button>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>云播 · 视频播放</span>
+                <span class="text-slate-400">今日 3 次</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>云易达 · 订单生成</span>
+                <span class="text-slate-400">今日 1 份</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CSV Export Flow -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-700/60">
+          <header class="flex items-center justify-between text-slate-300 text-xs uppercase tracking-[0.32em]">
+            <span>管理员 · CSV 导出</span>
+            <span class="flex items-center gap-1"><i class="ri-file-download-line text-sky-300"></i> UTF-8</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-slate-900/60 border border-slate-800 px-5 py-6 space-y-5">
+            <div class="rounded-2xl bg-slate-800/70 border border-slate-700/60 p-4 text-sm text-slate-200 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs text-slate-400">导出字段</p>
+                  <p class="text-white font-medium">登录日期 / 功能模块 / 使用次数</p>
+                </div>
+                <button class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-200 text-xs">字段管理</button>
+              </div>
+              <div class="rounded-xl bg-slate-900/80 border border-slate-700/60 p-3 text-xs text-slate-300 space-y-2">
+                <p>文件名：hx-usage-20240516.csv</p>
+                <p>编码：UTF-8（确保无中文乱码）</p>
+                <p>记录：员工 48 人 · 管理员 2 人</p>
+              </div>
+              <div class="flex items-center gap-2 text-xs text-slate-300">
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" checked />
+                  压缩后发送至企业微信
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-900" />
+                  发送副本至邮箱
+                </label>
+              </div>
+              <div class="flex gap-3 text-sm">
+                <button class="flex-1 px-4 py-2 rounded-xl border border-slate-600 text-slate-300">下载 CSV</button>
+                <button class="flex-1 px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">导出历史</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
