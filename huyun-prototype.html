@@ -34,6 +34,26 @@
       .status-dot {
         box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15);
       }
+      .bottom-nav {
+        background: linear-gradient(90deg, #1d4ed8, #0ea5e9);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      }
+      .bottom-nav button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+      .bottom-nav button span {
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+      }
+      .bottom-nav button.active {
+        color: #ffffff;
+      }
       .proto-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -131,6 +151,22 @@
               登录即视为同意《隐私政策》。登录后 72 小时内无需重复验证，将在到期前 6 小时提醒重新认证。
             </p>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Personal Center Logged In -->
@@ -198,6 +234,22 @@
               </div>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Personal Center Admin -->
@@ -268,131 +320,156 @@
               </button>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Cloud Play Main -->
         <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-200">
           <header class="flex items-center justify-between text-slate-600 text-xs uppercase tracking-[0.32em]">
             <span>云播 · 视频资产中心</span>
-            <span class="flex items-center gap-1"><i class="ri-filter-3-line text-blue-500"></i> 智能筛选</span>
+            <span class="flex items-center gap-1"><i class="ri-filter-3-line text-blue-500"></i> 默认收起筛选</span>
           </header>
           <div class="mt-6 rounded-[1.75rem] bg-white/85 border border-slate-200 px-5 py-6 space-y-6">
-            <div class="rounded-2xl bg-gradient-to-r from-blue-500/20 to-sky-500/10 border border-blue-500/30 px-5 py-4 flex items-center justify-between">
+            <div class="flex items-start justify-between">
               <div>
-                <p class="text-xs text-blue-500 uppercase tracking-[0.28em]">辉鑫科技</p>
-                <h2 class="text-2xl font-semibold text-slate-900 mt-1">视频资产中心</h2>
-                <p class="text-xs text-slate-600 mt-2">云播入口需登录，支持实时预览、暂停、全屏</p>
+                <h2 class="text-xl font-semibold text-slate-900">云播筛选面板</h2>
+                <p class="text-xs text-slate-500 mt-1">收起状态默认展示前三行筛选条件，展开后显示全部 20 项分类。</p>
               </div>
-              <button class="px-4 py-2 rounded-xl bg-blue-500/20 text-blue-400 text-xs font-medium">上传新素材</button>
+              <div class="flex flex-col items-end gap-2">
+                <button class="px-4 py-2 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-500 text-xs font-medium">上传新素材</button>
+                <span class="text-[0.65rem] text-slate-400">需完成个人中心登录</span>
+              </div>
             </div>
-            <div class="rounded-2xl bg-blue-100/80 border border-slate-200 p-4 space-y-3 text-sm text-slate-600">
+            <div class="rounded-2xl bg-blue-100/70 border border-blue-200/60 p-4 space-y-4 text-sm text-slate-600">
               <div class="flex items-center justify-between">
-                <span class="flex items-center gap-2 text-slate-900 font-medium"><i class="ri-equalizer-line text-blue-500"></i> 筛选条件</span>
-                <button class="text-xs text-blue-500 flex items-center gap-1"><i class="ri-corner-down-s-line"></i> 收起</button>
+                <span class="flex items-center gap-2 text-slate-900 font-medium"><i class="ri-equalizer-line text-blue-500"></i> 筛选条件（收起）</span>
+                <button class="text-xs text-blue-500 flex items-center gap-1"><i class="ri-add-line"></i> 展开全部 14 项</button>
               </div>
-              <div class="grid grid-cols-3 gap-3">
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>产品类型</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>灌装机</option>
-                    <option>半自动线</option>
-                    <option>自动线</option>
-                    <option>码垛机</option>
-                  </select>
-                </label>
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>自动灌装机</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>30A</option>
-                    <option>30B/BG</option>
-                    <option>30G/GY</option>
-                    <option>ZSQ</option>
-                    <option>HX200</option>
-                    <option>2T</option>
-                  </select>
-                </label>
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>自动灌装线</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>1~5L 方桶灌装自动线</option>
-                    <option>1~5L 圆桶灌装自动线</option>
-                    <option>15~25L 铁桶灌装自动线</option>
-                    <option>15~25L 塑料桶灌装自动线</option>
-                    <option>15~25L 偏心口桶灌装自动线</option>
-                    <option>50~200L 桶灌装自动线</option>
-                    <option>IBC 桶灌装自动线</option>
-                    <option>袋式灌装</option>
-                  </select>
-                </label>
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>桶盖</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>塑料盖</option>
-                    <option>花篮盖</option>
-                    <option>小口桶盖</option>
-                    <option>圆形铁盖</option>
-                    <option>内外盖</option>
-                    <option>偏心口桶盖</option>
-                  </select>
-                </label>
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>容量</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>0.5~5L</option>
-                    <option>15~25L</option>
-                    <option>50L</option>
-                    <option>200L</option>
-                    <option>1000L</option>
-                  </select>
-                </label>
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>防爆要求</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>防爆</option>
-                    <option>不防爆</option>
-                  </select>
-                </label>
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>灌装方式</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>单头</option>
-                    <option>双头</option>
-                    <option>三头</option>
-                    <option>四头</option>
-                    <option>五头</option>
-                    <option>六头</option>
-                    <option>八头</option>
-                  </select>
-                </label>
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>压盖方式</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>5L 平板压</option>
-                    <option>20L 平板压</option>
-                    <option>花篮压盖</option>
-                    <option>自动辊压</option>
-                    <option>自动拧盖</option>
-                    <option>助力拧盖</option>
-                    <option>自动封盖</option>
-                    <option>自动捶盖</option>
-                    <option>自动封袋</option>
-                    <option>无</option>
-                  </select>
-                </label>
-                <label class="flex flex-col gap-1 text-xs">
-                  <span>输送方式</span>
-                  <select class="bg-blue-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                    <option>滚筒</option>
-                    <option>板链</option>
-                    <option>步进</option>
-                    <option>无</option>
-                  </select>
-                </label>
+              <div class="relative">
+                <div class="grid grid-cols-3 gap-3">
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>产品类型</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>灌装机</option>
+                      <option>半自动线</option>
+                      <option>自动线</option>
+                      <option>码垛机</option>
+                    </select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>自动灌装机</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>30A</option>
+                      <option>30B/BG</option>
+                      <option>30G/GY</option>
+                      <option>ZSQ</option>
+                      <option>HX200</option>
+                      <option>2T</option>
+                    </select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>自动灌装线</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>1~5L 方桶灌装自动线</option>
+                      <option>1~5L 圆桶灌装自动线</option>
+                      <option>15~25L 铁桶灌装自动线</option>
+                      <option>15~25L 塑料桶灌装自动线</option>
+                      <option>15~25L 偏心口桶灌装自动线</option>
+                      <option>50~200L 桶灌装自动线</option>
+                      <option>IBC 桶灌装自动线</option>
+                      <option>袋式灌装</option>
+                    </select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>桶盖</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>塑料盖</option>
+                      <option>花篮盖</option>
+                      <option>小口桶盖</option>
+                      <option>圆形铁盖</option>
+                      <option>内外盖</option>
+                      <option>偏心口桶盖</option>
+                    </select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>容量</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>0.5~5L</option>
+                      <option>15~25L</option>
+                      <option>50L</option>
+                      <option>200L</option>
+                      <option>1000L</option>
+                    </select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>防爆要求</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>防爆</option>
+                      <option>不防爆</option>
+                    </select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>灌装方式</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>单头</option>
+                      <option>双头</option>
+                      <option>三头</option>
+                      <option>四头</option>
+                      <option>五头</option>
+                      <option>六头</option>
+                      <option>八头</option>
+                    </select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>压盖方式</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>5L 平板压</option>
+                      <option>20L 平板压</option>
+                      <option>花篮压盖</option>
+                      <option>自动辊压</option>
+                      <option>自动拧盖</option>
+                      <option>助力拧盖</option>
+                      <option>自动封盖</option>
+                      <option>自动捶盖</option>
+                      <option>自动封袋</option>
+                      <option>无</option>
+                    </select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-xs">
+                    <span>输送方式</span>
+                    <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                      <option>滚筒</option>
+                      <option>板链</option>
+                      <option>步进</option>
+                      <option>无</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-2xl bg-gradient-to-t from-white via-white/80 to-transparent"></div>
               </div>
-              <div class="flex justify-end gap-2 text-xs">
-                <button class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600">重置</button>
-                <button class="px-4 py-2 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">应用筛选</button>
+              <div class="flex items-center justify-between text-xs text-slate-500">
+                <span>已选择：灌装机 / HX200 / 防爆</span>
+                <div class="flex gap-2">
+                  <button class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600">重置</button>
+                  <button class="px-3 py-1.5 rounded-xl bg-blue-500 text-white">应用</button>
+                </div>
               </div>
+              <p class="text-[0.65rem] text-blue-500 text-right">展开后可继续选择缓存方式、VOC、分桶等高级条件</p>
             </div>
             <div class="space-y-4">
               <div class="flex items-center justify-between text-sm text-slate-600">
@@ -442,62 +519,25 @@
                 </div>
               </div>
             </div>
+            <nav class="mt-6">
+              <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+                <button class="active">
+                  <i class="fa-solid fa-play-circle text-lg"></i>
+                  <span>云播</span>
+                </button>
+                <button>
+                  <i class="fa-solid fa-comments text-lg"></i>
+                  <span>云易达</span>
+                </button>
+                <button>
+                  <i class="fa-solid fa-user-circle text-lg"></i>
+                  <span>个人中心</span>
+                </button>
+              </div>
+            </nav>
           </div>
         </article>
 
-        <!-- Cloud Play Collapsed Filters -->
-        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-200">
-          <header class="flex items-center justify-between text-slate-600 text-xs uppercase tracking-[0.32em]">
-            <span>云播 · 高级筛选</span>
-            <span class="flex items-center gap-1"><i class="ri-arrow-up-down-line text-blue-500"></i> 收缩状态</span>
-          </header>
-          <div class="mt-6 rounded-[1.75rem] bg-white/85 border border-slate-200 px-5 py-6 space-y-6">
-            <div class="rounded-2xl border border-slate-200 bg-blue-100/80">
-              <button class="w-full flex items-center justify-between px-4 py-3 text-xs text-slate-600">
-                <span class="flex items-center gap-2 text-slate-900 font-medium"><i class="ri-equalizer-2-line text-blue-500"></i> 快速筛选</span>
-                <span class="flex items-center gap-2 text-blue-500">展开全部 <i class="ri-arrow-down-s-line"></i></span>
-              </button>
-              <div class="grid grid-cols-3 gap-2 px-4 pb-4 text-xs text-slate-700">
-                <button class="flex items-center justify-between px-3 py-2 rounded-xl bg-blue-50 border border-slate-200">
-                  产品类型 · 灌装机
-                  <i class="ri-close-line text-slate-500"></i>
-                </button>
-                <button class="flex items-center justify-between px-3 py-2 rounded-xl bg-blue-50 border border-slate-200">
-                  自动灌装机 · HX200
-                  <i class="ri-close-line text-slate-500"></i>
-                </button>
-                <button class="flex items-center justify-between px-3 py-2 rounded-xl bg-blue-50 border border-slate-200">
-                  灌装方式 · 四头
-                  <i class="ri-close-line text-slate-500"></i>
-                </button>
-              </div>
-            </div>
-            <div class="rounded-2xl bg-blue-100/60 border border-slate-200 p-4 text-sm text-slate-700 space-y-4">
-              <div class="flex items-center justify-between">
-                <span>额外分类</span>
-                <button class="text-xs text-blue-500">批量勾选</button>
-              </div>
-              <div class="grid grid-cols-2 gap-3 text-xs text-slate-600">
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" class="h-4 w-4 rounded border-slate-300 bg-white" checked />
-                  来料方式 · 泵送
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" class="h-4 w-4 rounded border-slate-300 bg-white" />
-                  来料方式 · 角座阀
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" class="h-4 w-4 rounded border-slate-300 bg-white" checked />
-                  防爆要求 · 防爆
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" class="h-4 w-4 rounded border-slate-300 bg-white" />
-                  分桶方式 · 自动卸桶
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" class="h-4 w-4 rounded border-slate-300 bg-white" />
-                  理盖方式 · 自动补盖
-                </label>
                 <label class="flex items-center gap-2">
                   <input type="checkbox" class="h-4 w-4 rounded border-slate-300 bg-white" checked />
                   托盘方式 · 托盘库
@@ -542,6 +582,277 @@
             </div>
           </div>
         </article>
+
+        <!-- Cloud Play Expanded Filters -->
+        <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-200">
+          <header class="flex items-center justify-between text-slate-600 text-xs uppercase tracking-[0.32em]">
+            <span>云播 · 筛选展开</span>
+            <span class="flex items-center gap-1"><i class="ri-arrow-up-down-line text-blue-500"></i> 已显示全部分类</span>
+          </header>
+          <div class="mt-6 rounded-[1.75rem] bg-white/85 border border-slate-200 px-5 py-6 space-y-6">
+            <div class="rounded-2xl bg-blue-100/70 border border-blue-200/60 p-4 space-y-4 text-sm text-slate-600">
+              <div class="flex items-center justify-between">
+                <span class="flex items-center gap-2 text-slate-900 font-medium"><i class="ri-equalizer-3-line text-blue-500"></i> 筛选条件（已展开）</span>
+                <button class="text-xs text-blue-500 flex items-center gap-1"><i class="ri-arrow-up-s-line"></i> 收起前三行</button>
+              </div>
+              <div class="grid grid-cols-3 gap-3">
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>产品类型</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>灌装机</option>
+                    <option>半自动线</option>
+                    <option>自动线</option>
+                    <option>码垛机</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>自动灌装机</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>30A</option>
+                    <option>30B/BG</option>
+                    <option>30G/GY</option>
+                    <option>ZSQ</option>
+                    <option>HX200</option>
+                    <option>2T</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>自动灌装线</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>1~5L 方桶灌装自动线</option>
+                    <option>1~5L 圆桶灌装自动线</option>
+                    <option>15~25L 铁桶灌装自动线</option>
+                    <option>15~25L 塑料桶灌装自动线</option>
+                    <option>15~25L 偏心口桶灌装自动线</option>
+                    <option>50~200L 桶灌装自动线</option>
+                    <option>IBC 桶灌装自动线</option>
+                    <option>袋式灌装</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>桶盖</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>塑料盖</option>
+                    <option>花篮盖</option>
+                    <option>小口桶盖</option>
+                    <option>圆形铁盖</option>
+                    <option>内外盖</option>
+                    <option>偏心口桶盖</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>容量</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>0.5~5L</option>
+                    <option>15~25L</option>
+                    <option>50L</option>
+                    <option>200L</option>
+                    <option>1000L</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>来料方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>直接供料</option>
+                    <option>泵送</option>
+                    <option>过滤</option>
+                    <option>螺杆增压</option>
+                    <option>压料机</option>
+                    <option>拉缸</option>
+                    <option>角座阀</option>
+                    <option>手阀控制</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>防爆要求</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>防爆</option>
+                    <option>不防爆</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>灌装方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>单头</option>
+                    <option>双头</option>
+                    <option>三头</option>
+                    <option>四头</option>
+                    <option>五头</option>
+                    <option>六头</option>
+                    <option>八头</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>压盖方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>5L 平板压</option>
+                    <option>20L 平板压</option>
+                    <option>花篮压盖</option>
+                    <option>自动辊压</option>
+                    <option>自动拧盖</option>
+                    <option>助力拧盖</option>
+                    <option>自动封盖</option>
+                    <option>自动捶盖</option>
+                    <option>自动封袋</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>输送方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>滚筒</option>
+                    <option>板链</option>
+                    <option>步进</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>缓存方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>不锈钢面板</option>
+                    <option>无动力滚筒</option>
+                    <option>无动力滚筒延长架</option>
+                    <option>重托盘缓存输送</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>VOC 要求</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>一体式集气</option>
+                    <option>灌装阀集气</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>分桶方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>卧式分桶</option>
+                    <option>立式分桶</option>
+                    <option>抽底式分桶</option>
+                    <option>自动集桶平台</option>
+                    <option>自动卸桶</option>
+                    <option>人工上空桶</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>检重方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>皮带</option>
+                    <option>静态</option>
+                    <option>检重剔除</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>理盖方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>自动补盖</option>
+                    <option>转盘式理盖</option>
+                    <option>振动盘理盖</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>放盖方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>单吸盘</option>
+                    <option>双吸盘</option>
+                    <option>自动落盖</option>
+                    <option>自动追踪放盖</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>贴标方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>空桶贴标</option>
+                    <option>重桶贴标</option>
+                    <option>顶部贴标</option>
+                    <option>在线打印贴标</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span>码垛方式</span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>机器人码垛</option>
+                    <option>悬臂式码垛</option>
+                    <option>龙门式码垛</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span class="flex items-center justify-between">托盘方式 <span class="text-[0.6rem] text-blue-500">可多选</span></span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>托盘库</option>
+                    <option>托盘分离</option>
+                    <option>空托盘换线输送</option>
+                    <option>重托盘换线输送</option>
+                    <option>无</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span class="flex items-center justify-between">装箱方式 <span class="text-[0.6rem] text-blue-500">可多选</span></span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>自动开箱</option>
+                    <option>自动装箱</option>
+                    <option>自动封箱</option>
+                    <option>自动码箱</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-xs">
+                  <span class="flex items-center justify-between">其他功能 <span class="text-[0.6rem] text-blue-500">可多选</span></span>
+                  <select class="bg-white border border-blue-200 rounded-xl px-3 py-2 text-sm">
+                    <option>自动充氮</option>
+                    <option>自动套内袋</option>
+                    <option>皮带输盖</option>
+                    <option>自动喷码</option>
+                    <option>自动缠绕</option>
+                    <option>自动捆扎</option>
+                    <option>180°翻桶</option>
+                    <option>无</option>
+                  </select>
+                </label>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-500">
+                <span>共 20 项分类均已展开，已选 8 项</span>
+                <div class="flex gap-2">
+                  <button class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-600">重置全部</button>
+                  <button class="px-3 py-1.5 rounded-xl bg-blue-500 text-white">保存方案</button>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-blue-50 border border-blue-200/70 p-4 text-xs text-slate-600 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-900 font-medium">当前筛选摘要</span>
+                <button class="text-blue-500">导出配置</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 rounded-full bg-white border border-blue-200">HX200 自动灌装机</span>
+                <span class="px-3 py-1 rounded-full bg-white border border-blue-200">防爆</span>
+                <span class="px-3 py-1 rounded-full bg-white border border-blue-200">自动封盖</span>
+                <span class="px-3 py-1 rounded-full bg-white border border-blue-200">机器人码垛</span>
+                <span class="px-3 py-1 rounded-full bg-white border border-blue-200">托盘库 + 换线输送</span>
+              </div>
+            </div>
+            <nav class="mt-6">
+              <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+                <button class="active">
+                  <i class="fa-solid fa-play-circle text-lg"></i>
+                  <span>云播</span>
+                </button>
+                <button>
+                  <i class="fa-solid fa-comments text-lg"></i>
+                  <span>云易达</span>
+                </button>
+                <button>
+                  <i class="fa-solid fa-user-circle text-lg"></i>
+                  <span>个人中心</span>
+                </button>
+              </div>
+            </nav>
+          </div>
         </article>
 
         <!-- Cloud Play Video Detail -->
@@ -600,6 +911,22 @@
               </div>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button class="active">
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Cloud Play Access Guard -->
@@ -633,6 +960,22 @@
               </div>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button class="active">
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Cloud Yida Main -->
@@ -696,6 +1039,22 @@
               </div>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Business Script Library Detail -->
@@ -760,6 +1119,22 @@
               </button>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Live Script Library Detail -->
@@ -817,6 +1192,22 @@
               </button>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
         <!-- Order Generation -->
         <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-200">
@@ -866,7 +1257,23 @@
                 <button class="px-4 py-2 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">导出 PDF</button>
               </div>
             </div>
-          </div>
+            </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Gift Center -->
@@ -911,6 +1318,22 @@
               </div>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
         <!-- Access Control Flow -->
         <article class="glass-card device-frame rounded-[2.25rem] p-6 shadow-2xl border border-slate-200">
@@ -931,11 +1354,11 @@
               <div class="rounded-xl bg-white border border-slate-200 p-3 text-xs text-slate-600">
                 <p>为了保障资产安全，72 小时后需重新验证。管理员可手动失效指定账号，立即阻断云播/云易达访问。</p>
               </div>
-              <div class="grid grid-cols-2 gap-3 text-xs text-slate-600">
-                <button class="rounded-xl bg-blue-50 border border-slate-200 p-3 text-left">
-                  <p class="text-slate-900 font-medium">访问云播</p>
-                  <p class="text-slate-500 mt-1">需保持登录态</p>
-                </button>
+            <div class="grid grid-cols-2 gap-3 text-xs text-slate-600">
+              <button class="rounded-xl bg-blue-50 border border-slate-200 p-3 text-left">
+                <p class="text-slate-900 font-medium">访问云播</p>
+                <p class="text-slate-500 mt-1">需保持登录态</p>
+              </button>
                 <button class="rounded-xl bg-blue-50 border border-slate-200 p-3 text-left">
                   <p class="text-slate-900 font-medium">访问云易达</p>
                   <p class="text-slate-500 mt-1">需保持登录态</p>
@@ -954,6 +1377,22 @@
               </div>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- Login Reminder Modal -->
@@ -988,7 +1427,23 @@
                 <span class="text-slate-500">今日 1 份</span>
               </div>
             </div>
-          </div>
+            </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
 
         <!-- CSV Export Flow -->
@@ -1027,8 +1482,24 @@
               </div>
             </div>
           </div>
+          <nav class="mt-6">
+            <div class="bottom-nav rounded-2xl px-6 py-3 flex items-center justify-between">
+              <button>
+                <i class="fa-solid fa-play-circle text-lg"></i>
+                <span>云播</span>
+              </button>
+              <button>
+                <i class="fa-solid fa-comments text-lg"></i>
+                <span>云易达</span>
+              </button>
+              <button class="active">
+                <i class="fa-solid fa-user-circle text-lg"></i>
+                <span>个人中心</span>
+              </button>
+            </div>
+          </nav>
         </article>
-      </section>
+        </section>
     </main>
   </body>
 </html>
