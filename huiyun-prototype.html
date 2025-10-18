@@ -46,12 +46,143 @@
     <header class="py-10 text-center text-slate-100">
       <h1 class="text-4xl font-bold tracking-tight">辉云易达 OS 小程序 · 高保真界面原型</h1>
       <p class="mt-3 text-slate-300">
-        员工与管理员需在<span class="font-semibold">“个人中心”</span>登录后方可访问“云播”与“云易达”。单次登录有效期 72 小时，管理员支持导出使用记录 CSV。
+        场景覆盖<span class="font-semibold">品牌活动引流</span>、<span class="font-semibold">云易达智能工具</span>与<span class="font-semibold">个人中心留资管理</span>，确保扫码即获手机号属地、话术一键调用以及订单 PDF 快速分享。
       </p>
     </header>
 
     <main class="mx-auto max-w-7xl pb-24">
       <section class="grid grid-cols-3 gap-10">
+        <!-- Brand Activation - Event Hub -->
+        <article class="artboard overflow-hidden rounded-3xl bg-white/10 p-6 shadow-[0_40px_80px_-40px_rgba(59,130,246,0.6)] backdrop-blur">
+          <header class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-500/20 text-sky-300">
+                <i class="fa-solid fa-bullhorn text-lg"></i>
+              </span>
+              <div>
+                <p class="text-xs uppercase tracking-[0.35em] text-sky-200">品牌活动</p>
+                <h2 class="text-xl font-semibold text-white">辉云 OS 品牌共创节</h2>
+              </div>
+            </div>
+            <span class="rounded-full bg-slate-900/40 px-4 py-1 text-xs text-slate-300">
+              <i class="ri-calendar-line mr-1"></i>2024.06.18
+            </span>
+          </header>
+
+          <section class="mt-6 space-y-5">
+            <div class="rounded-2xl bg-slate-900/60 p-4 text-xs text-slate-300">
+              <p class="text-[11px] uppercase tracking-[0.3em] text-sky-200">扫码引流</p>
+              <div class="mt-3 grid grid-cols-2 gap-4 text-center">
+                <div class="space-y-3 rounded-2xl bg-slate-950/70 p-4">
+                  <span class="inline-flex items-center justify-center gap-1 rounded-full bg-sky-500/15 px-3 py-1 text-[11px] text-sky-100"><i class="ri-video-line"></i>视频号</span>
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=huixin-video" alt="辉鑫视频号二维码" class="mx-auto h-36 w-36 rounded-xl bg-white/5 p-2" />
+                  <p class="text-[11px] text-slate-400">扫码关注辉鑫科技视频号</p>
+                </div>
+                <div class="space-y-3 rounded-2xl bg-slate-950/70 p-4">
+                  <span class="inline-flex items-center justify-center gap-1 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] text-emerald-100"><i class="ri-wechat-2-line"></i>企业微信</span>
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=huixin-work" alt="企业微信二维码" class="mx-auto h-36 w-36 rounded-xl bg-white/5 p-2" />
+                  <p class="text-[11px] text-slate-400">扫码接入客服 · 自动留资</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 text-xs">
+              <div class="rounded-2xl bg-slate-900/60 p-3 text-slate-200">
+                <p class="text-[11px] text-slate-400">今日扫码</p>
+                <p class="mt-1 text-2xl font-semibold text-white">128</p>
+              </div>
+              <div class="rounded-2xl bg-slate-900/60 p-3 text-slate-200">
+                <p class="text-[11px] text-slate-400">自动识别手机号</p>
+                <p class="mt-1 text-2xl font-semibold text-white">126</p>
+              </div>
+              <div class="rounded-2xl bg-slate-900/60 p-3 text-slate-200">
+                <p class="text-[11px] text-slate-400">号码属地覆盖</p>
+                <p class="mt-1 text-2xl font-semibold text-white">23 省</p>
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-sky-500/15 p-4 text-xs text-sky-100">
+              <p><i class="ri-sparkling-line mr-1"></i>扫码成功后即时推送客户手机号、归属地、省市及首次互动时间。</p>
+            </div>
+          </section>
+        </article>
+
+        <!-- Brand Activation - Lead Capture -->
+        <article class="artboard overflow-hidden rounded-3xl bg-white/10 p-6 shadow-[0_40px_80px_-40px_rgba(45,212,191,0.6)] backdrop-blur">
+          <header class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-300">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+              </span>
+              <div>
+                <p class="text-xs uppercase tracking-[0.35em] text-emerald-200">品牌活动</p>
+                <h2 class="text-xl font-semibold text-white">实时留资面板</h2>
+              </div>
+            </div>
+            <button class="flex items-center gap-1 rounded-full bg-slate-900/40 px-4 py-1 text-xs text-emerald-100">
+              <i class="ri-refresh-line"></i>
+              实时刷新
+            </button>
+          </header>
+
+          <section class="mt-6 space-y-4">
+            <div class="rounded-2xl bg-slate-900/60 p-4 text-xs text-slate-200">
+              <header class="flex items-center justify-between text-[11px] text-slate-400">
+                <span><i class="ri-time-line mr-1"></i>最近 5 分钟</span>
+                <button class="text-emerald-200"><i class="ri-download-2-line mr-1"></i>导出 Excel</button>
+              </header>
+              <ul class="mt-3 space-y-3">
+                <li class="flex items-center justify-between rounded-xl bg-slate-950/70 px-4 py-3">
+                  <div>
+                    <p class="text-sm font-semibold text-white">陈语桐 · 173****4286</p>
+                    <p class="mt-1 text-[11px] text-slate-400">四川 · 成都 · 新材料采购经理</p>
+                  </div>
+                  <span class="rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] text-emerald-100"><i class="ri-timer-flash-line mr-1"></i>2 分钟前</span>
+                </li>
+                <li class="flex items-center justify-between rounded-xl bg-slate-950/70 px-4 py-3">
+                  <div>
+                    <p class="text-sm font-semibold text-white">刘峰 · 139****8821</p>
+                    <p class="mt-1 text-[11px] text-slate-400">江苏 · 苏州 · 灌装线项目负责人</p>
+                  </div>
+                  <span class="rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] text-emerald-100"><i class="ri-timer-flash-line mr-1"></i>4 分钟前</span>
+                </li>
+                <li class="flex items-center justify-between rounded-xl bg-slate-950/70 px-4 py-3">
+                  <div>
+                    <p class="text-sm font-semibold text-white">王珊 · 186****0315</p>
+                    <p class="mt-1 text-[11px] text-slate-400">广东 · 佛山 · 供应链总监</p>
+                  </div>
+                  <span class="rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] text-emerald-100"><i class="ri-timer-flash-line mr-1"></i>5 分钟前</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div class="rounded-2xl bg-slate-900/60 p-3 text-slate-200">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-emerald-200">号码属地热力</p>
+                <p class="mt-2 text-[11px] text-slate-400">华东 38% · 华南 26% · 西南 18%</p>
+                <div class="mt-3 h-20 rounded-xl bg-gradient-to-br from-emerald-500/20 to-sky-500/10">
+                  <div class="flex h-full items-end justify-around px-4 pb-3 text-[11px]">
+                    <span class="flex h-14 w-8 items-end justify-center rounded-full bg-emerald-400/60 text-slate-900">38%</span>
+                    <span class="flex h-10 w-8 items-end justify-center rounded-full bg-sky-400/60 text-slate-900">26%</span>
+                    <span class="flex h-8 w-8 items-end justify-center rounded-full bg-cyan-400/60 text-slate-900">18%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-2xl bg-slate-900/60 p-3 text-slate-200">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-emerald-200">转化动作</p>
+                <ul class="mt-2 space-y-2 text-[11px] text-slate-300">
+                  <li class="flex items-center justify-between"><span><i class="ri-message-3-line mr-1 text-emerald-200"></i>添加企业微信</span><span>86%</span></li>
+                  <li class="flex items-center justify-between"><span><i class="ri-phone-line mr-1 text-emerald-200"></i>拨打热线</span><span>42%</span></li>
+                  <li class="flex items-center justify-between"><span><i class="ri-file-text-line mr-1 text-emerald-200"></i>下载方案</span><span>31%</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-emerald-500/15 p-4 text-xs text-emerald-100">
+              <p><i class="ri-lightbulb-flash-line mr-1"></i>自动匹配 CRM 标签，导入后即可在“个人中心 > 客户留资”中查看明细。</p>
+            </div>
+          </section>
+        </article>
         <!-- Personal Center - Login -->
         <article class="artboard overflow-hidden rounded-3xl bg-white/10 p-6 shadow-[0_40px_80px_-40px_rgba(14,165,233,0.6)] backdrop-blur">
           <header class="flex items-center justify-between">
@@ -158,6 +289,36 @@
                   <p class="mt-1 text-lg font-semibold text-white">9</p>
                 </div>
               </div>
+            </section>
+
+            <section class="rounded-2xl bg-emerald-500/10 p-4 text-xs text-slate-200">
+              <header class="flex items-center justify-between text-[11px] text-emerald-200">
+                <span><i class="ri-user-voice-line mr-1"></i>客户扫码留资 · 最近 24 小时</span>
+                <button class="rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] text-emerald-100"><i class="ri-folder-shared-line mr-1"></i>查看全部</button>
+              </header>
+              <ul class="mt-3 space-y-2">
+                <li class="flex items-center justify-between rounded-xl bg-slate-950/70 px-4 py-3">
+                  <div>
+                    <p class="text-sm font-semibold text-white">黄昊 · 136****0911</p>
+                    <p class="mt-1 text-[11px] text-slate-400">华北 · 北京 · 石化厂采购</p>
+                  </div>
+                  <span class="text-[11px] text-emerald-100"><i class="ri-price-tag-3-line mr-1"></i>自动灌装线 · 热度 92</span>
+                </li>
+                <li class="flex items-center justify-between rounded-xl bg-slate-950/70 px-4 py-3">
+                  <div>
+                    <p class="text-sm font-semibold text-white">赵琳 · 155****6620</p>
+                    <p class="mt-1 text-[11px] text-slate-400">华东 · 宁波 · 物流仓储负责人</p>
+                  </div>
+                  <span class="text-[11px] text-emerald-100"><i class="ri-price-tag-3-line mr-1"></i>IBC 桶自动线 · 热度 85</span>
+                </li>
+                <li class="flex items-center justify-between rounded-xl bg-slate-950/70 px-4 py-3">
+                  <div>
+                    <p class="text-sm font-semibold text-white">陈瀚宇 · 189****3388</p>
+                    <p class="mt-1 text-[11px] text-slate-400">西南 · 重庆 · 涂料厂技术总监</p>
+                  </div>
+                  <span class="text-[11px] text-emerald-100"><i class="ri-price-tag-3-line mr-1"></i>机器人码垛 · 热度 78</span>
+                </li>
+              </ul>
             </section>
 
             <section class="rounded-2xl bg-slate-900/60 p-4">
@@ -789,6 +950,90 @@
 **行动号召**  
 我可现场演示“30A 自动灌装线”视频，安排技术经理 4 小时内出具报价方案。
             </pre>
+          </section>
+        </article>
+
+        <!-- Live Script Library -->
+        <article class="artboard overflow-hidden rounded-3xl bg-white/10 p-6 shadow-[0_40px_80px_-40px_rgba(168,85,247,0.6)] backdrop-blur">
+          <header class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.35em] text-fuchsia-200">云易达 · 直播话术库</p>
+              <h2 class="text-xl font-semibold text-white">直播间脚本 · Markdown</h2>
+            </div>
+            <span class="rounded-full bg-slate-800 px-4 py-1 text-xs text-fuchsia-100">
+              <i class="ri-broadcast-line mr-1"></i>直播同步
+            </span>
+          </header>
+
+          <section class="mt-5 grid grid-cols-3 gap-3 text-xs">
+            <button class="rounded-2xl bg-gradient-to-br from-fuchsia-500/20 to-purple-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">场景</p>
+              <p class="mt-2 text-[11px] text-fuchsia-100/80">新品首发夜场</p>
+            </button>
+            <button class="rounded-2xl bg-gradient-to-br from-sky-500/20 to-indigo-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">塑品</p>
+              <p class="mt-2 text-[11px] text-sky-100/80">高速灌装效率展示</p>
+            </button>
+            <button class="rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">品牌</p>
+              <p class="mt-2 text-[11px] text-emerald-100/80">辉鑫智造 · 全球 30+ 国家案例</p>
+            </button>
+            <button class="rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">卖点</p>
+              <p class="mt-2 text-[11px] text-amber-100/80">防爆认证 + 机器人码垛</p>
+            </button>
+            <button class="rounded-2xl bg-gradient-to-br from-rose-500/20 to-pink-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">背书</p>
+              <p class="mt-2 text-[11px] text-rose-100/80">央企直播共创案例</p>
+            </button>
+            <button class="rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">人设</p>
+              <p class="mt-2 text-[11px] text-cyan-100/80">首席智造官 · 直播连线</p>
+            </button>
+            <button class="rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">报价</p>
+              <p class="mt-2 text-[11px] text-indigo-100/80">直播专属三档优惠</p>
+            </button>
+            <button class="rounded-2xl bg-gradient-to-br from-lime-500/20 to-emerald-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">促单</p>
+              <p class="mt-2 text-[11px] text-lime-100/80">直播间限时签约礼</p>
+            </button>
+            <button class="rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/10 p-4 text-left text-slate-200">
+              <p class="text-sm font-semibold">福利</p>
+              <p class="mt-2 text-[11px] text-red-100/80">下单送 12 个月运维</p>
+            </button>
+          </section>
+
+          <section class="mt-6 space-y-4">
+            <div class="rounded-2xl bg-slate-900/70 p-4 text-xs text-slate-200">
+              <header class="flex items-center justify-between">
+                <div>
+                  <p class="text-[11px] uppercase tracking-[0.3em] text-fuchsia-200">Markdown 预览</p>
+                  <h3 class="text-base font-semibold text-white">新品首发 · 直播暖场话术</h3>
+                </div>
+                <button class="rounded-full bg-fuchsia-500/20 px-3 py-1 text-[11px] text-fuchsia-100">
+                  <i class="ri-file-copy-line mr-1"></i>复制脚本
+                </button>
+              </header>
+              <pre class="mt-4 whitespace-pre-wrap rounded-2xl bg-slate-950/70 p-4 text-[11px] leading-relaxed text-slate-200">**暖场开场**
+家人们晚上好，我是辉鑫科技首席智造官，今晚带来全新升级的 HX200 智能灌装一体线。
+
+**卖点拆解**
+- 双枪同步灌装，直播间专享 15% 效率加速包；
+- 全流程防爆设计，支持直播现场远程巡检；
+- 一键联动机器人码垛与托盘库，节省 4 名人工。
+
+**互动引导**
+评论区输入“我要方案”，即可秒收 PDF 报价与视频案例，前 20 名锁定延保两年。
+
+**促单福利**
+直播间签约立减 5 万，送原厂调试团队驻场 30 天，再赠 500 套防漏盖耗材。
+              </pre>
+            </div>
+
+            <div class="rounded-2xl bg-fuchsia-500/15 p-4 text-xs text-fuchsia-100">
+              <p><i class="ri-mic-line mr-1"></i>支持与直播提词器联动，主播点击卡片即可推送指定话术至提词屏。</p>
+            </div>
           </section>
         </article>
 
