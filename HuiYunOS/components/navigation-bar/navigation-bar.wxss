@@ -1,0 +1,58 @@
+.nav-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  border-radius: 28rpx;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1rpx solid rgba(148, 163, 184, 0.16);
+}
+
+.nav-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
+  background: rgba(14, 165, 233, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.nav-icon .dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 999rpx;
+  background: #38bdf8;
+  box-shadow: 0 0 0 12rpx rgba(56, 189, 248, 0.25);
+}
+
+.nav-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-title {
+  font-size: 30rpx;
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.nav-subtitle {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 4rpx;
+}
+
+.nav-default {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.nav-emerald {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.24), rgba(15, 118, 110, 0.14));
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+.nav-sky {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(59, 130, 246, 0.12));
+  border-color: rgba(59, 130, 246, 0.3);
+}

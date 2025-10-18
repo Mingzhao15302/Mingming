@@ -1,0 +1,9 @@
+<view class="nav-wrapper {{themeClassMap[theme]}}">
+  <view class="nav-icon">
+    <view class="dot"></view>
+  </view>
+  <view class="nav-text">
+    <text class="nav-title">{{title}}</text>
+    <text wx:if="{{subtitle}}" class="nav-subtitle">{{subtitle}}</text>
+  </view>
+</view>

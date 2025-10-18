@@ -1,0 +1,150 @@
+<view class="page">
+  <scroll-view scroll-y="true" class="page-scroll">
+    <view class="hero card">
+      <navigation-bar title="辉云 OS" subtitle="品牌活动 · 云易达 · 个人中心" theme="sky" />
+      <view class="hero-content">
+        <view class="hero-text">
+          <text class="hero-title">一体化私域运营驾驶舱</text>
+          <text class="hero-subtitle">统一管理扫码留资、话术资产与订单成交流程，实时掌握客户旅程</text>
+          <view class="hero-actions">
+            <view class="primary-button" bindtap="handleSyncQr">同步二维码</view>
+            <view class="secondary-button" bindtap="handleOpenDashboard">打开数据面板</view>
+          </view>
+        </view>
+        <view class="hero-qrs">
+          <view class="qr-card">
+            <text class="qr-label">视频号引流</text>
+            <image src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=huixin-video" class="qr-image"></image>
+            <text class="qr-caption">扫码关注即可自动识别手机号、归属地</text>
+          </view>
+          <view class="qr-card">
+            <text class="qr-label">企业微信承接</text>
+            <image src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=huixin-work" class="qr-image"></image>
+            <text class="qr-caption">快捷添加客户经理，沉淀意向标签</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section card">
+      <navigation-bar title="品牌活动 · 留资总览" subtitle="实时统计客户扫码数据" theme="emerald" />
+      <view class="grid columns-3 stats-grid">
+        <view class="stat-card" wx:for="{{brandStats}}" wx:key="metric">
+          <text class="stat-label">{{item.label}}</text>
+          <text class="stat-value">{{item.value}}</text>
+          <text class="stat-trend">{{item.trend}}</text>
+        </view>
+      </view>
+      <view class="lead-feed">
+        <view class="section-title">
+          <text class="section-title-text">最新留资线索</text>
+          <view class="tag">实时同步 · 企业微信</view>
+        </view>
+        <view class="lead-item" wx:for="{{recentLeads}}" wx:key="id">
+          <view class="lead-head">
+            <view class="lead-left">
+              <view class="status-dot" style="background: {{item.statusColor}}"></view>
+              <text class="lead-name">{{item.name}}</text>
+              <text class="lead-tag">{{item.tag}}</text>
+            </view>
+            <text class="lead-time">{{item.time}}</text>
+          </view>
+          <view class="lead-meta">
+            <text>手机：{{item.mobile}}</text>
+            <text class="lead-location">{{item.location}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section card">
+      <navigation-bar title="云易达 · 业务话术库" subtitle="九大场景即点即用" />
+      <view class="grid columns-3 speech-grid">
+        <view class="speech-card" wx:for="{{businessScripts}}" wx:key="key" bindtap="handleOpenScript" data-type="business" data-key="{{item.key}}">
+          <text class="card-title">{{item.title}}</text>
+          <text class="card-subtitle">{{item.subtitle}}</text>
+          <view class="speech-meta">
+            <text>{{item.count}} 条话术</text>
+            <text class="badge">{{item.badge}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section card">
+      <navigation-bar title="云易达 · 直播话术库" subtitle="直播脚本一键唤起" theme="sky" />
+      <view class="grid columns-3 speech-grid">
+        <view class="speech-card" wx:for="{{livestreamScripts}}" wx:key="key" bindtap="handleOpenScript" data-type="livestream" data-key="{{item.key}}">
+          <text class="card-title">{{item.title}}</text>
+          <text class="card-subtitle">{{item.subtitle}}</text>
+          <view class="speech-meta">
+            <text>{{item.count}} 条话术</text>
+            <text class="badge">{{item.badge}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section card">
+      <navigation-bar title="订单生成系统" subtitle="智能生成成交提案" theme="emerald" />
+      <textarea class="input-area" placeholder="输入客户需求、产品配置、预算等关键信息" value="{{orderForm.content}}" bindinput="handleOrderContent"></textarea>
+      <view class="helper-text">系统会基于内置模版自动排版，支持导出 PDF 分享至微信好友</view>
+      <view class="order-actions">
+        <view class="primary-button" bindtap="handleGenerateOrder">生成订单 PDF</view>
+        <view class="secondary-button" bindtap="handlePreviewOrder">预览订单内容</view>
+      </view>
+      <view class="order-preview" wx:if="{{orderPreview}}">
+        <text class="order-title">订单预览</text>
+        <text selectable="true">{{orderPreview}}</text>
+      </view>
+    </view>
+
+    <view class="section card">
+      <navigation-bar title="个人中心" subtitle="登录后管理留资" />
+      <view wx:if="{{!isAuthenticated}}" class="login-card">
+        <text class="card-title">账号登录</text>
+        <input class="input-field" placeholder="请输入账号" value="{{loginForm.username}}" bindinput="handleUsername" />
+        <input class="input-field" placeholder="请输入密码" password value="{{loginForm.password}}" bindinput="handlePassword" />
+        <view class="primary-button" bindtap="handleLogin">登录并同步留资</view>
+        <view class="helper-text">默认体验账号：pm_admin / 123456</view>
+      </view>
+      <view wx:else>
+        <view class="user-summary">
+          <text class="card-title">{{userInfo.name}} · {{userInfo.role}}</text>
+          <text class="card-subtitle">最近同步：{{userInfo.lastSync}}</text>
+        </view>
+        <view class="lead-feed">
+          <view class="section-title">
+            <text class="section-title-text">客户留资详情</text>
+            <view class="tag">共 {{customerLeads.length}} 条</view>
+          </view>
+          <view class="lead-item" wx:for="{{customerLeads}}" wx:key="id">
+            <view class="lead-head">
+              <view class="lead-left">
+                <view class="status-dot" style="background: {{item.statusColor}}"></view>
+                <text class="lead-name">{{item.name}}</text>
+                <text class="lead-tag">{{item.intent}}</text>
+              </view>
+              <text class="lead-time">{{item.followUp}}</text>
+            </view>
+            <view class="lead-meta">
+              <text>手机：{{item.mobile}}</text>
+              <text class="lead-location">{{item.location}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="secondary-button" bindtap="handleLogout">退出登录</view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{scriptModal.visible}}" class="modal-backdrop" catchtouchmove="true">
+    <view class="modal">
+      <view class="modal-title">{{scriptModal.title}}</view>
+      <scroll-view scroll-y="true" class="modal-body">
+        <rich-text nodes="{{scriptModal.nodes}}"></rich-text>
+      </scroll-view>
+      <view class="secondary-button" bindtap="handleCloseScript">关闭</view>
+    </view>
+  </view>
+</view>
