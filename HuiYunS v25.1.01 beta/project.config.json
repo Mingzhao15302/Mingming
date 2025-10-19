@@ -1,0 +1,9 @@
+{
+  "description": "辉鑫OS 小程序",
+  "miniprogramRoot": "./",
+  "projectname": "HuiYunS v25.1.01 beta",
+  "appid": "touristappid",
+  "compileType": "miniprogram",
+  "libVersion": "3.1.0",
+  "condition": {}
+}

@@ -1,0 +1,32 @@
+<view class="nav-bar">
+  <view class="status-area">
+    <text class="time">09:41</text>
+    <view class="signals">
+      <text>📶</text>
+      <text>📡</text>
+      <text>🔋</text>
+    </view>
+  </view>
+  <view class="tab-area">
+    <view class="brand">
+      <view class="brand-icon">辉</view>
+      <view class="brand-text">
+        <text class="brand-title">辉鑫OS</text>
+        <text class="brand-sub">智能运营驾驶舱</text>
+      </view>
+    </view>
+    <scroll-view class="tab-scroll" scroll-x>
+      <view class="tabs">
+        <view
+          wx:for="{{tabs}}"
+          wx:key="key"
+          class="tab-item {{item.key === active ? 'tab-item--active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onTabTap"
+        >
+          <text>{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
