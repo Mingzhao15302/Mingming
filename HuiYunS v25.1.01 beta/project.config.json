@@ -4,7 +4,7 @@
   "projectname": "HuiYunS v25.1.01 beta",
   "appid": "touristappid",
   "compileType": "miniprogram",
-  "libVersion": "3.1.0",
+  "libVersion": "stable",
   "setting": {
     "urlCheck": false,
     "es6": true,
@@ -13,7 +13,7 @@
     "minifyWXML": true,
     "minifyWXSS": true,
     "lazyloadPlaceholder": true,
-    "useCompilerPlugins": true
+    "useCompilerPlugins": []
   },
   "condition": {}
 }
