@@ -8,5 +8,6 @@
     "backgroundColor": "#f1f5f9"
   },
   "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
   "sitemapLocation": "sitemap.json"
 }

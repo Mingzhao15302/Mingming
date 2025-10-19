@@ -1,6 +1,11 @@
 <view class="page">
   <navigation-bar tabs="{{tabs}}" active="{{activeTab}}" bind:change="handleTabChange" />
 
+  <view wx:if="{{offlineMode}}" class="offline-banner">
+    <text class="offline-text">当前展示离线演示数据，请启动后台服务后点击重试连接。</text>
+    <button class="offline-button" size="mini" bindtap="retryBackend">重试连接</button>
+  </view>
+
   <view wx:if="{{activeTab === 'dashboard'}}" class="content">
     <view class="hero card gradient-card">
       <view class="hero-header">
@@ -8,9 +13,9 @@
           <text class="hero-subtitle">欢迎回来</text>
           <view class="hero-title">辉鑫智能运营</view>
         </view>
-        <view class="hero-status">
-          <view class="status-dot"></view>
-          <text>Online</text>
+        <view class="hero-status {{offlineMode ? 'hero-status--offline' : ''}}">
+          <view class="status-dot {{offlineMode ? 'status-dot--offline' : ''}}"></view>
+          <text>{{offlineMode ? 'Offline' : 'Online'}}</text>
         </view>
       </view>
       <view class="hero-metrics">
