@@ -4,7 +4,7 @@
   "projectname": "HuiYunS v25.1.01 beta",
   "appid": "touristappid",
   "compileType": "miniprogram",
-  "libVersion": "stable",
+  "libVersion": "3.0.0",
   "setting": {
     "urlCheck": false,
     "es6": true,
