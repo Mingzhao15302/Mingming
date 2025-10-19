@@ -1,0 +1,204 @@
+<view class="page">
+  <navigation-bar tabs="{{tabs}}" active="{{activeTab}}" bind:change="handleTabChange" />
+
+  <view wx:if="{{activeTab === 'dashboard'}}" class="content">
+    <view class="hero card gradient-card">
+      <view class="hero-header">
+        <view>
+          <text class="hero-subtitle">欢迎回来</text>
+          <view class="hero-title">辉鑫智能运营</view>
+        </view>
+        <view class="hero-status">
+          <view class="status-dot"></view>
+          <text>Online</text>
+        </view>
+      </view>
+      <view class="hero-metrics">
+        <view class="metric-card">
+          <text class="metric-label">本月线索</text>
+          <text class="metric-value">{{dashboard.leads}}</text>
+          <view class="metric-trend">{{dashboard.leadsTrend}}</view>
+        </view>
+        <view class="metric-card">
+          <text class="metric-label">合同金额</text>
+          <text class="metric-value">¥{{dashboard.contractAmount}}</text>
+          <text class="metric-note">待签约 {{dashboard.pendingContracts}} 单</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">快捷入口</view>
+      <view class="quick-actions">
+        <view class="quick-action" data-key="quotation" bindtap="handleShortcut">
+          <view class="action-icon action-icon--primary">📄</view>
+          <text>报价单</text>
+        </view>
+        <view class="quick-action" data-key="calendar" bindtap="handleShortcut">
+          <view class="action-icon action-icon--success">📅</view>
+          <text>销售日历</text>
+        </view>
+        <view class="quick-action" data-key="summary" bindtap="handleShortcut">
+          <view class="action-icon action-icon--secondary">🤖</view>
+          <text>AI总结</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">今日待办</view>
+      <view class="todo-item" wx:for="{{dashboard.todos}}" wx:key="title">
+        <view class="todo-icon">{{item.icon}}</view>
+        <view>
+          <view class="todo-title">{{item.title}}</view>
+          <view class="todo-subtitle">{{item.subtitle}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:elif="{{activeTab === 'quotation'}}" class="content">
+    <view class="section-header">
+      <view class="section-title">灌装机报价单</view>
+      <button class="btn-secondary" size="mini" bindtap="saveDraft">保存草稿</button>
+    </view>
+
+    <view class="card form-card">
+      <view class="form-item">
+        <view class="form-label">客户名称</view>
+        <view class="input-wrapper">
+          <input class="form-input" placeholder="请输入企业名称" value="{{quotationForm.clientName}}" data-field="clientName" bindinput="handleQuotationInput" />
+          <button class="link-button" size="mini" bindtap="loadHistory">历史</button>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-item">
+          <view class="form-label">灌装产能 (瓶/小时)</view>
+          <input class="form-input" type="number" placeholder="请输入" value="{{quotationForm.capacity}}" data-field="capacity" bindinput="handleQuotationInput" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">瓶型规格</view>
+          <picker mode="selector" range="{{bottleOptions}}" value="{{quotationForm.bottleIndex}}" data-field="bottleIndex" bindchange="handleBottleChange">
+            <view class="picker-value">{{bottleOptions[quotationForm.bottleIndex]}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-item">
+          <view class="form-label">预计投产时间</view>
+          <picker mode="date" value="{{quotationForm.launchDate}}" data-field="launchDate" bindchange="handleDateChange">
+            <view class="picker-value">{{quotationForm.launchDate || '选择日期'}} </view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <view class="form-label">预算范围 (万元)</view>
+          <input class="form-input" type="digit" placeholder="请输入" value="{{quotationForm.budget}}" data-field="budget" bindinput="handleQuotationInput" />
+        </view>
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">项目重点需求</view>
+        <textarea class="form-textarea" placeholder="请详细描述工艺、包装及配套要求" value="{{quotationForm.requirements}}" data-field="requirements" bindinput="handleQuotationInput" auto-height maxlength="500" />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">附件备注</view>
+        <view class="attachment">
+          <button class="btn-secondary" size="mini" bindtap="chooseFile">上传附件</button>
+          <text class="attachment-tip">支持 pdf / docx / 图片</text>
+        </view>
+      </view>
+
+      <button class="btn-primary submit" loading="{{quotationSubmitting}}" bindtap="submitQuotation">生成报价方案</button>
+    </view>
+
+    <view wx:if="{{quotationPreview}}" class="card preview-card">
+      <view class="preview-header">
+        <view>
+          <view class="preview-title">报价预览</view>
+          <view class="preview-subtitle">为客户量身定制的初步解决方案</view>
+        </view>
+        <button class="btn-secondary" size="mini" bindtap="exportQuotation">导出 PDF</button>
+      </view>
+      <view class="preview-body">
+        <view class="preview-row">
+          <text class="preview-label">客户</text>
+          <text class="preview-value">{{quotationPreview.clientName}}</text>
+        </view>
+        <view class="preview-row">
+          <text class="preview-label">方案亮点</text>
+          <text class="preview-value">{{quotationPreview.highlights}}</text>
+        </view>
+        <view class="preview-row">
+          <text class="preview-label">预计总价</text>
+          <text class="preview-value">¥{{quotationPreview.estimatedTotal}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:elif="{{activeTab === 'calendar'}}" class="content">
+    <view class="section-header">
+      <view class="section-title">销售日志日历</view>
+      <view class="month-label">{{calendar.currentMonthLabel}}</view>
+    </view>
+
+    <view class="card calendar">
+      <view class="calendar-grid">
+        <view class="calendar-weekday" wx:for="{{calendar.weekdays}}" wx:key="index">{{item}}</view>
+        <view class="calendar-day {{item.isCurrentMonth ? '' : 'calendar-day--muted'}} {{item.hasLog ? 'calendar-day--active' : ''}}" wx:for="{{calendar.days}}" wx:key="index" data-date="{{item.date}}" bindtap="handleDateSelect">
+          <text>{{item.day}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card log-list">
+      <view class="section-title">{{selectedDateLabel}}</view>
+      <view wx:if="{{selectedLogs.length}}">
+        <view class="log-item" wx:for="{{selectedLogs}}" wx:key="id">
+          <view class="log-header">
+            <text class="log-title">{{item.title}}</text>
+            <text class="log-time">{{item.time}}</text>
+          </view>
+          <view class="log-content">{{item.content}}</view>
+        </view>
+      </view>
+      <view wx:else class="empty">暂无日志，快去记录吧～</view>
+    </view>
+  </view>
+
+  <view wx:else class="content">
+    <view class="section-header">
+      <view>
+        <view class="section-title">AI 销售总结</view>
+        <view class="summary-subtitle">自动聚合近一月销售进展</view>
+      </view>
+      <button class="btn-secondary" size="mini" bindtap="refreshSummary">重新生成</button>
+    </view>
+
+    <view class="card summary-card">
+      <view class="summary-header">
+        <view class="summary-month">{{aiSummary.month}}</view>
+        <view class="summary-updated">更新于 {{aiSummary.generatedAt}}</view>
+      </view>
+      <view class="summary-body">
+        <view class="summary-section">
+          <view class="summary-label">核心进展</view>
+          <view class="summary-text">{{aiSummary.coreProgress}}</view>
+        </view>
+        <view class="summary-section">
+          <view class="summary-label">重点客户</view>
+          <view class="summary-tags">
+            <text class="tag" wx:for="{{aiSummary.keyAccounts}}" wx:key="*this">{{item}}</text>
+          </view>
+        </view>
+        <view class="summary-section">
+          <view class="summary-label">下阶段策略</view>
+          <view class="summary-text">{{aiSummary.nextSteps}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
