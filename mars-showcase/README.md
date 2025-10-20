@@ -48,6 +48,7 @@ mars-showcase/
    ├─ components/            # UI 组件
    │  ├─ Toolbar.tsx
    │  ├─ Sidebar.tsx
+   │  ├─ TexturePanel.tsx
    │  ├─ Canvas3D.tsx
    │  ├─ MarkerCard.tsx
    │  └─ Toast.tsx
@@ -79,7 +80,7 @@ npm run preview
 
 ### 界面结构说明
 - **顶部工具栏**：提供“新增标注”“导入”“导出”“重置视角”“安装 PWA”“生成预置标注”等快捷操作
-- **左侧 Sidebar**：展示 17 条自动线列表，支持搜索关键字、按是否包含媒体筛选，以及点击条目飞行至标注
+- **左侧 Sidebar**：展示 17 条自动线列表，支持搜索关键字、按是否包含媒体筛选，以及点击条目飞行至标注；同时包含“火星贴图管理”面板，可通过按钮上传/替换贴图文件实现无代码纹理配置
 - **中间 3D Canvas**：基于 Three.js 渲染的火星球体，支持 OrbitControls 旋转缩放与 Raycaster 点击拾取
 - **右侧标注卡片**：展示并编辑选中标注的名称、描述、媒体列表，上传按钮用于选择图片或视频文件并写入 IndexedDB
 
@@ -102,8 +103,8 @@ npm run preview
   - `mars_albedo.jpg`
   - `mars_normal.jpg`（可选）
   - `mars_roughness.jpg`（可选）
-  - 加载方法：在 `src/three/mars.ts` 中的占位注释下，使用 `new TextureLoader().load('/textures/mars_albedo.jpg')` 等 API 将贴图绑定到材质；为确保类型提示，可在文件顶部引入 `TextureLoader`
-- **PWA 图标**：存放于 `public/icons/` 目录（当前仅 `.gitkeep` 占位），并在 `manifest.webmanifest` 与 `src/App.tsx` 的 `useEffect` 内注册逻辑中保持路径一致
+  - 无需改动源码：在运行应用后，打开左侧 Sidebar 的“火星贴图管理”面板，点击对应的“上传文件/替换文件”按钮即可选择本地图片，系统会自动写入 IndexedDB 并刷新 Three.js 材质。若需要从磁盘批量替换，也可直接将文件放在上述目录，再通过该面板完成加载。
+- **PWA 图标**：存放于 `public/icons/` 目录（当前仅 `.gitkeep` 占位）。新增图标后，在 `manifest.webmanifest` 的 `icons` 数组中添加条目（示例：`{"src":"/icons/pwa-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"}`），即可在构建和安装 PWA 时被识别。
 - **用户上传媒体**：通过应用内上传并持久化到 IndexedDB，仓库不直接包含任何二进制文件
 
 ## 17 种自动线预置名称

@@ -33,3 +33,15 @@ export interface MediaAsset {
   size: number;
   createdAt: string;
 }
+
+export type TextureSlot = 'albedo' | 'normal' | 'roughness';
+
+export interface TextureInfo {
+  slot: TextureSlot;
+  blobKey: string;
+  fileName: string;
+  mimeType: string;
+  createdAt: string;
+}
+
+export type TextureState = Record<TextureSlot, TextureInfo | null>;

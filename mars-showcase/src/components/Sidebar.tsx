@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useAppStore } from '../store/useStore';
+import { TexturePanel } from './TexturePanel';
 
 export const Sidebar: React.FC = () => {
   const markers = useAppStore((state) => state.markers);
@@ -47,6 +48,9 @@ export const Sidebar: React.FC = () => {
           />
           仅显示包含媒体的标注
         </label>
+        <div className="mt-4">
+          <TexturePanel />
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4">
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">

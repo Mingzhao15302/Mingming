@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Group, Raycaster, Vector2 } from 'three';
+import { Group, MeshStandardMaterial, Raycaster, Texture, TextureLoader, Vector2 } from 'three';
 import type { OrbitControls } from 'three-stdlib';
 import { createSceneBundle, resizeRenderer } from '../three/scene';
 import { createOrbitControls } from '../three/controls';
@@ -17,6 +17,7 @@ export const Canvas3D: React.FC = () => {
   const addMarker = useAppStore((state) => state.addMarker);
   const selectMarker = useAppStore((state) => state.selectMarker);
   const queueToast = useAppStore((state) => state.queueToast);
+  const textureUrls = useAppStore((state) => state.textureUrls);
 
   const bundleRef = useRef<ReturnType<typeof createSceneBundle> | null>(null);
   const markerGroupRef = useRef<Group | null>(null);
@@ -129,6 +130,67 @@ export const Canvas3D: React.FC = () => {
       markerGroup.add(mesh);
     });
   }, [markers, selectedMarkerId]);
+
+  useEffect(() => {
+    const mesh = marsMeshRef.current;
+    if (!mesh) return;
+    const material = mesh.material as MeshStandardMaterial;
+    const loader = new TextureLoader();
+    let cancelled = false;
+    const previousTextures: Texture[] = [];
+
+    const loadTexture = async (url: string | null) => {
+      if (!url) return null;
+      const texture = await loader.loadAsync(url);
+      previousTextures.push(texture);
+      return texture;
+    };
+
+    const applyTextures = async () => {
+      try {
+        const [map, normalMap, roughnessMap] = await Promise.all([
+          loadTexture(textureUrls.albedo),
+          loadTexture(textureUrls.normal),
+          loadTexture(textureUrls.roughness)
+        ]);
+        if (cancelled) {
+          map?.dispose();
+          normalMap?.dispose();
+          roughnessMap?.dispose();
+          return;
+        }
+
+        const oldMap = material.map as Texture | null;
+        const oldNormal = material.normalMap as Texture | null;
+        const oldRoughness = material.roughnessMap as Texture | null;
+
+        oldMap?.dispose();
+        oldNormal?.dispose();
+        oldRoughness?.dispose();
+
+        material.map = map ?? null;
+        material.normalMap = normalMap ?? null;
+        material.roughnessMap = roughnessMap ?? null;
+
+        if (map) {
+          material.color.set('#ffffff');
+        } else {
+          material.color.set('#b45309');
+        }
+
+        material.needsUpdate = true;
+      } catch (error) {
+        console.error('Failed to load textures', error);
+      }
+    };
+
+    void applyTextures();
+
+    return () => {
+      cancelled = true;
+      previousTextures.forEach((texture) => texture.dispose());
+    };
+  }, [textureUrls.albedo, textureUrls.normal, textureUrls.roughness]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 };
