@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>辉云易达 OS - 视频浏览</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="hero fade-in">
+    <h1>辉云易达 视频矩阵</h1>
+    <p>以液态玻璃视界呈现工业视频的多维筛选与播放体验</p>
+    <a class="ghost-btn" href="login.html">前往控制台</a>
+  </header>
+
+  <section class="filters glass-panel fade-in">
+    <div class="filter-row">
+      <div class="filter" data-field="productType"></div>
+      <div class="filter" data-field="capType"></div>
+      <div class="filter" data-field="capacity"></div>
+      <div class="filter" data-field="feedingMethod"></div>
+    </div>
+    <div class="filter-row">
+      <div class="filter" data-field="explosionProof"></div>
+      <div class="filter" data-field="fillingMethod"></div>
+      <div class="filter" data-field="cappingMethod"></div>
+      <div class="filter" data-field="conveyorMethod"></div>
+    </div>
+    <button id="toggleFilters" class="secondary-btn">展开更多</button>
+    <div id="moreFilters" class="more-filters collapsed">
+      <div class="filter" data-field="autoFillingMachine"></div>
+      <div class="filter" data-field="autoFillingLine"></div>
+      <div class="filter" data-field="bufferMethod"></div>
+      <div class="filter" data-field="vocRequirement"></div>
+      <div class="filter" data-field="barrelSeparation"></div>
+      <div class="filter" data-field="weighingMethod" data-multi="true"></div>
+      <div class="filter" data-field="capSorting"></div>
+      <div class="filter" data-field="capPlacing"></div>
+      <div class="filter" data-field="labelingMethod" data-multi="true"></div>
+      <div class="filter" data-field="palletizingMethod"></div>
+      <div class="filter" data-field="palletMethod" data-multi="true"></div>
+      <div class="filter" data-field="boxingMethod" data-multi="true"></div>
+      <div class="filter" data-field="otherFunctions" data-multi="true"></div>
+    </div>
+  </section>
+
+  <main class="gallery fade-in" id="gallery"></main>
+  <div class="nebula"></div>
+  <script src="js/main.js"></script>
+</body>
+</html>

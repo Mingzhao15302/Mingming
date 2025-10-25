@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>辉云易达 OS - 控制台</title>
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="glass-header fade-in">
+    <div class="title-group">
+      <h1>辉云易达 OS 控制台</h1>
+      <p>集中管理视频资源、元数据与导入导出</p>
+    </div>
+    <div class="actions">
+      <button id="uploadTrigger" class="primary-btn">批量导入视频</button>
+      <input type="file" id="videoInput" accept="video/*" multiple hidden />
+      <button id="csvImportTrigger" class="secondary-btn">导入 CSV</button>
+      <input type="file" id="csvInput" accept=".csv" hidden />
+      <button id="csvExport" class="ghost-btn">导出 CSV</button>
+      <button id="logout" class="ghost-btn">退出登录</button>
+    </div>
+  </header>
+  <main class="content fade-in">
+    <section class="table-wrapper glass-panel">
+      <table>
+        <thead>
+          <tr>
+            <th>预览</th>
+            <th>文件名</th>
+            <th>产品类型</th>
+            <th>自动灌装机</th>
+            <th>自动灌装线</th>
+            <th>桶盖</th>
+            <th>容量</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="videoTableBody"></tbody>
+      </table>
+      <p id="emptyMessage" class="empty-message">暂无视频，请先导入。</p>
+    </section>
+  </main>
+
+  <div id="editModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content glass-panel">
+      <button class="modal-close" id="modalClose" aria-label="关闭">×</button>
+      <h2>编辑分类信息</h2>
+      <form id="editForm" class="edit-form"></form>
+      <div class="modal-actions">
+        <button type="button" id="saveEdit" class="primary-btn">保存</button>
+        <button type="button" id="cancelEdit" class="secondary-btn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nebula"></div>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

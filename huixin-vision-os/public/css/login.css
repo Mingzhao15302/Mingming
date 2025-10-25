@@ -1,0 +1,149 @@
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.18);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --shadow: 0 20px 45px rgba(40, 65, 120, 0.3);
+  --accent: #7f7bff;
+  --accent-strong: #9f8aff;
+  --text-primary: #fdfdff;
+  --text-secondary: rgba(255, 255, 255, 0.75);
+  --bg-gradient: radial-gradient(circle at 20% 20%, rgba(133, 129, 255, 0.35), transparent 60%),
+    radial-gradient(circle at 80% 0%, rgba(140, 225, 255, 0.25), transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(255, 166, 255, 0.25), transparent 60%),
+    linear-gradient(135deg, #0e1330, #1f1b3a, #232d4f);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-gradient);
+  font-family: 'Segoe UI', 'Helvetica Neue', PingFangSC, 'Microsoft YaHei', sans-serif;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.glass-container {
+  width: min(420px, 90%);
+  padding: 2.5rem;
+  border-radius: 24px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px) saturate(120%);
+  box-shadow: var(--shadow);
+  position: relative;
+  z-index: 2;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.brand p {
+  margin-top: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.login-form {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1.4rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: rgba(151, 193, 255, 0.8);
+  box-shadow: 0 0 20px rgba(151, 193, 255, 0.3);
+}
+
+.primary-btn {
+  padding: 0.95rem;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 12px 30px rgba(119, 114, 255, 0.4);
+}
+
+.primary-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 38px rgba(119, 114, 255, 0.55);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+}
+
+.error-message {
+  margin: 0;
+  min-height: 1.2rem;
+  color: #ff9ba6;
+  font-size: 0.9rem;
+}
+
+.nebula {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 15% 20%, rgba(109, 155, 255, 0.35), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(255, 138, 255, 0.25), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(255, 189, 140, 0.2), transparent 50%);
+  filter: blur(60px);
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  .glass-container {
+    padding: 2rem 1.6rem;
+    border-radius: 18px;
+  }
+
+  .brand h1 {
+    font-size: 1.8rem;
+  }
+}
