@@ -25,18 +25,23 @@ form.addEventListener('submit', async (event) => {
       body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      throw new Error('登录失败');
+    let result = null;
+    try {
+      result = await response.json();
+    } catch (parseError) {
+      console.error('Failed to parse login response', parseError);
     }
 
-    const result = await response.json();
-    if (result.success) {
+    if (response.ok && result?.success) {
       localStorage.setItem(LOGIN_KEY, 'true');
       localStorage.setItem('hxos-username', payload.username);
       window.location.href = 'dashboard.html';
-    } else {
-      errorBox.textContent = result.message || '请检查账号或密码';
+      return;
     }
+
+    // Display meaningful error for invalid credentials or server-side errors
+    const message = result?.message || (response.ok ? '请检查账号或密码' : '登录失败，请稍后再试');
+    errorBox.textContent = message;
   } catch (err) {
     errorBox.textContent = '网络异常，请稍后再试';
     console.error(err);
