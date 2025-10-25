@@ -1,0 +1,159 @@
+[
+  {
+    "key": "productType",
+    "label": "产品类型",
+    "type": "single",
+    "options": ["灌装机", "自动线", "码垛机"],
+    "group": "primary-row-1"
+  },
+  {
+    "key": "capType",
+    "label": "桶盖",
+    "type": "single",
+    "options": ["塑料盖", "花篮盖", "小口桶盖", "圆形铁盖", "内外盖", "偏心口桶盖", "空白"],
+    "group": "primary-row-1"
+  },
+  {
+    "key": "capacity",
+    "label": "容量",
+    "type": "single",
+    "options": ["0.5~5L", "15~25L", "50L", "200L", "1000L", "空白"],
+    "group": "primary-row-1"
+  },
+  {
+    "key": "supplyMode",
+    "label": "来料方式",
+    "type": "single",
+    "options": ["直接供料", "泵送", "过滤", "螺杆增压", "压料机", "拉缸", "角座阀", "手阀控制", "空白"],
+    "group": "primary-row-1"
+  },
+  {
+    "key": "explosionProof",
+    "label": "防爆要求",
+    "type": "single",
+    "options": ["防爆", "不防爆", "空白"],
+    "group": "primary-row-2"
+  },
+  {
+    "key": "fillingMode",
+    "label": "灌装方式",
+    "type": "single",
+    "options": ["单头", "双头", "三头", "四头", "五头", "六头", "八头", "空白"],
+    "group": "primary-row-2"
+  },
+  {
+    "key": "cappingMode",
+    "label": "压盖方式",
+    "type": "single",
+    "options": ["5L平板压", "20L平板压", "花篮压盖", "自动辊压", "自动拧盖", "助力拧盖", "自动封盖", "自动捶盖", "自动封袋", "人工压盖", "空白"],
+    "group": "primary-row-2"
+  },
+  {
+    "key": "conveyMode",
+    "label": "输送方式",
+    "type": "single",
+    "options": ["滚筒", "板链", "步进", "空白"],
+    "group": "primary-row-2"
+  },
+  {
+    "key": "autoFillingMachine",
+    "label": "自动灌装机",
+    "type": "single",
+    "options": ["30A", "30B/BG", "30G/GY", "ZSQ", "HX200", "2T", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "autoFillingLine",
+    "label": "自动灌装线",
+    "type": "single",
+    "options": [
+      "1~5L方桶灌装自动线",
+      "1~5L圆桶灌装自动线",
+      "15~25L铁桶灌装自动线",
+      "15~25L塑料桶灌装自动线",
+      "15~25L偏心口桶灌装自动线",
+      "50~200L桶灌装自动线",
+      "IBC桶灌装自动线",
+      "袋式灌装机",
+      "空白"
+    ],
+    "group": "extended"
+  },
+  {
+    "key": "bufferMode",
+    "label": "缓存方式",
+    "type": "single",
+    "options": ["不锈钢面板", "无动力滚筒", "无动力滚筒延长架", "重托盘缓存输送", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "vocRequirement",
+    "label": "VOC要求",
+    "type": "single",
+    "options": ["一体式集气", "灌装阀集气", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "separateMode",
+    "label": "分桶方式",
+    "type": "single",
+    "options": ["卧式分桶", "立式分桶", "抽底式分桶", "理桶平台", "自动卸桶", "人工上空桶", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "weightCheck",
+    "label": "检重方式",
+    "type": "multi",
+    "options": ["动态检重", "静态检重", "检重剔除", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "coverArrange",
+    "label": "理盖方式",
+    "type": "single",
+    "options": ["自动补盖", "转盘式理盖", "振动盘理盖", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "coverPlacement",
+    "label": "放盖方式",
+    "type": "single",
+    "options": ["单吸盘", "双吸盘", "自动落盖", "自动追踪放盖", "人工放盖", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "labeling",
+    "label": "贴标方式",
+    "type": "multi",
+    "options": ["空桶贴标", "重桶贴标", "顶部贴标", "在线打印贴标", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "palletizing",
+    "label": "码垛方式",
+    "type": "single",
+    "options": ["机器人码垛", "悬臂式码垛", "龙门式码垛", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "palletHandling",
+    "label": "托盘方式",
+    "type": "multi",
+    "options": ["托盘库", "托盘分离", "空托盘换线输送", "重托盘换线输送", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "boxing",
+    "label": "装箱方式",
+    "type": "multi",
+    "options": ["自动开箱", "自动装箱", "自动封箱", "自动码箱", "空白"],
+    "group": "extended"
+  },
+  {
+    "key": "extraFeatures",
+    "label": "其他功能",
+    "type": "multi",
+    "options": ["自动充氮", "自动套内袋", "皮带输盖", "自动喷码", "自动缠绕", "自动捆扎", "180°翻桶", "空白"],
+    "group": "extended"
+  }
+]

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>辉云易达 OS - 控制台</title>
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/dashboard.css" />
+  </head>
+  <body class="dashboard-body fade-in">
+    <div class="background-glow"></div>
+    <div class="dashboard-container">
+      <header class="dashboard-header glass-card">
+        <div>
+          <h1>辉云易达控制台</h1>
+          <p>集中管理视频与分类，保持数据同步</p>
+        </div>
+        <div class="header-actions">
+          <button id="importVideosBtn" class="primary-btn">批量导入视频</button>
+          <button id="importCsvBtn" class="secondary-btn">导入 CSV</button>
+          <button id="exportCsvBtn" class="primary-btn outline">导出 CSV</button>
+          <button id="logoutBtn" class="secondary-btn ghost">退出登录</button>
+        </div>
+      </header>
+
+      <main class="dashboard-main glass-card">
+        <div class="table-wrapper">
+          <table id="videosTable">
+            <thead>
+              <tr>
+                <th>标题</th>
+                <th>文件名</th>
+                <th>分类摘要</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="videosTableBody"></tbody>
+          </table>
+          <p id="emptyState" class="empty-state hidden">尚未导入任何视频，点击“批量导入视频”开始管理。</p>
+        </div>
+      </main>
+    </div>
+
+    <div id="editModal" class="modal hidden">
+      <div class="modal-content glass-card">
+        <header>
+          <h2>编辑视频分类</h2>
+          <button id="closeModalBtn" class="close-btn" aria-label="关闭">×</button>
+        </header>
+        <form id="editForm" class="edit-form"></form>
+        <footer class="modal-actions">
+          <button type="button" id="cancelEditBtn" class="secondary-btn ghost">取消</button>
+          <button type="submit" form="editForm" class="primary-btn">保存</button>
+        </footer>
+      </div>
+    </div>
+
+    <input type="file" id="videoInput" accept="video/*" multiple hidden />
+    <input type="file" id="csvInput" accept=".csv" hidden />
+
+    <script src="/js/dashboard.js"></script>
+  </body>
+</html>
