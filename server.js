@@ -1,233 +1,304 @@
 import express from 'express';
 import multer from 'multer';
-import fs from 'fs/promises';
-import fssync from 'fs';
+import fs from 'fs';
+import fsPromises from 'fs/promises';
 import path from 'path';
-import cors from 'cors';
+import os from 'os';
 import { fileURLToPath } from 'url';
-import { nanoid } from 'nanoid';
+import { randomUUID } from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const APP_PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const VIDEO_DIR = path.join(__dirname, 'videos');
 const DATA_DIR = path.join(__dirname, 'data');
-const UPLOAD_DIR = path.join(__dirname, 'uploads', 'videos');
-const META_FILE = path.join(DATA_DIR, 'videos.json');
+const DATA_FILE = path.join(DATA_DIR, 'videos.json');
 
-async function ensureDirectories() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
-  if (!fssync.existsSync(META_FILE)) {
-    await fs.writeFile(META_FILE, JSON.stringify([], null, 2), 'utf-8');
+function stripBom(text) {
+  if (text.charCodeAt(0) === 0xfeff) {
+    return text.slice(1);
   }
+  return text;
 }
 
-async function readMetadata() {
-  const raw = await fs.readFile(META_FILE, 'utf-8');
-  try {
-    const data = JSON.parse(raw);
-    if (Array.isArray(data)) {
-      return data;
+function parseCsv(text) {
+  const rows = [];
+  let current = '';
+  let row = [];
+  let insideQuotes = false;
+  const source = stripBom(text);
+
+  for (let i = 0; i < source.length; i += 1) {
+    const char = source[i];
+    const next = source[i + 1];
+
+    if (char === '"') {
+      if (insideQuotes && next === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        insideQuotes = !insideQuotes;
+      }
+    } else if (char === ',' && !insideQuotes) {
+      row.push(current);
+      current = '';
+    } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+      if (char === '\r' && next === '\n') {
+        i += 1;
+      }
+      row.push(current);
+      rows.push(row);
+      row = [];
+      current = '';
+    } else {
+      current += char;
     }
-    return [];
+  }
+
+  if (current.length > 0 || row.length > 0) {
+    row.push(current);
+    rows.push(row);
+  }
+
+  return rows.filter((fields) => fields.some((value) => value && value.trim().length > 0));
+}
+
+function csvToObjects(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) return [];
+  const headers = rows[0].map((header) => header.trim().toLowerCase());
+  const records = [];
+  for (let i = 1; i < rows.length; i += 1) {
+    const row = rows[i];
+    if (!row || row.length === 0) continue;
+    const record = {};
+    headers.forEach((header, index) => {
+      if (!header) return;
+      record[header] = (row[index] ?? '').trim();
+    });
+    records.push(record);
+  }
+  return records;
+}
+
+async function ensureEnvironment() {
+  await fsPromises.mkdir(PUBLIC_DIR, { recursive: true });
+  await fsPromises.mkdir(VIDEO_DIR, { recursive: true });
+  await fsPromises.mkdir(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(DATA_FILE)) {
+    await fsPromises.writeFile(DATA_FILE, JSON.stringify([], null, 2), 'utf-8');
+  }
+}
+
+async function readVideoData() {
+  try {
+    const raw = await fsPromises.readFile(DATA_FILE, 'utf-8');
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error('Failed to parse metadata file, resetting.', error);
-    await fs.writeFile(META_FILE, JSON.stringify([], null, 2));
+    console.error('Failed to read videos.json, resetting to empty array.', error);
+    await fsPromises.writeFile(DATA_FILE, JSON.stringify([], null, 2), 'utf-8');
     return [];
   }
 }
 
-async function writeMetadata(items) {
-  await fs.writeFile(META_FILE, JSON.stringify(items, null, 2));
+async function writeVideoData(data) {
+  await fsPromises.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-function buildStorage() {
-  return multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, UPLOAD_DIR);
-    },
-    filename: (req, file, cb) => {
-      const unique = nanoid(10);
-      const ext = path.extname(file.originalname) || '.bin';
-      cb(null, `${Date.now()}-${unique}${ext}`);
-    },
-  });
-}
+const videoStorage = multer.diskStorage({
+  destination: (_, __, cb) => cb(null, VIDEO_DIR),
+  filename: (_, file, cb) => {
+    const ext = path.extname(file.originalname) || '.mp4';
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const name = `${Date.now()}-${safeName}`;
+    cb(null, name.endsWith(ext) ? name : `${name}${ext}`);
+  },
+});
 
-function createApp(metadata) {
+const uploadVideos = multer({ storage: videoStorage });
+const uploadCsv = multer({ storage: multer.memoryStorage() });
+
+function createApp(videoData) {
   const app = express();
-  app.use(cors());
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 
-  app.use('/media', express.static(UPLOAD_DIR));
-  app.use(express.static(__dirname));
+  app.use(express.static(PUBLIC_DIR));
+  app.use('/videos', express.static(VIDEO_DIR));
 
-  const upload = multer({
-    storage: buildStorage(),
-    limits: {
-      fileSize: 200 * 1024 * 1024,
-      files: 1000,
-    },
-  });
-
-  function persist() {
-    return writeMetadata(metadata);
-  }
-
-  function findIndexById(id) {
-    return metadata.findIndex((item) => item.id === id);
-  }
-
-  app.get('/api/status', async (req, res) => {
-    try {
-      let totalSize = 0;
-      for (const item of metadata) {
-        totalSize += item.size || 0;
-      }
-      const status = {
-        status: 'online',
-        videoCount: metadata.length,
-        totalSize,
-        totalSizeReadable: formatSize(totalSize),
-        uptime: process.uptime(),
-        lastUpdated: Math.max(0, ...metadata.map((item) => item.updatedAt || 0)),
-        storagePath: UPLOAD_DIR,
-        metadataPath: META_FILE,
-      };
-      res.json(status);
-    } catch (error) {
-      res.status(500).json({ status: 'error', message: error.message });
+  app.post('/api/login', (req, res) => {
+    const { username, password } = req.body || {};
+    if (username === 'hxadmin' && password === 'hx84556793') {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false, message: '账号或密码错误' });
     }
   });
 
-  app.get('/api/videos', (req, res) => {
-    res.json({ videos: metadata });
+  app.get('/api/videos', (_, res) => {
+    const payload = videoData.map((video) => ({
+      ...video,
+      url: `/videos/${video.storedName}`,
+    }));
+    res.json({ videos: payload });
   });
 
-  app.post('/api/videos', upload.array('videos', 1000), async (req, res) => {
+  app.post('/api/upload', uploadVideos.array('videos'), async (req, res) => {
     try {
-      const now = Date.now();
+      const files = req.files || [];
+      const now = new Date().toISOString();
       const created = [];
-      for (const file of req.files) {
-        const id = nanoid(12);
+      for (const file of files) {
         const record = {
-          id,
-          name: file.originalname,
-          clientName: '',
-          material: '',
-          series: '30A系列',
-          weight: '0.5~5kg',
-          capping: '5L平板压盖',
-          conveyor: '滚筒',
-          buffer: '不锈钢面板',
-          voc: '一体式集气罩',
-          explosion: '防爆',
-          size: file.size,
-          type: file.mimetype,
-          storageName: path.basename(file.path),
+          id: randomUUID(),
+          originalName: file.originalname,
+          storedName: file.filename,
+          category: '',
+          module: '',
+          bucket: '',
+          tags: [],
           createdAt: now,
           updatedAt: now,
         };
-        metadata.push(record);
-        created.push(record);
+        videoData.push(record);
+        created.push({ ...record, url: `/videos/${record.storedName}` });
       }
-      await persist();
+      await writeVideoData(videoData);
       res.status(201).json({ videos: created });
     } catch (error) {
-      console.error('Upload failed:', error);
-      res.status(500).json({ message: '上传失败', error: error.message });
+      console.error('Video upload failed:', error);
+      res.status(500).json({ message: '视频上传失败', error: error.message });
     }
   });
 
   app.put('/api/videos/:id', async (req, res) => {
     const { id } = req.params;
-    const index = findIndexById(id);
+    const index = videoData.findIndex((item) => item.id === id);
     if (index === -1) {
       res.status(404).json({ message: '未找到对应视频' });
       return;
     }
-    const updates = req.body || {};
-    metadata[index] = {
-      ...metadata[index],
-      ...updates,
-      updatedAt: Date.now(),
+    const payload = req.body || {};
+    const tags = Array.isArray(payload.tags)
+      ? payload.tags
+      : typeof payload.tags === 'string'
+      ? payload.tags.split(',').map((t) => t.trim()).filter(Boolean)
+      : videoData[index].tags;
+    videoData[index] = {
+      ...videoData[index],
+      category: payload.category ?? videoData[index].category,
+      module: payload.module ?? videoData[index].module,
+      bucket: payload.bucket ?? videoData[index].bucket,
+      tags,
+      updatedAt: new Date().toISOString(),
     };
-    await persist();
-    res.json({ video: metadata[index] });
+    await writeVideoData(videoData);
+    res.json({
+      video: {
+        ...videoData[index],
+        url: `/videos/${videoData[index].storedName}`,
+      },
+    });
   });
 
-  app.put('/api/videos', async (req, res) => {
-    const updates = Array.isArray(req.body?.videos) ? req.body.videos : [];
-    const now = Date.now();
-    const applied = [];
-    for (const update of updates) {
-      if (!update.id) continue;
-      const index = findIndexById(update.id);
-      if (index === -1) continue;
-      metadata[index] = {
-        ...metadata[index],
-        ...update,
-        updatedAt: now,
-      };
-      applied.push(metadata[index]);
+  app.post('/api/import-csv', uploadCsv.single('file'), async (req, res) => {
+    if (!req.file) {
+      res.status(400).json({ message: '未上传 CSV 文件' });
+      return;
     }
-    await persist();
-    res.json({ videos: applied });
-  });
-
-  app.delete('/api/videos', async (req, res) => {
-    const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
-    let removed = 0;
-    for (const id of ids) {
-      const index = findIndexById(id);
-      if (index === -1) continue;
-      const [removedItem] = metadata.splice(index, 1);
-      if (removedItem?.storageName) {
-        const filePath = path.join(UPLOAD_DIR, removedItem.storageName);
-        fs.unlink(filePath).catch(() => {});
+    try {
+      const text = req.file.buffer.toString('utf-8');
+      const records = csvToObjects(text);
+      const updates = [];
+      for (const row of records) {
+        const filename = row.filename || row.fileName || row.name || '';
+        if (!filename) continue;
+        const target = videoData.find(
+          (item) =>
+            item.originalName === filename ||
+            item.storedName === filename ||
+            path.basename(item.originalName) === path.basename(filename)
+        );
+        if (!target) continue;
+        target.category = row.category ?? target.category ?? '';
+        target.module = row.module ?? target.module ?? '';
+        target.bucket = row.bucket ?? row.bucketType ?? target.bucket ?? '';
+        const tagsValue = row.tags || row.tag || '';
+        target.tags = typeof tagsValue === 'string'
+          ? tagsValue
+              .split(/[,\s]+/)
+              .map((tag) => tag.trim())
+              .filter(Boolean)
+          : target.tags;
+        target.updatedAt = new Date().toISOString();
+        updates.push({ ...target, url: `/videos/${target.storedName}` });
       }
-      removed += 1;
+      await writeVideoData(videoData);
+      res.json({ updated: updates, total: updates.length });
+    } catch (error) {
+      console.error('CSV import error:', error);
+      res.status(500).json({ message: 'CSV 导入失败', error: error.message });
     }
-    await persist();
-    res.json({ removed });
   });
 
-  app.delete('/api/videos/all', async (req, res) => {
-    const removed = metadata.length;
-    const files = metadata.map((item) => path.join(UPLOAD_DIR, item.storageName));
-    metadata.splice(0, metadata.length);
-    for (const file of files) {
-      fs.unlink(file).catch(() => {});
-    }
-    await persist();
-    res.json({ removed });
+  app.get('/api/export-csv', (_, res) => {
+    const header = 'filename,category,module,bucket,tags\n';
+    const rows = videoData
+      .map((video) => {
+        const tags = Array.isArray(video.tags) ? video.tags.join(' ') : '';
+        return [
+          video.originalName,
+          video.category ?? '',
+          video.module ?? '',
+          video.bucket ?? '',
+          tags,
+        ]
+          .map((value) => `"${String(value ?? '').replace(/"/g, '""')}"`)
+          .join(',');
+      })
+      .join('\n');
+    const csv = `${header}${rows}`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="videos.csv"');
+    res.send(csv);
   });
 
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+  app.get('/api/health', (_, res) => {
+    res.json({ status: 'ok', count: videoData.length });
+  });
+
+  app.get('*', (_, res) => {
+    res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
   });
 
   return app;
 }
 
-function formatSize(bytes) {
-  if (!bytes || Number.isNaN(bytes)) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const exponent = Math.min(
-    Math.floor(Math.log(bytes) / Math.log(1024)),
-    units.length - 1,
-  );
-  const value = bytes / 1024 ** exponent;
-  return `${value.toFixed(value >= 10 || exponent === 0 ? 0 : 1)} ${units[exponent]}`;
+function printAddresses(port) {
+  const networks = os.networkInterfaces();
+  const addresses = new Set(['http://localhost:' + port]);
+  for (const net of Object.values(networks)) {
+    if (!net) continue;
+    for (const iface of net) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        addresses.add(`http://${iface.address}:${port}`);
+      }
+    }
+  }
+  console.log('辉云易达 OS 已启动，可访问以下地址:');
+  for (const address of addresses) {
+    console.log('  -', address);
+  }
 }
 
 (async () => {
-  await ensureDirectories();
-  const metadata = await readMetadata();
-  const app = createApp(metadata);
-  app.listen(APP_PORT, () => {
-    console.log(`辉鑫科技视频管理器服务器已启动，端口: ${APP_PORT}`);
+  await ensureEnvironment();
+  const data = await readVideoData();
+  const app = createApp(data);
+  app.listen(PORT, () => {
+    printAddresses(PORT);
   });
 })();
