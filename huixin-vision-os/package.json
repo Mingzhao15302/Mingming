@@ -1,0 +1,16 @@
+{
+  "name": "huixin-vision-os",
+  "version": "1.0.0",
+  "description": "辉云易达 OS - 本地视频管理器系统",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "csv-parse": "^5.5.6",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
