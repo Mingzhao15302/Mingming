@@ -107,7 +107,7 @@ body {
 }
 
 .filter select,
-.filter .multi-select {
+.filter summary {
   width: 100%;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -118,26 +118,114 @@ body {
   font-size: 0.9rem;
 }
 
-.multi-select {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+.filter select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23a5e8ff' d='M6 8L0 .5h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.95rem center;
+  background-size: 12px;
 }
 
-.multi-select label {
+.filter select option {
+  color: #0b162e;
+}
+
+.filter details,
+.filter details.dropdown {
+  position: relative;
+}
+
+.filter details.dropdown {
+  width: 100%;
+}
+
+.filter summary {
+  list-style: none;
+  cursor: pointer;
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.82rem;
-  padding: 0.35rem 0.55rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-  transition: box-shadow 0.3s ease;
+  min-height: 44px;
+  padding-right: 2.4rem;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.multi-select input[type='checkbox'] {
+.filter summary::after {
+  content: '▾';
+  position: absolute;
+  right: 0.95rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--accent-secondary);
+  pointer-events: none;
+}
+
+.filter details[open] > summary::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.filter summary::-webkit-details-marker,
+.filter summary::marker {
+  display: none;
+}
+
+.filter summary:focus-visible {
+  outline: 2px solid rgba(138, 239, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.filter summary:hover,
+.filter details[open] > summary {
+  border-color: rgba(138, 239, 255, 0.55);
+  box-shadow: 0 16px 35px rgba(88, 176, 255, 0.25);
+}
+
+.dropdown-menu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.35rem);
+  width: 100%;
+  background: rgba(14, 26, 58, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(12, 16, 38, 0.5);
+  backdrop-filter: blur(14px);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 15;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dropdown-option:hover {
+  background: rgba(122, 216, 255, 0.2);
+  border-color: rgba(138, 239, 255, 0.4);
+  box-shadow: 0 12px 28px rgba(88, 176, 255, 0.25);
+}
+
+.dropdown-option input[type='checkbox'] {
   accent-color: var(--accent-secondary);
 }
 

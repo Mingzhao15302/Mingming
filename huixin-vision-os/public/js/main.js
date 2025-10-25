@@ -63,7 +63,7 @@ const FIELD_CONFIG = {
   },
   weighingMethod: {
     label: '检重方式',
-    options: ['动态检重', '静态检重', '检重剔除', '空白'],
+    options: ['动态检重', '静态检重', '检重剔除'],
     multi: true
   },
   capSorting: {
@@ -76,7 +76,7 @@ const FIELD_CONFIG = {
   },
   labelingMethod: {
     label: '贴标方式',
-    options: ['空桶贴标', '重桶贴标', '顶部贴标', '在线打印贴标', '空白'],
+    options: ['空桶贴标', '重桶贴标', '顶部贴标', '在线打印贴标'],
     multi: true
   },
   palletizingMethod: {
@@ -85,17 +85,17 @@ const FIELD_CONFIG = {
   },
   palletMethod: {
     label: '托盘方式',
-    options: ['托盘库', '托盘分离', '空托盘换线输送', '重托盘换线输送', '空白'],
+    options: ['托盘库', '托盘分离', '空托盘换线输送', '重托盘换线输送'],
     multi: true
   },
   boxingMethod: {
     label: '装箱方式',
-    options: ['自动开箱', '自动装箱', '自动封箱', '自动码箱', '空白'],
+    options: ['自动开箱', '自动装箱', '自动封箱', '自动码箱'],
     multi: true
   },
   otherFunctions: {
     label: '其他功能',
-    options: ['自动充氮', '自动套内袋', '皮带输盖', '自动喷码', '自动缠绕', '自动捆扎', '180°翻桶', '空白'],
+    options: ['自动充氮', '自动套内袋', '皮带输盖', '自动喷码', '自动缠绕', '自动捆扎', '180°翻桶'],
     multi: true
   }
 };
@@ -118,19 +118,44 @@ function initFilters() {
     container.appendChild(labelEl);
 
     if (config.multi) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'multi-select';
+      const dropdown = document.createElement('details');
+      dropdown.className = 'dropdown';
+
+      const summary = document.createElement('summary');
+      summary.className = 'dropdown-trigger';
+      summary.textContent = '全部';
+      dropdown.appendChild(summary);
+
+      const list = document.createElement('div');
+      list.className = 'dropdown-menu';
+
       config.options.forEach((option) => {
         const optionLabel = document.createElement('label');
+        optionLabel.className = 'dropdown-option';
+
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.value = option;
         checkbox.addEventListener('change', () => handleFilterChange(field));
-        optionLabel.appendChild(checkbox);
-        optionLabel.append(option);
-        wrapper.appendChild(optionLabel);
+
+        const text = document.createElement('span');
+        text.textContent = option;
+
+        optionLabel.append(checkbox, text);
+        list.appendChild(optionLabel);
       });
-      container.appendChild(wrapper);
+
+      dropdown.appendChild(list);
+      dropdown.addEventListener('toggle', () => {
+        if (!dropdown.open) return;
+        document.querySelectorAll('.filter details[open]').forEach((activeDropdown) => {
+          if (activeDropdown !== dropdown) {
+            activeDropdown.open = false;
+          }
+        });
+      });
+      container.appendChild(dropdown);
+      updateMultiSummary(field, []);
     } else {
       const select = document.createElement('select');
       config.options.forEach((option) => {
@@ -150,15 +175,37 @@ function handleFilterChange(field) {
   if (!config) return;
 
   if (config.multi) {
-    const container = document.querySelector(`.filter[data-field="${field}"] .multi-select`);
-    const selected = Array.from(container.querySelectorAll('input:checked')).map((input) => input.value);
+    const dropdown = document.querySelector(`.filter[data-field="${field}"] details`);
+    if (!dropdown) return;
+    const selected = Array.from(dropdown.querySelectorAll('input[type="checkbox"]:checked')).map((input) => input.value);
     selectedFilters[field] = selected;
+    updateMultiSummary(field, selected);
   } else {
     const select = document.querySelector(`.filter[data-field="${field}"] select`);
     selectedFilters[field] = select.value;
   }
 
   renderGallery();
+}
+
+function updateMultiSummary(field, selected) {
+  const summary = document.querySelector(`.filter[data-field="${field}"] summary`);
+  if (!summary) return;
+
+  if (!selected || selected.length === 0) {
+    summary.textContent = '全部';
+    summary.title = '全部';
+    return;
+  }
+
+  if (selected.length <= 2) {
+    summary.textContent = selected.join('、');
+    summary.title = selected.join('、');
+    return;
+  }
+
+  summary.textContent = `${selected.slice(0, 2).join('、')} 等${selected.length}项`;
+  summary.title = selected.join('、');
 }
 
 function matchesFilter(video, field, value) {
@@ -267,6 +314,14 @@ initFilters();
 Object.keys(FIELD_CONFIG).forEach((field) => {
   const config = FIELD_CONFIG[field];
   selectedFilters[field] = config.multi ? [] : '全部';
+});
+
+document.addEventListener('click', (event) => {
+  document.querySelectorAll('.filter details[open]').forEach((dropdown) => {
+    if (!dropdown.contains(event.target)) {
+      dropdown.open = false;
+    }
+  });
 });
 
 toggleFiltersBtn.addEventListener('click', () => {
