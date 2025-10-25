@@ -1,0 +1,69 @@
+:root {
+  --bg-gradient: radial-gradient(120% 120% at 10% 10%, rgba(97, 221, 255, 0.35), transparent 60%),
+    radial-gradient(140% 140% at 90% 20%, rgba(207, 129, 255, 0.4), transparent 70%),
+    linear-gradient(135deg, rgba(20, 32, 55, 0.95), rgba(28, 16, 64, 0.92));
+  --glass-bg: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --primary: #8c8cff;
+  --text: #f2f5ff;
+  --text-dim: rgba(255, 255, 255, 0.7);
+  --shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, rgba(126, 138, 255, 0.85), rgba(87, 206, 255, 0.85));
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(120, 145, 255, 0.35);
+}
+
+.primary-btn::after,
+.secondary-btn::after,
+.ghost-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.35), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.primary-btn:hover::after,
+.secondary-btn:hover::after,
+.ghost-btn:hover::after {
+  opacity: 1;
+}
+
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ghost-btn {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--text);
+}

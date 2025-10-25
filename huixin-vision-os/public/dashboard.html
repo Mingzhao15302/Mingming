@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>辉云易达 OS - 控制台</title>
+  <link rel="stylesheet" href="./css/dashboard.css">
+</head>
+<body>
+  <div class="gradient-bg"></div>
+  <header class="top-bar glass-card">
+    <h1>辉云易达 OS 控制台</h1>
+    <div class="actions">
+      <button id="logoutBtn" class="secondary-btn">退出登录</button>
+    </div>
+  </header>
+
+  <main class="dashboard-wrapper fade-in">
+    <section class="toolbar glass-card">
+      <div class="upload-group">
+        <label class="upload-btn">
+          批量导入视频
+          <input type="file" id="videoUploader" accept="video/*" multiple>
+        </label>
+        <label class="upload-btn">
+          导入 CSV
+          <input type="file" id="csvUploader" accept=".csv">
+        </label>
+      </div>
+      <div class="right-tools">
+        <button id="exportCsvBtn" class="primary-btn">批量导出 CSV</button>
+      </div>
+    </section>
+
+    <section class="table-section glass-card">
+      <table>
+        <thead>
+          <tr>
+            <th>缩略图</th>
+            <th>文件名</th>
+            <th>显示名称</th>
+            <th>产品类型</th>
+            <th>分类信息</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="videoTableBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <div id="editorModal" class="modal hidden">
+    <div class="modal-content glass-card">
+      <button class="close-btn" id="closeModal">×</button>
+      <h2>视频分类编辑</h2>
+      <form id="editForm"></form>
+      <div class="modal-actions">
+        <button class="secondary-btn" id="cancelEdit">取消</button>
+        <button class="primary-btn" id="saveEdit">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="./js/dashboard.js"></script>
+</body>
+</html>

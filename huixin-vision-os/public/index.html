@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>辉云易达 OS - 视频浏览</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div class="gradient-bg"></div>
+  <header class="hero glass-card fade-in">
+    <h1>辉云易达视频矩阵</h1>
+    <p>多维筛选 · 自适应播放 · 液态玻璃界面体验</p>
+    <div class="hero-actions">
+      <a href="/login" class="secondary-btn">前往登录</a>
+      <a href="/dashboard" class="primary-btn">管理视频</a>
+    </div>
+  </header>
+
+  <main class="content fade-in">
+    <section class="filter-panel glass-card">
+      <div class="filter-row" id="primaryFilters"></div>
+      <div class="filter-row" id="secondaryFilters"></div>
+      <div class="toggle-row">
+        <button id="toggleFilters" class="ghost-btn">展开更多筛选</button>
+      </div>
+      <div class="filter-row collapse" id="extraFilters"></div>
+      <div class="filter-row">
+        <button id="resetFilters" class="secondary-btn">重置筛选</button>
+      </div>
+    </section>
+
+    <section class="video-grid" id="videoGrid"></section>
+  </main>
+
+  <template id="videoCardTemplate">
+    <article class="video-card glass-card">
+      <div class="video-wrapper">
+        <video preload="metadata"></video>
+        <div class="video-controls">
+          <button class="play-btn">▶</button>
+          <button class="fullscreen-btn">⛶</button>
+        </div>
+      </div>
+      <div class="video-info">
+        <h3></h3>
+        <p class="meta"></p>
+      </div>
+    </article>
+  </template>
+
+  <script src="./js/main.js"></script>
+</body>
+</html>

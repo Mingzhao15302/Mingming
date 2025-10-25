@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>辉云易达 OS - 登录</title>
+  <link rel="stylesheet" href="./css/login.css">
+</head>
+<body>
+  <div class="gradient-bg"></div>
+  <main class="login-container">
+    <section class="glass-card fade-in">
+      <h1>辉云易达 OS</h1>
+      <p class="subtitle">本地视频管理控制台</p>
+      <form id="loginForm">
+        <div class="input-group">
+          <label for="username">账号</label>
+          <input type="text" id="username" placeholder="请输入账号" required>
+        </div>
+        <div class="input-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" placeholder="请输入密码" required>
+        </div>
+        <p class="error" id="errorMessage"></p>
+        <button type="submit" class="primary-btn">登录</button>
+      </form>
+      <footer>
+        <small>默认账号：hxadmin | 默认密码：******</small>
+      </footer>
+    </section>
+  </main>
+  <script src="./js/login.js"></script>
+</body>
+</html>
