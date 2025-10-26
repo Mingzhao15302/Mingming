@@ -17,6 +17,12 @@ const modalState = {
   currentIndex: -1,
 };
 
+const importSummaryState = {
+  summary: null,
+  unmatched: [],
+  duplicates: [],
+};
+
 function guardAuth() {
   if (localStorage.getItem(AUTH_KEY) !== 'true') {
     window.location.href = '/login';
@@ -134,6 +140,140 @@ function renderTable(videos, fields, highlightId = null) {
     }
     tbody.appendChild(row);
   });
+}
+
+function formatSummaryMessage(summary) {
+  if (!summary) return '已根据 CSV 更新分类信息。';
+  const parts = [`成功匹配 ${summary.matched || 0} 条记录`];
+  if (summary.unmatched) {
+    parts.push(`未匹配 ${summary.unmatched} 条`);
+  }
+  if (summary.duplicateOverrides) {
+    parts.push(`重复覆盖 ${summary.duplicateOverrides} 条`);
+  }
+
+  let guidance = '';
+  if (summary.unmatched) {
+    guidance += ' 请下载未匹配清单并检查文件名或分类字段。';
+  }
+  if (summary.duplicateOverrides) {
+    guidance += ' 同名条目仅保留最后一次出现，建议核对重复覆盖清单。';
+  }
+
+  return `${parts.join('，')}。${guidance.trim()}`.trim();
+}
+
+function toggleImportSummary(visible) {
+  const card = document.getElementById('importSummary');
+  if (!card) return;
+  if (visible) {
+    card.classList.remove('hidden');
+  } else {
+    card.classList.add('hidden');
+  }
+}
+
+function hideImportSummary() {
+  importSummaryState.summary = null;
+  importSummaryState.unmatched = [];
+  importSummaryState.duplicates = [];
+  const message = document.getElementById('importSummaryMessage');
+  if (message) message.textContent = '';
+  const unmatchedBtn = document.getElementById('downloadUnmatchedBtn');
+  if (unmatchedBtn) unmatchedBtn.disabled = true;
+  const duplicatesBtn = document.getElementById('downloadDuplicatesBtn');
+  if (duplicatesBtn) duplicatesBtn.disabled = true;
+  toggleImportSummary(false);
+}
+
+function showImportSummary(result) {
+  if (!result) {
+    hideImportSummary();
+    return;
+  }
+
+  importSummaryState.summary = result.summary || null;
+  importSummaryState.unmatched = Array.isArray(result.unmatched) ? result.unmatched : [];
+  importSummaryState.duplicates = Array.isArray(result.duplicates) ? result.duplicates : [];
+
+  const summary = importSummaryState.summary;
+
+  const totalEl = document.getElementById('summaryTotal');
+  const matchedEl = document.getElementById('summaryMatched');
+  const unmatchedEl = document.getElementById('summaryUnmatched');
+  const duplicatesEl = document.getElementById('summaryDuplicates');
+  const messageEl = document.getElementById('importSummaryMessage');
+
+  if (summary) {
+    if (totalEl) totalEl.textContent = summary.totalRows ?? summary.total ?? 0;
+    if (matchedEl) matchedEl.textContent = summary.matched ?? 0;
+    if (unmatchedEl) unmatchedEl.textContent = summary.unmatched ?? 0;
+    if (duplicatesEl) duplicatesEl.textContent = summary.duplicateOverrides ?? 0;
+    if (messageEl) messageEl.textContent = formatSummaryMessage(summary);
+  } else {
+    if (totalEl) totalEl.textContent = '0';
+    if (matchedEl) matchedEl.textContent = '0';
+    if (unmatchedEl) unmatchedEl.textContent = '0';
+    if (duplicatesEl) duplicatesEl.textContent = '0';
+    if (messageEl) messageEl.textContent = 'CSV 导入已完成。';
+  }
+
+  const unmatchedBtn = document.getElementById('downloadUnmatchedBtn');
+  if (unmatchedBtn) {
+    unmatchedBtn.disabled = importSummaryState.unmatched.length === 0;
+  }
+
+  const duplicatesBtn = document.getElementById('downloadDuplicatesBtn');
+  if (duplicatesBtn) {
+    duplicatesBtn.disabled = importSummaryState.duplicates.length === 0;
+  }
+
+  toggleImportSummary(true);
+}
+
+function exportCsv(filename, headers, rows) {
+  if (!rows.length) return;
+  const lines = [headers.join(',')];
+  rows.forEach((row) => {
+    const line = row
+      .map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`)
+      .join(',');
+    lines.push(line);
+  });
+  const csvContent = `\uFEFF${lines.join('\r\n')}`;
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+function downloadUnmatchedCsv() {
+  if (!importSummaryState.unmatched.length) return;
+  const headers = ['行号', 'fileName', 'originalName', '未匹配原因'];
+  const rows = importSummaryState.unmatched.map((item) => [
+    item.lineNumber ?? '',
+    item.fileName ?? '',
+    item.originalName ?? '',
+    item.reason ?? '',
+  ]);
+  exportCsv('csv-unmatched-records.csv', headers, rows);
+}
+
+function downloadDuplicateCsv() {
+  if (!importSummaryState.duplicates.length) return;
+  const headers = ['fileName', 'originalName', '行号', '状态'];
+  const rows = [];
+  importSummaryState.duplicates.forEach((group) => {
+    group.rows.forEach((entry) => {
+      rows.push([entry.fileName ?? '', entry.originalName ?? '', entry.lineNumber ?? '', entry.status ?? '']);
+    });
+  });
+  exportCsv('csv-duplicate-overrides.csv', headers, rows);
 }
 
 function pruneCategoriesForType(values, productType, fields) {
@@ -462,6 +602,7 @@ async function init() {
     if (result.success) {
       videos = result.videos;
       renderTable(videos, fields);
+      hideImportSummary();
     } else {
       alert(result.message || '视频导入失败');
     }
@@ -481,14 +622,20 @@ async function init() {
     if (result.success) {
       videos = result.videos;
       renderTable(videos, fields);
+      showImportSummary(result);
     } else {
       alert(result.message || 'CSV 导入失败');
+      hideImportSummary();
     }
     event.target.value = '';
   });
 
   bindTableActions(() => videos, fields);
   bindModalControls(fields, refresh);
+
+  document.getElementById('dismissImportSummary').addEventListener('click', hideImportSummary);
+  document.getElementById('downloadUnmatchedBtn').addEventListener('click', downloadUnmatchedCsv);
+  document.getElementById('downloadDuplicatesBtn').addEventListener('click', downloadDuplicateCsv);
 
   if (highlightId) {
     const highlightedVideo = videos.find((video) => String(video.id) === highlightId);

@@ -148,6 +148,41 @@ function sanitizeCategories(inputCategories = {}, categoryConfig, defaultCategor
 ensureDirectories();
 ensureBuildArtifacts();
 
+function toHalfWidth(str = '') {
+  return str
+    .replace(/[\uFF01-\uFF5E]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+    .replace(/\u3000/g, ' ');
+}
+
+function normalizeFileName(input) {
+  if (!input || typeof input !== 'string') {
+    return {
+      original: input || '',
+      withExt: '',
+      withoutExt: '',
+      hasValue: false,
+    };
+  }
+
+  let value = input.trim();
+  value = value.replace(/[\u200B-\u200D\uFEFF]/g, '');
+  value = toHalfWidth(value);
+  value = value.replace(/\\/g, '/');
+  const baseName = path.posix.basename(value);
+
+  const ext = path.extname(baseName);
+  const nameWithoutExt = ext ? baseName.slice(0, -ext.length) : baseName;
+  const lowerBase = nameWithoutExt.toLowerCase();
+  const lowerExt = ext.toLowerCase();
+
+  return {
+    original: input,
+    withExt: lowerExt ? `${lowerBase}${lowerExt}` : lowerBase,
+    withoutExt: lowerBase,
+    hasValue: true,
+  };
+}
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, VIDEOS_DIR),
@@ -240,39 +275,202 @@ app.post('/api/videos/import-csv', upload.single('csv'), (req, res) => {
   }
 
   const videos = loadVideos();
-  let updatedCount = 0;
 
-  records.forEach((row) => {
-    const name = row.fileName || row.filename || row.title || '';
-    if (!name) return;
+  const normalizedVideos = videos.map((video, index) => ({
+    index,
+    video,
+    fileName: normalizeFileName(video.fileName),
+    originalName: normalizeFileName(video.originalName),
+  }));
 
-    const matchIndex = videos.findIndex((video) => video.fileName === name || video.originalName === name || video.title === name);
-    if (matchIndex === -1) return;
+  const allowedCategoryKeys = new Set(categoryCache.map((field) => field.key));
 
-    const target = videos[matchIndex];
+  const totalRows = records.length;
+  let matchedCount = 0;
+
+  const unmatchedRecords = [];
+  const duplicateTracker = new Map();
+
+  function recordDuplicate(normalizedKey, detail) {
+    if (!normalizedKey) return;
+    if (!duplicateTracker.has(normalizedKey)) {
+      duplicateTracker.set(normalizedKey, []);
+    }
+    duplicateTracker.get(normalizedKey).push(detail);
+  }
+
+  function findUniqueMatch(matches, failureReason) {
+    if (matches.length === 1) {
+      return { index: matches[0], reason: null };
+    }
+    if (matches.length > 1) {
+      return { index: -1, reason: `${failureReason}（匹配到多条记录）` };
+    }
+    return { index: -1, reason: `${failureReason}（未找到对应文件）` };
+  }
+
+  function locateVideo(rowInfo) {
+    const reasons = [];
+
+    if (rowInfo.fileName?.hasValue) {
+      const exactMatches = normalizedVideos
+        .filter((entry) => entry.fileName.withExt && entry.fileName.withExt === rowInfo.fileName.withExt)
+        .map((entry) => entry.index);
+      const result = findUniqueMatch(exactMatches, '根据 fileName（含扩展名）');
+      if (result.index !== -1) {
+        return result;
+      }
+      reasons.push(result.reason);
+
+      if (rowInfo.fileName.withoutExt) {
+        const withoutExtMatches = normalizedVideos
+          .filter((entry) => entry.fileName.withoutExt && entry.fileName.withoutExt === rowInfo.fileName.withoutExt)
+          .map((entry) => entry.index);
+        const looseResult = findUniqueMatch(withoutExtMatches, '根据 fileName（不含扩展名）');
+        if (looseResult.index !== -1) {
+          return looseResult;
+        }
+        reasons.push(looseResult.reason);
+      }
+    }
+
+    if (rowInfo.originalName?.hasValue) {
+      const exactMatches = normalizedVideos
+        .filter(
+          (entry) =>
+            (entry.fileName.withExt && entry.fileName.withExt === rowInfo.originalName.withExt) ||
+            (entry.originalName.withExt && entry.originalName.withExt === rowInfo.originalName.withExt)
+        )
+        .map((entry) => entry.index);
+      const result = findUniqueMatch(exactMatches, '根据 originalName（含扩展名）');
+      if (result.index !== -1) {
+        return result;
+      }
+      reasons.push(result.reason);
+
+      if (rowInfo.originalName.withoutExt) {
+        const withoutExtMatches = normalizedVideos
+          .filter(
+            (entry) =>
+              (entry.fileName.withoutExt && entry.fileName.withoutExt === rowInfo.originalName.withoutExt) ||
+              (entry.originalName.withoutExt && entry.originalName.withoutExt === rowInfo.originalName.withoutExt)
+          )
+          .map((entry) => entry.index);
+        const looseResult = findUniqueMatch(withoutExtMatches, '根据 originalName（不含扩展名）');
+        if (looseResult.index !== -1) {
+          return looseResult;
+        }
+        reasons.push(looseResult.reason);
+      }
+    }
+
+    return { index: -1, reason: reasons.filter(Boolean).join('；') || '缺少可用于匹配的文件名' };
+  }
+
+  records.forEach((row, idx) => {
+    const fileNameRaw = row.fileName ?? row.filename ?? '';
+    const originalNameRaw = row.originalName ?? row.originalname ?? '';
+    const rowInfo = {
+      fileName: normalizeFileName(fileNameRaw),
+      originalName: normalizeFileName(originalNameRaw),
+    };
+
+    const csvLineNumber = idx + 2;
+
+    if (rowInfo.fileName.hasValue) {
+      const duplicateKey = rowInfo.fileName.withExt || rowInfo.fileName.withoutExt;
+      recordDuplicate(duplicateKey, {
+        lineNumber: csvLineNumber,
+        fileName: fileNameRaw,
+        originalName: originalNameRaw,
+      });
+    }
+
+    const match = locateVideo(rowInfo);
+    if (match.index === -1) {
+      unmatchedRecords.push({
+        lineNumber: csvLineNumber,
+        fileName: fileNameRaw,
+        originalName: originalNameRaw,
+        reason: match.reason,
+      });
+      return;
+    }
+
+    const targetIndex = match.index;
+    const target = videos[targetIndex];
     const updatedCategories = { ...target.categories };
 
     categoryCache.forEach((field) => {
-      const value = row[field.label] ?? row[field.key];
-      if (value === undefined || value === null || value === '') return;
+      if (!allowedCategoryKeys.has(field.key)) return;
+
+      const hasLabel = Object.prototype.hasOwnProperty.call(row, field.label);
+      const hasKey = Object.prototype.hasOwnProperty.call(row, field.key);
+      if (!hasLabel && !hasKey) return;
+
+      const rawValue = hasLabel ? row[field.label] : row[field.key];
 
       if (field.type === 'multi') {
-        const parts = Array.isArray(value) ? value : String(value).split(/[,;\n]/);
-        updatedCategories[field.key] = parts
-          .map((part) => part.trim())
-          .filter((part) => part.length > 0);
+        if (rawValue === undefined || rawValue === null || rawValue === '') {
+          updatedCategories[field.key] = [];
+        } else if (Array.isArray(rawValue)) {
+          updatedCategories[field.key] = rawValue.map((item) => String(item).trim()).filter((item) => item.length > 0);
+        } else {
+          updatedCategories[field.key] = String(rawValue)
+            .split(/[，,;；\n]/)
+            .map((part) => part.trim())
+            .filter((part) => part.length > 0);
+        }
+      } else if (typeof rawValue === 'string') {
+        updatedCategories[field.key] = rawValue.trim();
       } else {
-        updatedCategories[field.key] = value;
+        updatedCategories[field.key] = rawValue;
       }
     });
 
     const sanitized = sanitizeCategories(updatedCategories, categoryCache, defaultCategories);
-    videos[matchIndex] = { ...target, categories: sanitized };
-    updatedCount += 1;
+    videos[targetIndex] = {
+      ...target,
+      categories: sanitized,
+      updatedAt: new Date().toISOString(),
+    };
+    matchedCount += 1;
+  });
+
+  const duplicateRecords = [];
+  let duplicateOverrides = 0;
+  duplicateTracker.forEach((entries, key) => {
+    if (!entries || entries.length <= 1) return;
+    duplicateOverrides += entries.length - 1;
+    duplicateRecords.push({
+      normalizedKey: key,
+      rows: entries.map((entry, index) => ({
+        ...entry,
+        status: index === entries.length - 1 ? '保留' : '覆盖',
+      })),
+    });
   });
 
   saveVideos(videos);
-  res.json({ success: true, updated: updatedCount, videos });
+
+  const summary = {
+    totalRows,
+    matched: matchedCount,
+    unmatched: unmatchedRecords.length,
+    duplicateOverrides,
+  };
+
+  console.log(
+    `CSV 导入完成：总行数 ${summary.totalRows}，成功 ${summary.matched}，未匹配 ${summary.unmatched}，重复覆盖 ${summary.duplicateOverrides}`
+  );
+
+  res.json({
+    success: true,
+    summary,
+    unmatched: unmatchedRecords,
+    duplicates: duplicateRecords,
+    videos,
+  });
 });
 
 app.put('/api/videos/:id', (req, res) => {

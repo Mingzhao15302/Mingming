@@ -12,6 +12,85 @@ body.dashboard-body {
   width: 100%;
 }
 
+.import-summary {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.import-summary__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.import-summary__header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.summary-subtitle {
+  margin: 6px 0 0;
+  color: var(--subtext-color);
+}
+
+.import-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.summary-tile {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summary-tile.success {
+  background: linear-gradient(135deg, rgba(86, 225, 171, 0.15), rgba(255, 255, 255, 0.08));
+}
+
+.summary-tile.warning {
+  background: linear-gradient(135deg, rgba(255, 176, 97, 0.18), rgba(255, 255, 255, 0.08));
+}
+
+.summary-tile.accent {
+  background: linear-gradient(135deg, rgba(111, 140, 255, 0.2), rgba(255, 255, 255, 0.08));
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--subtext-color);
+}
+
+.summary-value {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.summary-message {
+  color: var(--subtext-color);
+  line-height: 1.6;
+}
+
+.import-summary__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.import-summary__actions button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -188,6 +267,7 @@ tbody tr:hover {
   border: none;
   color: var(--text-color);
   cursor: pointer;
+  line-height: 1;
 }
 
 .edit-form {
@@ -318,6 +398,10 @@ tbody tr:hover {
     align-items: flex-start;
   }
 
+  .import-summary {
+    padding: 24px;
+  }
+
   .header-actions {
     width: 100%;
     justify-content: flex-start;
@@ -338,6 +422,7 @@ tbody tr:hover {
   }
 
   .dashboard-header,
+  .import-summary,
   .dashboard-main {
     padding: 24px;
   }

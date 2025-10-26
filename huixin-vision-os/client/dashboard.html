@@ -21,6 +21,39 @@
         </div>
       </header>
 
+      <section id="importSummary" class="import-summary glass-card hidden" aria-live="polite">
+        <div class="import-summary__header">
+          <div>
+            <h2>CSV 导入结果</h2>
+            <p class="summary-subtitle">查看匹配情况与处理建议</p>
+          </div>
+          <button id="dismissImportSummary" class="close-btn" aria-label="关闭导入结果">×</button>
+        </div>
+        <div class="import-summary__grid">
+          <div class="summary-tile">
+            <span class="summary-label">总行数</span>
+            <span id="summaryTotal" class="summary-value">0</span>
+          </div>
+          <div class="summary-tile success">
+            <span class="summary-label">匹配成功</span>
+            <span id="summaryMatched" class="summary-value">0</span>
+          </div>
+          <div class="summary-tile warning">
+            <span class="summary-label">未匹配</span>
+            <span id="summaryUnmatched" class="summary-value">0</span>
+          </div>
+          <div class="summary-tile accent">
+            <span class="summary-label">重复覆盖条数</span>
+            <span id="summaryDuplicates" class="summary-value">0</span>
+          </div>
+        </div>
+        <div id="importSummaryMessage" class="summary-message"></div>
+        <div class="import-summary__actions">
+          <button id="downloadUnmatchedBtn" class="secondary-btn outline" disabled>下载未匹配清单</button>
+          <button id="downloadDuplicatesBtn" class="secondary-btn outline" disabled>下载重复覆盖清单</button>
+        </div>
+      </section>
+
       <main class="dashboard-main glass-card">
         <div class="table-wrapper">
           <table id="videosTable">
