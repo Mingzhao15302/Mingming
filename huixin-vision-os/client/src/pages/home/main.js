@@ -367,6 +367,10 @@ function createVideoCard(video) {
   const previewControls = document.createElement('div');
   previewControls.className = 'preview-controls';
 
+  const previewToolbar = document.createElement('div');
+  previewToolbar.className = 'preview-toolbar';
+  previewControls.appendChild(previewToolbar);
+
   const fullscreenControls = document.createElement('div');
   fullscreenControls.className = 'fullscreen-controls controls-hidden';
 
@@ -574,7 +578,7 @@ function createVideoCard(video) {
 
   const previewDownloadButton = createControlButton('download-button', '下载', () => downloadVideo());
 
-  previewControls.append(previewPlayButton, previewFullscreenButton, previewDownloadButton);
+  previewToolbar.append(previewPlayButton, previewFullscreenButton, previewDownloadButton);
 
   const fullscreenRewindButton = createControlButton('rewind-button', '快退10秒', () => seekBy(-10));
   applyIcon(fullscreenRewindButton, 'rewind10');

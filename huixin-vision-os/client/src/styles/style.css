@@ -193,15 +193,18 @@ body.gallery-body {
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(16px, 3vw, 28px);
+  padding: clamp(12px, 2.8vw, 18px);
   z-index: 3;
   pointer-events: none;
 }
 
-.preview-controls .video-control {
+.preview-toolbar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 4vw, 28px);
   pointer-events: auto;
 }
 
@@ -215,7 +218,7 @@ body.gallery-body {
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 3;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .fullscreen-controls.controls-hidden {
