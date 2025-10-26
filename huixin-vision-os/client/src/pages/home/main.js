@@ -430,7 +430,7 @@ function createVideoCard(video) {
 
   updateFullscreenState();
 
-  controlBar.append(rewindButton, volumeToggle, playToggle, forwardButton, fullscreenButton, downloadButton);
+  controlBar.append(volumeToggle, playToggle, fullscreenButton, downloadButton, rewindButton, forwardButton);
   overlay.appendChild(controlBar);
   videoWrapper.appendChild(videoElement);
   videoWrapper.appendChild(overlay);
