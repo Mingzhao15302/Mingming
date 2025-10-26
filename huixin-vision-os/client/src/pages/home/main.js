@@ -166,55 +166,66 @@ function createMultiField(field, container) {
 
 const ICONS = {
   play: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M8 5v14l11-7z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
+      <polygon points="18,12 38,24 18,36" />
     </svg>
   `,
   pause: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M6 19h4V5H6zm8-14v14h4V5h-4z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
+      <rect x="14" y="12" width="8" height="24" rx="1.5" />
+      <rect x="26" y="12" width="8" height="24" rx="1.5" />
     </svg>
   `,
   volumeUp: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M4 9v6h3l4 4V5l-4 4H4z" />
-      <path d="M16.5 12a4.5 4.5 0 0 0-3-4.24v8.48A4.5 4.5 0 0 0 16.5 12z" />
-      <path d="M13.5 3.97v2.07c3.05.78 5.25 3.5 5.25 6.96s-2.2 6.18-5.25 6.96v2.07c4.09-.88 7.25-4.51 7.25-9.03s-3.16-8.15-7.25-9.03z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
+      <path d="M9 20h7.5L26 14v20l-9.5-6H9z" />
+      <path d="M30.5 16.8v14.4c3.04-1.1 5.1-4.02 5.1-7.2s-2.06-6.1-5.1-7.2z" />
+      <path d="M35.6 11.7v4.7c3.87 1.64 6.4 5.2 6.4 8.6s-2.53 6.96-6.4 8.6v4.7C41.87 36.2 46 30.6 46 25s-4.13-11.2-10.4-13.3z" />
     </svg>
   `,
   volumeOff: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M3 9v6h4l5 5V4l-4 4H3z" />
-      <path d="M16.5 12c0-1.77-.77-3.37-2-4.47v2.12l2 2c0-.21 0-.43 0-.65z" />
-      <path d="M14.5 3.97v2.09c2.89.86 5 3.54 5 6.94 0 1.55-.36 2.93-1 4.14l1.46 1.46C20.99 17.37 21.5 14.76 21.5 12c0-4.54-2.99-8.12-7-9.03z" />
-      <path d="M2.81 2.81 1.39 4.22 5.17 8H3v8h4l5 5v-6.17l4.78 4.78 1.41-1.41z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
+      <path d="M9 20h7.5L26 14v20l-9.5-6H9z" />
+      <path d="M30.6 17.1v6.26L26 18.76V14l4.6 3.1z" />
+      <path d="M34.4 18 31 21.4l-3.4-3.4-3 3 3.4 3.4L24.6 28l3 3 3.4-3.4L34.4 31l3-3-3.4-3.4L37.4 21z" />
     </svg>
   `,
   fullscreen: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm14-5h-5v2h3v3h2V5zm-5 14h5v-5h-2v3h-3v2z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
+      <path d="M8 18v-12h16v6h-10v6H8z" />
+      <path d="M40 18h-6v-6h-10V6h16v12z" />
+      <path d="M24 36v6H8V30h6v6h10z" />
+      <path d="M40 30v12H24v-6h10v-6h6z" />
     </svg>
   `,
   fullscreenExit: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm8 8h-3v3h-2v-5h5v2zm-3-8V5h2v3h3v2h-5z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
+      <path d="M18 18h-6v6H8V12h16v6h-6z" />
+      <path d="M30 18v-6h-6V12h16v12h-4v-6h-6z" />
+      <path d="M18 30h6v6H24v-12H8v12h4v-6h6z" />
+      <path d="M30 30h6v6h4V24H24v12h6v-6z" />
     </svg>
   `,
   download: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M5 20h14v-2H5v2zm7-18-5 5h3v4h4V7h3l-5-5z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
+      <path d="M10 34h28v6H10z" />
+      <path d="M24 8v18.34l-5.66-5.66-4.24 4.24L24 38l9.9-9.08-4.24-4.24L24 26.34V8z" />
     </svg>
   `,
   rewind10: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M11.25 6.5a.75.75 0 0 0-1.17-.63l-5.75 3.75a.75.75 0 0 0 0 1.26l5.75 3.75a.75.75 0 0 0 1.17-.63V12l4.83 3.15a.75.75 0 0 0 1.17-.63v-7a.75.75 0 0 0-1.17-.63L11.25 11V6.5Z" />
-      <path d="M19 10.25h-1v3.5h1V15h-2.25V9H19v1.25Zm-5.5-1.25A2.75 2.75 0 0 0 10.75 11v.5A2.75 2.75 0 0 0 13.5 14.25 2.75 2.75 0 0 0 16.25 11.5V11a2.75 2.75 0 0 0-2.75-2.75Zm0 1.5A1.25 1.25 0 0 1 14.75 11v.5a1.25 1.25 0 0 1-2.5 0V11a1.25 1.25 0 0 1 1.25-1.25Z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
+      <polygon points="30,16 30,32 18,24" />
+      <polygon points="40,16 40,32 28,24" />
+      <path d="M11 16h4v16h-4z" />
+      <path d="M19 16h9v16h-9V16zm3 3v10h3V19h-3z" />
     </svg>
   `,
   forward10: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12.75 6.5a.75.75 0 0 1 1.17-.63l5.75 3.75a.75.75 0 0 1 0 1.26l-5.75 3.75a.75.75 0 0 1-1.17-.63V12l-4.83 3.15a.75.75 0 0 1-1.17-.63v-7a.75.75 0 0 1 1.17-.63L12.75 11V6.5Z" />
-      <path d="M5 10.25h1V13.8H5V15h2.25V9H5v1.25Zm5.5-1.25A2.75 2.75 0 0 1 13.25 11v.5a2.75 2.75 0 0 1-2.75 2.75A2.75 2.75 0 0 1 7.75 11.5V11A2.75 2.75 0 0 1 10.5 9Zm0 1.5A1.25 1.25 0 0 0 9.25 11v.5a1.25 1.25 0 0 0 2.5 0V11a1.25 1.25 0 0 0-1.25-1.25Z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
+      <polygon points="8,16 20,24 8,32" />
+      <polygon points="18,16 30,24 18,32" />
+      <path d="M32 16h4v16h-4z" />
+      <path d="M36 16h9v16h-9V16zm3 3v10h3V19h-3z" />
     </svg>
   `,
 };
