@@ -40,16 +40,26 @@
     </div>
 
     <div id="editModal" class="modal hidden">
-      <div class="modal-content glass-card">
-        <header>
-          <h2>编辑视频分类</h2>
-          <button id="closeModalBtn" class="close-btn" aria-label="关闭">×</button>
-        </header>
-        <form id="editForm" class="edit-form"></form>
-        <footer class="modal-actions">
-          <button type="button" id="cancelEditBtn" class="secondary-btn ghost">取消</button>
-          <button type="submit" form="editForm" class="primary-btn">保存</button>
-        </footer>
+      <div class="modal-shell">
+        <button type="button" id="prevModalBtn" class="modal-nav" aria-label="上一条视频">
+          <span aria-hidden="true">&#8592;</span>
+        </button>
+        <div class="modal-content glass-card">
+          <header class="modal-header">
+            <h2 class="hero-title">编辑视频分类</h2>
+            <button id="closeModalBtn" class="close-btn" aria-label="关闭">×</button>
+          </header>
+          <div class="modal-body">
+            <form id="editForm" class="edit-form"></form>
+          </div>
+          <footer class="modal-actions">
+            <button type="button" id="cancelEditBtn" class="secondary-btn ghost">取消</button>
+            <button type="submit" form="editForm" class="primary-btn">保存</button>
+          </footer>
+        </div>
+        <button type="button" id="nextModalBtn" class="modal-nav" aria-label="下一条视频">
+          <span aria-hidden="true">&#8594;</span>
+        </button>
       </div>
     </div>
 

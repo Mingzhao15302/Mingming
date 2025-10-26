@@ -13,6 +13,8 @@ const modalState = {
   fields: [],
   currentType: '灌装机',
   values: {},
+  videos: [],
+  currentIndex: -1,
 };
 
 function guardAuth() {
@@ -127,7 +129,7 @@ function renderTable(videos, fields, highlightId = null) {
       </td>
       <td><button class="action-btn" data-id="${video.id}">编辑</button></td>
     `;
-    if (highlightId && video.id === highlightId) {
+    if (highlightId && String(video.id) === highlightId) {
       row.classList.add('highlight-row');
     }
     tbody.appendChild(row);
@@ -262,24 +264,55 @@ function renderModalForm() {
   });
 }
 
-function openModal(video, fields) {
+function updateModalNavigation() {
+  const prevBtn = document.getElementById('prevModalBtn');
+  const nextBtn = document.getElementById('nextModalBtn');
+  if (!prevBtn || !nextBtn) return;
+
+  const total = Array.isArray(modalState.videos) ? modalState.videos.length : 0;
+  const hasVideos = total > 0;
+
+  prevBtn.disabled = !hasVideos || modalState.currentIndex <= 0;
+  nextBtn.disabled = !hasVideos || modalState.currentIndex >= total - 1;
+}
+
+function openModal(video, fields, videos = modalState.videos, index = null) {
   const modal = document.getElementById('editModal');
   const form = document.getElementById('editForm');
   modalState.video = video;
   modalState.fields = fields;
+  modalState.videos = Array.isArray(videos) ? videos : [];
   modalState.values = { ...categoryFieldsCache.defaults, ...video.categories };
   modalState.currentType = modalState.values.productType || categoryFieldsCache.defaultProductType;
+  modalState.currentIndex =
+    typeof index === 'number' && index >= 0
+      ? index
+      : modalState.videos.findIndex((item) => String(item.id) === String(video.id));
+
+  if (modalState.currentIndex === -1 && modalState.videos.length) {
+    modalState.currentIndex = modalState.videos.findIndex((item) => item.fileName === video.fileName);
+  }
+
+  if (modalState.currentIndex === -1) {
+    modalState.videos = [...modalState.videos, video];
+    modalState.currentIndex = modalState.videos.length - 1;
+  }
+
   pruneCategoriesForType(modalState.values, modalState.currentType, fields);
   renderModalForm();
   form.dataset.id = video.id;
   modal.classList.remove('hidden');
   modal.classList.add('fade-in');
+  updateModalNavigation();
 }
 
 function closeModal() {
   const modal = document.getElementById('editModal');
   modal.classList.add('hidden');
   modalState.video = null;
+  modalState.videos = [];
+  modalState.currentIndex = -1;
+  updateModalNavigation();
 }
 
 function gatherFormData(form) {
@@ -305,15 +338,40 @@ function bindTableActions(getVideos, fields) {
     const button = event.target.closest('button[data-id]');
     if (!button) return;
     const currentVideos = getVideos();
-    const video = currentVideos.find((item) => item.id === button.dataset.id);
+    const video = currentVideos.find((item) => String(item.id) === button.dataset.id);
     if (!video) return;
-    openModal(video, fields);
+    openModal(
+      video,
+      fields,
+      currentVideos,
+      currentVideos.findIndex((item) => String(item.id) === button.dataset.id)
+    );
   });
 }
 
-function bindModalControls(videos, fields, refresh) {
+function navigateModal(step) {
+  const videos = Array.isArray(modalState.videos) ? modalState.videos : [];
+  if (!videos.length) return;
+  const nextIndex = Math.min(Math.max(modalState.currentIndex + step, 0), videos.length - 1);
+  if (nextIndex === modalState.currentIndex) return;
+  const nextVideo = videos[nextIndex];
+  if (!nextVideo) return;
+  openModal(nextVideo, modalState.fields, videos, nextIndex);
+}
+
+function bindModalControls(fields, refresh) {
   document.getElementById('closeModalBtn').addEventListener('click', closeModal);
   document.getElementById('cancelEditBtn').addEventListener('click', closeModal);
+  document.getElementById('prevModalBtn').addEventListener('click', (event) => {
+    if (event.currentTarget.disabled) return;
+    navigateModal(-1);
+  });
+  document.getElementById('nextModalBtn').addEventListener('click', (event) => {
+    if (event.currentTarget.disabled) return;
+    navigateModal(1);
+  });
+
+  updateModalNavigation();
 
   document.getElementById('editForm').addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -334,6 +392,18 @@ function bindModalControls(videos, fields, refresh) {
     if (result.success) {
       refresh(result.videos);
       closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    const modal = document.getElementById('editModal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      navigateModal(-1);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      navigateModal(1);
     }
   });
 }
@@ -418,12 +488,17 @@ async function init() {
   });
 
   bindTableActions(() => videos, fields);
-  bindModalControls(videos, fields, refresh);
+  bindModalControls(fields, refresh);
 
   if (highlightId) {
-    const highlightedVideo = videos.find((video) => video.id === highlightId);
+    const highlightedVideo = videos.find((video) => String(video.id) === highlightId);
     if (highlightedVideo) {
-      openModal(highlightedVideo, fields);
+      openModal(
+        highlightedVideo,
+        fields,
+        videos,
+        videos.findIndex((item) => String(item.id) === highlightId)
+      );
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }
