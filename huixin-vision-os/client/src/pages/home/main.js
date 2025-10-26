@@ -290,11 +290,8 @@ function createVideoCard(video) {
   const overlay = document.createElement('div');
   overlay.className = 'video-overlay';
 
-  const centerControls = document.createElement('div');
-  centerControls.className = 'center-controls';
-
-  const bottomControls = document.createElement('div');
-  bottomControls.className = 'bottom-controls';
+  const controlBar = document.createElement('div');
+  controlBar.className = 'control-bar';
 
   const playToggle = document.createElement('button');
   playToggle.type = 'button';
@@ -382,6 +379,43 @@ function createVideoCard(video) {
     }
   });
 
+  const downloadButton = document.createElement('button');
+  downloadButton.type = 'button';
+  downloadButton.className = 'video-control download-button';
+  applyIcon(downloadButton, 'download');
+  downloadButton.setAttribute('aria-label', '下载');
+
+  downloadButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const link = document.createElement('a');
+    link.href = videoElement.src;
+    link.download = video.originalName || video.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  const rewindButton = document.createElement('button');
+  rewindButton.type = 'button';
+  rewindButton.className = 'video-control rewind-button';
+  applyIcon(rewindButton, 'rewind');
+  rewindButton.setAttribute('aria-label', '快退10秒');
+  rewindButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
+  });
+
+  const forwardButton = document.createElement('button');
+  forwardButton.type = 'button';
+  forwardButton.className = 'video-control forward-button';
+  applyIcon(forwardButton, 'forward');
+  forwardButton.setAttribute('aria-label', '快进10秒');
+  forwardButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const duration = Number.isFinite(videoElement.duration) ? videoElement.duration : videoElement.currentTime + 10;
+    videoElement.currentTime = Math.min(duration, videoElement.currentTime + 10);
+  });
+
   const handleFullscreenChange = () => {
     if (!videoWrapper.isConnected) {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -396,9 +430,8 @@ function createVideoCard(video) {
 
   updateFullscreenState();
 
-  centerControls.appendChild(playToggle);
-  bottomControls.append(volumeToggle, fullscreenButton);
-  overlay.append(centerControls, bottomControls);
+  controlBar.append(rewindButton, volumeToggle, playToggle, forwardButton, fullscreenButton, downloadButton);
+  overlay.appendChild(controlBar);
   videoWrapper.appendChild(videoElement);
   videoWrapper.appendChild(overlay);
 
