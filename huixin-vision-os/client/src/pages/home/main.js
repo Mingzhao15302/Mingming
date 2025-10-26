@@ -1,0 +1,562 @@
+import '../../styles/base.css';
+import '../../styles/style.css';
+
+const AUTH_KEY = 'hyos-authenticated';
+
+const categoryState = {
+  fields: [],
+  videos: [],
+  filters: {},
+  defaults: {},
+  defaultProductType: '灌装机',
+  expandedFilters: false,
+};
+
+async function fetchJSON(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`请求失败：${response.status}`);
+  return response.json();
+}
+
+function buildDefaultCategories(fields) {
+  const defaults = {};
+  fields.forEach((field) => {
+    if (field.type === 'multi') {
+      defaults[field.key] = [];
+    } else if (field.default) {
+      defaults[field.key] = field.default;
+    } else if (field.options?.includes('空白')) {
+      defaults[field.key] = '空白';
+    } else {
+      defaults[field.key] = field.options?.[0] ?? '';
+    }
+  });
+  return defaults;
+}
+
+function shouldDisplayField(field, productType) {
+  if (field.key === 'productType') return true;
+  if (!field.contexts || field.contexts.length === 0) return true;
+  if (field.contexts.includes('all')) return true;
+  return field.contexts.includes(productType);
+}
+
+function getFieldOrder(field, productType) {
+  if (field.order) {
+    if (field.order[productType] !== undefined) return field.order[productType];
+    if (field.order.default !== undefined) return field.order.default;
+  }
+  return 999;
+}
+
+function pruneFilters(productType) {
+  const allowed = new Set(['productType']);
+  categoryState.fields.forEach((field) => {
+    if (shouldDisplayField(field, productType)) {
+      allowed.add(field.key);
+    }
+  });
+  Object.keys(categoryState.filters).forEach((key) => {
+    if (!allowed.has(key)) {
+      delete categoryState.filters[key];
+    }
+  });
+}
+
+function createSelectField(field, container) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'filter-field';
+
+  const label = document.createElement('label');
+  label.textContent = field.label;
+
+  const select = document.createElement('select');
+  select.name = field.key;
+
+  if (field.key !== 'productType') {
+    const emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = '全部';
+    select.appendChild(emptyOption);
+  }
+
+  (field.options || []).forEach((option) => {
+    const optionElement = document.createElement('option');
+    optionElement.value = option;
+    optionElement.textContent = option;
+    select.appendChild(optionElement);
+  });
+
+  const currentValue = categoryState.filters[field.key];
+  if (currentValue !== undefined) {
+    select.value = currentValue;
+  } else if (field.key === 'productType') {
+    select.value = categoryState.filters.productType || categoryState.defaultProductType;
+  }
+
+  select.addEventListener('change', () => handleFilterChange(field, select));
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(select);
+  container.appendChild(wrapper);
+}
+
+function createToggleOption(option, checked, onChange) {
+  const label = document.createElement('label');
+  label.className = 'toggle-option';
+
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.value = option;
+  input.checked = checked;
+
+  const track = document.createElement('span');
+  track.className = 'toggle-track';
+  const handle = document.createElement('span');
+  handle.className = 'toggle-handle';
+  track.appendChild(handle);
+
+  const text = document.createElement('span');
+  text.className = 'toggle-text';
+  text.textContent = option;
+
+  input.addEventListener('change', () => onChange(input.checked));
+
+  label.append(input, track, text);
+  return label;
+}
+
+function createMultiField(field, container) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'multi-field-row';
+  wrapper.dataset.multiKey = field.key;
+
+  const title = document.createElement('span');
+  title.className = 'field-title';
+  title.textContent = field.label;
+
+  const toggleGroup = document.createElement('div');
+  toggleGroup.className = 'toggle-group';
+
+  const selectedValues = Array.isArray(categoryState.filters[field.key]) ? categoryState.filters[field.key] : [];
+
+  (field.options || []).forEach((option) => {
+    const toggle = createToggleOption(option, selectedValues.includes(option), (isChecked) => {
+      const currentValues = new Set(Array.isArray(categoryState.filters[field.key]) ? categoryState.filters[field.key] : []);
+      if (isChecked) {
+        currentValues.add(option);
+      } else {
+        currentValues.delete(option);
+      }
+
+      if (currentValues.size) {
+        categoryState.filters[field.key] = Array.from(currentValues);
+      } else {
+        delete categoryState.filters[field.key];
+      }
+
+      renderVideos();
+    });
+    toggleGroup.appendChild(toggle);
+  });
+
+  wrapper.append(title, toggleGroup);
+  container.appendChild(wrapper);
+}
+
+function applyIcon(button, iconName) {
+  const previous = button.dataset.iconName;
+  if (previous === iconName) return;
+  if (previous) {
+    button.classList.remove(`icon-${previous}`);
+  }
+  button.dataset.iconName = iconName;
+  button.classList.add(`icon-${iconName}`);
+}
+
+function renderFilters() {
+  const productType = categoryState.filters.productType || categoryState.defaultProductType;
+  pruneFilters(productType);
+
+  const primaryDropdown = document.getElementById('primaryDropdown');
+  const extendedDropdown = document.getElementById('extendedDropdown');
+  const multiFilters = document.getElementById('multiFilters');
+
+  primaryDropdown.innerHTML = '';
+  extendedDropdown.innerHTML = '';
+  multiFilters.innerHTML = '';
+
+  const dropdownFields = categoryState.fields
+    .filter((field) => field.type !== 'multi' && shouldDisplayField(field, productType))
+    .sort((a, b) => getFieldOrder(a, productType) - getFieldOrder(b, productType));
+
+  dropdownFields.forEach((field, index) => {
+    if (index < 8) {
+      createSelectField(field, primaryDropdown);
+    } else {
+      createSelectField(field, extendedDropdown);
+    }
+  });
+
+  const multiFields = categoryState.fields
+    .filter((field) => field.type === 'multi' && shouldDisplayField(field, productType))
+    .sort((a, b) => getFieldOrder(a, productType) - getFieldOrder(b, productType));
+
+  if (multiFields.length) {
+    multiFields.forEach((field) => createMultiField(field, multiFilters));
+  }
+
+  const toggleBtn = document.getElementById('toggleFilters');
+  if (categoryState.expandedFilters) {
+    toggleBtn.classList.add('expanded');
+    toggleBtn.querySelector('.icon').textContent = '▲';
+    toggleBtn.querySelector('.label').textContent = '收起扩展分类';
+    extendedDropdown.classList.remove('hidden');
+    if (multiFields.length) {
+      multiFilters.classList.remove('hidden');
+    }
+  } else {
+    toggleBtn.classList.remove('expanded');
+    toggleBtn.querySelector('.icon').textContent = '▼';
+    toggleBtn.querySelector('.label').textContent = '展开更多分类';
+    extendedDropdown.classList.add('hidden');
+    if (multiFields.length) {
+      multiFilters.classList.add('hidden');
+    } else {
+      multiFilters.classList.add('hidden');
+    }
+  }
+
+  if (!multiFields.length) {
+    multiFilters.classList.add('hidden');
+  }
+}
+
+function handleFilterChange(field, select) {
+  const value = select.value;
+  if (field.key === 'productType') {
+    categoryState.filters.productType = value || categoryState.defaultProductType;
+    pruneFilters(categoryState.filters.productType);
+    categoryState.expandedFilters = false;
+    renderFilters();
+  } else if (value) {
+    categoryState.filters[field.key] = value;
+  } else {
+    delete categoryState.filters[field.key];
+  }
+
+  renderVideos();
+}
+
+function resetFilters() {
+  categoryState.filters = { productType: categoryState.defaultProductType };
+  categoryState.expandedFilters = false;
+  renderFilters();
+  renderVideos();
+}
+
+function filterVideos(videos) {
+  return videos.filter((video) => {
+    return Object.entries(categoryState.filters).every(([key, value]) => {
+      if (key === 'productType' && !value) return true;
+      const categoryValue = video.categories?.[key];
+
+      if (Array.isArray(value)) {
+        if (!Array.isArray(categoryValue)) return false;
+        return value.every((item) => categoryValue.includes(item));
+      }
+
+      if (!value) return true;
+      if (value === '空白') {
+        return !categoryValue || categoryValue === '空白' || categoryValue === '';
+      }
+      return categoryValue === value;
+    });
+  });
+}
+
+function createVideoCard(video) {
+  const card = document.createElement('article');
+  card.className = 'video-card fade-in';
+
+  const videoWrapper = document.createElement('div');
+  videoWrapper.className = 'video-wrapper';
+
+  const videoElement = document.createElement('video');
+  videoElement.src = `/videos/${video.fileName}`;
+  videoElement.preload = 'metadata';
+  videoElement.controls = false;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'video-overlay';
+
+  const controlBar = document.createElement('div');
+  controlBar.className = 'control-bar';
+
+  const playToggle = document.createElement('button');
+  playToggle.type = 'button';
+  playToggle.className = 'video-control play-toggle';
+
+  const updatePlayIcon = () => {
+    if (videoElement.paused) {
+      applyIcon(playToggle, 'play');
+      playToggle.setAttribute('aria-label', '播放');
+    } else {
+      applyIcon(playToggle, 'pause');
+      playToggle.setAttribute('aria-label', '暂停');
+    }
+  };
+
+  updatePlayIcon();
+
+  playToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (videoElement.paused) {
+      videoElement.play();
+    } else {
+      videoElement.pause();
+    }
+  });
+
+  videoElement.addEventListener('play', updatePlayIcon);
+  videoElement.addEventListener('pause', updatePlayIcon);
+
+  const volumeToggle = document.createElement('button');
+  volumeToggle.type = 'button';
+  volumeToggle.className = 'video-control volume-toggle';
+
+  const updateVolumeIcon = () => {
+    if (videoElement.muted) {
+      applyIcon(volumeToggle, 'mute');
+      volumeToggle.setAttribute('aria-label', '恢复音量');
+    } else {
+      applyIcon(volumeToggle, 'volume');
+      volumeToggle.setAttribute('aria-label', '静音');
+    }
+  };
+
+  updateVolumeIcon();
+
+  volumeToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    videoElement.muted = !videoElement.muted;
+  });
+
+  videoElement.addEventListener('volumechange', updateVolumeIcon);
+
+  const fullscreenButton = document.createElement('button');
+  fullscreenButton.type = 'button';
+  fullscreenButton.className = 'video-control fullscreen-toggle';
+  const isWrapperInFullscreen = () =>
+    document.fullscreenElement === videoWrapper || document.webkitFullscreenElement === videoWrapper;
+
+  const updateFullscreenState = () => {
+    const active = isWrapperInFullscreen();
+    applyIcon(fullscreenButton, active ? 'minimize' : 'fullscreen');
+    fullscreenButton.setAttribute('aria-label', active ? '退出全屏' : '全屏');
+    videoWrapper.classList.toggle('fullscreen-active', active);
+  };
+
+  const exitFullscreen = () => {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  };
+
+  fullscreenButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (isWrapperInFullscreen()) {
+      exitFullscreen();
+      return;
+    }
+
+    if (videoWrapper.requestFullscreen) {
+      videoWrapper.requestFullscreen();
+    } else if (videoWrapper.webkitRequestFullscreen) {
+      videoWrapper.webkitRequestFullscreen();
+    }
+  });
+
+  const downloadButton = document.createElement('button');
+  downloadButton.type = 'button';
+  downloadButton.className = 'video-control download-button';
+  applyIcon(downloadButton, 'download');
+  downloadButton.setAttribute('aria-label', '下载');
+
+  downloadButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const link = document.createElement('a');
+    link.href = videoElement.src;
+    link.download = video.originalName || video.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  const rewindButton = document.createElement('button');
+  rewindButton.type = 'button';
+  rewindButton.className = 'video-control rewind-button';
+  applyIcon(rewindButton, 'rewind');
+  rewindButton.setAttribute('aria-label', '快退10秒');
+  rewindButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
+  });
+
+  const forwardButton = document.createElement('button');
+  forwardButton.type = 'button';
+  forwardButton.className = 'video-control forward-button';
+  applyIcon(forwardButton, 'forward');
+  forwardButton.setAttribute('aria-label', '快进10秒');
+  forwardButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const duration = Number.isFinite(videoElement.duration) ? videoElement.duration : videoElement.currentTime + 10;
+    videoElement.currentTime = Math.min(duration, videoElement.currentTime + 10);
+  });
+
+  const handleFullscreenChange = () => {
+    if (!videoWrapper.isConnected) {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      return;
+    }
+    updateFullscreenState();
+  };
+
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+  updateFullscreenState();
+
+  controlBar.append(volumeToggle, playToggle, fullscreenButton, downloadButton, rewindButton, forwardButton);
+  overlay.appendChild(controlBar);
+  videoWrapper.appendChild(videoElement);
+  videoWrapper.appendChild(overlay);
+
+  const info = document.createElement('div');
+  info.className = 'video-info';
+
+  const title = document.createElement('h3');
+  title.textContent = video.title || video.originalName || '未命名视频';
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+
+  const productTypeValue = video.categories?.productType;
+  if (productTypeValue) {
+    meta.appendChild(document.createElement('span')).textContent = `产品类型: ${productTypeValue}`;
+  }
+
+  const productType = productTypeValue || categoryState.defaultProductType;
+  const metaFields = categoryState.fields
+    .filter((field) => field.key !== 'productType' && shouldDisplayField(field, productType))
+    .sort((a, b) => getFieldOrder(a, productType) - getFieldOrder(b, productType));
+
+  metaFields.forEach((field) => {
+    const value = video.categories?.[field.key];
+    if (field.type === 'multi') {
+      if (Array.isArray(value) && value.length) {
+        const span = document.createElement('span');
+        span.textContent = `${field.label}: ${value.join('、')}`;
+        meta.appendChild(span);
+      }
+    } else if (value && value !== '空白') {
+      const span = document.createElement('span');
+      span.textContent = `${field.label}: ${value}`;
+      meta.appendChild(span);
+    }
+  });
+
+  info.appendChild(title);
+  info.appendChild(meta);
+
+  card.appendChild(videoWrapper);
+  card.appendChild(info);
+
+  card.addEventListener('mouseleave', () => {
+    videoElement.pause();
+    updatePlayIcon();
+  });
+
+  return card;
+}
+
+function renderVideos() {
+  const grid = document.getElementById('videoGrid');
+  const noResult = document.getElementById('noResult');
+  grid.innerHTML = '';
+
+  const filtered = filterVideos(categoryState.videos);
+  if (!filtered.length) {
+    noResult.classList.remove('hidden');
+    return;
+  }
+  noResult.classList.add('hidden');
+
+  filtered.forEach((video) => {
+    grid.appendChild(createVideoCard(video));
+  });
+}
+
+function isAuthenticated() {
+  return localStorage.getItem(AUTH_KEY) === 'true';
+}
+
+function handleEdit(video) {
+  if (isAuthenticated()) {
+    window.location.href = `/dashboard?video=${video.id}`;
+  } else if (window.confirm('需要登录控制台进行编辑，是否前往登录？')) {
+    window.location.href = '/login';
+  }
+}
+
+async function handleDelete(video) {
+  if (!isAuthenticated()) {
+    if (window.confirm('需要登录控制台进行删除，是否前往登录？')) {
+      window.location.href = '/login';
+    }
+    return;
+  }
+
+  if (!window.confirm('删除后无法恢复，确认要删除该视频吗？')) {
+    return;
+  }
+
+  const response = await fetch(`/api/videos/${video.id}`, {
+    method: 'DELETE',
+  });
+  const result = await response.json();
+  if (result.success) {
+    categoryState.videos = result.videos;
+    renderVideos();
+  } else {
+    alert(result.message || '删除失败，请重试');
+  }
+}
+
+async function init() {
+  const [fields, videos] = await Promise.all([
+    fetchJSON('/api/config/categories'),
+    fetchJSON('/api/videos'),
+  ]);
+
+  categoryState.fields = fields;
+  categoryState.videos = videos;
+  categoryState.defaults = buildDefaultCategories(fields);
+  categoryState.defaultProductType = fields.find((field) => field.key === 'productType')?.default || '灌装机';
+  categoryState.filters.productType = categoryState.defaultProductType;
+
+  renderFilters();
+  renderVideos();
+
+  document.getElementById('toggleFilters').addEventListener('click', () => {
+    categoryState.expandedFilters = !categoryState.expandedFilters;
+    renderFilters();
+  });
+
+  document.getElementById('resetFilters').addEventListener('click', resetFilters);
+}
+
+document.addEventListener('DOMContentLoaded', init);
