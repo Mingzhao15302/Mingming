@@ -411,22 +411,48 @@ function createVideoCard(video) {
     fullscreenControls.classList.remove('controls-hidden');
   };
 
+  const enterFullscreen = async () => {
+    if (videoWrapper.requestFullscreen) {
+      await videoWrapper.requestFullscreen();
+      return;
+    }
+    if (videoElement.requestFullscreen) {
+      await videoElement.requestFullscreen();
+      return;
+    }
+    if (videoWrapper.webkitRequestFullscreen) {
+      videoWrapper.webkitRequestFullscreen();
+      return;
+    }
+    if (videoElement.webkitRequestFullscreen) {
+      videoElement.webkitRequestFullscreen();
+      return;
+    }
+    if (videoElement.webkitEnterFullscreen) {
+      videoElement.webkitEnterFullscreen();
+    }
+  };
+
+  const exitFullscreen = async () => {
+    if (document.exitFullscreen) {
+      await document.exitFullscreen();
+      return;
+    }
+    if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+      return;
+    }
+    if (videoElement.webkitExitFullscreen) {
+      videoElement.webkitExitFullscreen();
+    }
+  };
+
   const toggleFullscreen = async () => {
     try {
       if (isWrapperInFullscreen()) {
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-      } else if (videoWrapper.requestFullscreen) {
-        await videoWrapper.requestFullscreen();
-      } else if (videoElement.requestFullscreen) {
-        await videoElement.requestFullscreen();
-      } else if (videoWrapper.webkitRequestFullscreen) {
-        videoWrapper.webkitRequestFullscreen();
-      } else if (videoElement.webkitRequestFullscreen) {
-        videoElement.webkitRequestFullscreen();
+        await exitFullscreen();
+      } else {
+        await enterFullscreen();
       }
     } catch (error) {
       console.error('切换全屏失败', error);
@@ -443,10 +469,43 @@ function createVideoCard(video) {
     document.body.removeChild(link);
   };
 
+  const ensureCanPlay = () => {
+    if (videoElement.readyState >= 2) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      const cleanup = () => {
+        videoElement.removeEventListener('canplay', handleCanPlay);
+        videoElement.removeEventListener('error', handleError);
+      };
+
+      const handleCanPlay = () => {
+        cleanup();
+        resolve();
+      };
+
+      const handleError = (event) => {
+        cleanup();
+        reject(event?.error || new Error('视频加载失败'));
+      };
+
+      videoElement.addEventListener('canplay', handleCanPlay, { once: true });
+      videoElement.addEventListener('error', handleError, { once: true });
+      if (videoElement.readyState === 0) {
+        videoElement.load();
+      }
+    });
+  };
+
   const togglePlayState = async () => {
     if (videoElement.paused) {
       try {
-        await videoElement.play();
+        await ensureCanPlay();
+        const playPromise = videoElement.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+          await playPromise;
+        }
       } catch (error) {
         console.error('播放失败', error);
       }
@@ -458,7 +517,9 @@ function createVideoCard(video) {
 
   const stopPlayback = () => {
     videoElement.pause();
-    videoElement.currentTime = 0;
+    if (Number.isFinite(videoElement.currentTime)) {
+      videoElement.currentTime = 0;
+    }
     updatePlayIcons();
   };
 
