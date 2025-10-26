@@ -159,10 +159,6 @@ body.gallery-body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 0 clamp(16px, 4vw, 28px) clamp(18px, 5vw, 32px);
   z-index: 2;
 }
 
@@ -178,6 +174,7 @@ body.gallery-body {
   );
   opacity: 0;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .video-card:hover .video-overlay::before,
@@ -188,14 +185,18 @@ body.gallery-body {
 .controls-row {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 2vw, 12px);
+  gap: 10px;
   pointer-events: auto;
 }
 
 .preview-controls {
-  position: relative;
+  position: absolute;
+  display: flex;
+  right: clamp(16px, 4vw, 24px);
+  bottom: clamp(16px, 4vw, 24px);
+  gap: 10px;
   z-index: 3;
-  justify-content: flex-end;
+  pointer-events: auto;
 }
 
 .video-wrapper.fullscreen-active .preview-controls {
@@ -205,15 +206,10 @@ body.gallery-body {
 .fullscreen-controls {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: clamp(24px, 6vw, 48px);
-  padding: 0 clamp(24px, 6vw, 64px) clamp(28px, 7vw, 72px);
   opacity: 0;
-  pointer-events: none;
   transition: opacity 0.3s ease;
   z-index: 3;
+  pointer-events: none;
 }
 
 .fullscreen-controls.controls-hidden {
@@ -223,19 +219,27 @@ body.gallery-body {
 
 .video-wrapper.fullscreen-active .fullscreen-controls {
   opacity: 1;
-  pointer-events: auto;
 }
 
 .fullscreen-primary {
-  align-self: center;
-  justify-content: center;
-  gap: clamp(16px, 5vw, 28px);
+  position: absolute;
+  left: 50%;
+  bottom: clamp(72px, 12vw, 120px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
 }
 
 .fullscreen-secondary {
-  align-self: flex-end;
-  justify-content: flex-end;
-  gap: clamp(10px, 3vw, 18px);
+  position: absolute;
+  right: clamp(20px, 5vw, 48px);
+  bottom: clamp(20px, 4vw, 36px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
 }
 
 .video-control {
@@ -354,20 +358,5 @@ body.gallery-body {
   .video-grid {
     grid-template-columns: 1fr;
   }
-}
-
-.video-control.icon-download::before {
-  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27%2523fff%27%20d%3D%27M12%203a1%201%200%200%201%201%201v9.586l2.293-2.293a1%201%200%200%201%201.414%201.414l-4%204a1%201%200%200%201-1.414%200l-4-4a1%201%200%200%201%201.414-1.414L11%2013.586V4a1%201%200%200%201%201-1Zm-6%2016a1%201%200%200%200%200%202h12a1%201%200%200%200%200-2H6Z%27/%3E%3C/svg%3E");
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27%2523fff%27%20d%3D%27M12%203a1%201%200%200%201%201%201v9.586l2.293-2.293a1%201%200%200%201%201.414%201.414l-4%204a1%201%200%200%201-1.414%200l-4-4a1%201%200%200%201%201.414-1.414L11%2013.586V4a1%201%200%200%201%201-1Zm-6%2016a1%201%200%200%200%200%202h12a1%201%200%200%200%200-2H6Z%27/%3E%3C/svg%3E");
-}
-
-.video-control.icon-rewind::before {
-  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27%2523fff%27%20d%3D%27M11.25%206.427a1%201%200%200%200-1.5-.864l-7%204.5a1%201%200%200%200%200%201.714l7%204.5a1%201%200%200%200%201.5-.864V13.5l7%204.5a1%201%200%200%200%201.5-.864v-9a1%201%200%200%200-1.5-.864l-7%204.5V6.427Z%27/%3E%3C/svg%3E");
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27%2523fff%27%20d%3D%27M11.25%206.427a1%201%200%200%200-1.5-.864l-7%204.5a1%201%200%200%200%200%201.714l7%204.5a1%201%200%200%200%201.5-.864V13.5l7%204.5a1%201%200%200%200%201.5-.864v-9a1%201%200%200%200-1.5-.864l-7%204.5V6.427Z%27/%3E%3C/svg%3E");
-}
-
-.video-control.icon-forward::before {
-  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27%2523fff%27%20d%3D%27M12.75%206.427a1%201%200%200%201%201.5-.864l7%204.5a1%201%200%200%201%200%201.714l-7%204.5a1%201%200%200%211-1.5-.864V13.5l-7%204.5a1%201%200%200%211-1.5-.864v-9a1%201%200%200%2111.5-.864l7%204.5V6.427Z%27/%3E%3C/svg%3E");
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20fill%3D%27%2523fff%27%20d%3D%27M12.75%206.427a1%201%200%200%201%201.5-.864l7%204.5a1%201%200%200%201%200%201.714l-7%204.5a1%201%200%200%211-1.5-.864V13.5l-7%204.5a1%201%200%200%211-1.5-.864v-9a1%201%200%200%2111.5-.864l7%204.5V6.427Z%27/%3E%3C/svg%3E");
 }
 

@@ -167,41 +167,42 @@ function createMultiField(field, container) {
 const ICONS = {
   play: `
     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M5.25 5.653v12.694a.75.75 0 0 0 1.136.643l10.892-6.347a.75.75 0 0 0 0-1.286L6.386 5.01a.75.75 0 0 0-1.136.643Z" />
+      <path d="M8 5v14l11-7z" />
     </svg>
   `,
   pause: `
     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M6.75 5.25A.75.75 0 0 1 7.5 6v12a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm7.5 0A.75.75 0 0 1 15 6v12a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Z" />
+      <path d="M6 19h4V5H6zm8-14v14h4V5h-4z" />
     </svg>
   `,
   volumeUp: `
     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19.114 5.636a.75.75 0 0 1 1.272-.772 9.005 9.005 0 0 1 0 10.272.75.75 0 1 1-1.272-.772 7.504 7.504 0 0 0 0-8.728Z" />
-      <path d="M16.012 8.738a.75.75 0 0 1 1.272-.772 5.002 5.002 0 0 1 0 5.068.75.75 0 0 1-1.272-.772 3.501 3.501 0 0 0 0-3.524Z" />
-      <path d="M12 4.5v15a1.5 1.5 0 0 1-2.561 1.06l-3.9-3.9H3.75A2.25 2.25 0 0 1 1.5 14.25v-4.5A2.25 2.25 0 0 1 3.75 7.5h1.789l3.9-3.9A1.5 1.5 0 0 1 12 4.5Z" />
+      <path d="M4 9v6h3l4 4V5l-4 4H4z" />
+      <path d="M16.5 12a4.5 4.5 0 0 0-3-4.24v8.48A4.5 4.5 0 0 0 16.5 12z" />
+      <path d="M13.5 3.97v2.07c3.05.78 5.25 3.5 5.25 6.96s-2.2 6.18-5.25 6.96v2.07c4.09-.88 7.25-4.51 7.25-9.03s-3.16-8.15-7.25-9.03z" />
     </svg>
   `,
   volumeOff: `
     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 4.5v15a1.5 1.5 0 0 1-2.561 1.06l-3.9-3.9H3.75A2.25 2.25 0 0 1 1.5 14.25v-4.5A2.25 2.25 0 0 1 3.75 7.5h1.789l3.9-3.9A1.5 1.5 0 0 1 12 4.5Z" />
-      <path d="M16.5 8.25a.75.75 0 0 1 1.06 0l1.94 1.94 1.94-1.94a.75.75 0 0 1 1.06 1.06l-1.94 1.94 1.94 1.94a.75.75 0 1 1-1.06 1.06l-1.94-1.94-1.94 1.94a.75.75 0 1 1-1.06-1.06l1.94-1.94-1.94-1.94a.75.75 0 0 1 0-1.06Z" />
+      <path d="M3 9v6h4l5 5V4l-4 4H3z" />
+      <path d="M16.5 12c0-1.77-.77-3.37-2-4.47v2.12l2 2c0-.21 0-.43 0-.65z" />
+      <path d="M14.5 3.97v2.09c2.89.86 5 3.54 5 6.94 0 1.55-.36 2.93-1 4.14l1.46 1.46C20.99 17.37 21.5 14.76 21.5 12c0-4.54-2.99-8.12-7-9.03z" />
+      <path d="M2.81 2.81 1.39 4.22 5.17 8H3v8h4l5 5v-6.17l4.78 4.78 1.41-1.41z" />
     </svg>
   `,
   fullscreen: `
     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h2.25a.75.75 0 0 1 0 1.5H6A1.5 1.5 0 0 0 4.5 6v2.25a.75.75 0 0 1-1.5 0V6Zm0 12a3 3 0 0 0 3 3h2.25a.75.75 0 0 0 0-1.5H6A1.5 1.5 0 0 1 4.5 18v-2.25a.75.75 0 1 0-1.5 0V18Zm18-12a3 3 0 0 0-3-3h-2.25a.75.75 0 0 0 0 1.5H18A1.5 1.5 0 0 1 19.5 6v2.25a.75.75 0 0 0 1.5 0V6Zm0 12a3 3 0 0 1-3 3h-2.25a.75.75 0 1 1 0-1.5H18a1.5 1.5 0 0 0 1.5-1.5v-2.25a.75.75 0 1 1 1.5 0V18Z" clip-rule="evenodd" />
+      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm14-5h-5v2h3v3h2V5zm-5 14h5v-5h-2v3h-3v2z" />
     </svg>
   `,
   fullscreenExit: `
     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path fill-rule="evenodd" d="M3 8.25A2.25 2.25 0 0 1 5.25 6H7.5a.75.75 0 0 1 0 1.5H5.25a.75.75 0 0 0-.75.75V10.5a.75.75 0 0 1-1.5 0V8.25ZM3 15.75A2.25 2.25 0 0 1 5.25 18H7.5a.75.75 0 0 0 0-1.5H5.25a.75.75 0 0 1-.75-.75V13.5a.75.75 0 1 0-1.5 0v2.25ZM21 8.25A2.25 2.25 0 0 0 18.75 6H16.5a.75.75 0 1 0 0 1.5h2.25a.75.75 0 0 1 .75.75V10.5a.75.75 0 0 0 1.5 0V8.25ZM21 15.75A2.25 2.25 0 0 0 18.75 18H16.5a.75.75 0 0 1 0-1.5h2.25a.75.75 0 0 0 .75-.75V13.5a.75.75 0 1 1 1.5 0v2.25Z" clip-rule="evenodd" />
+      <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm8 8h-3v3h-2v-5h5v2zm-3-8V5h2v3h3v2h-5z" />
     </svg>
   `,
   download: `
     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
-      <path fill-rule="evenodd" d="M11.47 3.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1-1.06 1.06L12.75 6.56v8.69a.75.75 0 0 1-1.5 0V6.56L8.78 8.53A.75.75 0 0 1 7.72 7.47l3.75-3.75Z" clip-rule="evenodd" />
-      <path fill-rule="evenodd" d="M4.5 15a4.5 4.5 0 0 0 4.5 4.5h6a4.5 4.5 0 0 0 4.5-4.5V9.75a.75.75 0 0 0-1.5 0V15a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V9.75a.75.75 0 0 0-1.5 0V15Z" clip-rule="evenodd" />
+      <path d="M5 20h14v-2H5v2zm7-18-5 5h3v4h4V7h3l-5-5z" />
     </svg>
   `,
   rewind10: `
@@ -355,7 +356,6 @@ function createVideoCard(video) {
   fullscreenSecondary.className = 'controls-row fullscreen-secondary';
 
   fullscreenControls.append(fullscreenPrimary, fullscreenSecondary);
-  overlay.append(previewControls, fullscreenControls);
 
   const isWrapperInFullscreen = () =>
     document.fullscreenElement === videoWrapper || document.webkitFullscreenElement === videoWrapper;
@@ -605,6 +605,8 @@ function createVideoCard(video) {
   videoElement.addEventListener('volumechange', updateVolumeIcons);
   videoWrapper.appendChild(videoElement);
   videoWrapper.appendChild(overlay);
+  videoWrapper.appendChild(previewControls);
+  videoWrapper.appendChild(fullscreenControls);
 
   const info = document.createElement('div');
   info.className = 'video-info';
