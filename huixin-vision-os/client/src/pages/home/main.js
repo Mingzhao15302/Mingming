@@ -280,45 +280,73 @@ function createVideoCard(video) {
   const overlay = document.createElement('div');
   overlay.className = 'video-overlay';
 
-  const playButton = document.createElement('button');
-  playButton.textContent = videoElement.paused ? '播放' : '暂停';
-  playButton.addEventListener('click', (event) => {
+  const playToggle = document.createElement('button');
+  playToggle.type = 'button';
+  playToggle.className = 'video-control play-toggle';
+
+  const setPlayIcon = () => {
+    playToggle.textContent = videoElement.paused ? '▶️' : '⏸️';
+  };
+
+  setPlayIcon();
+
+  playToggle.addEventListener('click', (event) => {
     event.stopPropagation();
     if (videoElement.paused) {
       videoElement.play();
-      playButton.textContent = '暂停';
     } else {
       videoElement.pause();
-      playButton.textContent = '播放';
     }
+  });
+
+  videoElement.addEventListener('play', setPlayIcon);
+  videoElement.addEventListener('pause', setPlayIcon);
+
+  const volumeToggle = document.createElement('button');
+  volumeToggle.type = 'button';
+  volumeToggle.className = 'video-control volume-toggle';
+
+  const setVolumeIcon = () => {
+    volumeToggle.textContent = videoElement.muted ? '🔇' : '🔊';
+  };
+
+  setVolumeIcon();
+
+  volumeToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    videoElement.muted = !videoElement.muted;
+    setVolumeIcon();
   });
 
   const fullscreenButton = document.createElement('button');
-  fullscreenButton.textContent = '全屏';
+  fullscreenButton.type = 'button';
+  fullscreenButton.className = 'video-control fullscreen-toggle';
+  fullscreenButton.textContent = '⛶';
+
+  const exitFullscreen = () => {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  };
+
   fullscreenButton.addEventListener('click', (event) => {
     event.stopPropagation();
-    if (videoElement.requestFullscreen) {
-      videoElement.requestFullscreen();
-    } else if (videoElement.webkitRequestFullscreen) {
-      videoElement.webkitRequestFullscreen();
+    const isFullscreen = document.fullscreenElement === videoWrapper || document.webkitFullscreenElement === videoWrapper;
+    if (isFullscreen) {
+      exitFullscreen();
+      return;
+    }
+
+    if (videoWrapper.requestFullscreen) {
+      videoWrapper.requestFullscreen();
+    } else if (videoWrapper.webkitRequestFullscreen) {
+      videoWrapper.webkitRequestFullscreen();
     }
   });
 
-  const editButton = document.createElement('button');
-  editButton.textContent = '编辑';
-  editButton.addEventListener('click', (event) => {
-    event.stopPropagation();
-    handleEdit(video);
-  });
-
-  const deleteButton = document.createElement('button');
-  deleteButton.textContent = '删除';
-  deleteButton.addEventListener('click', async (event) => {
-    event.stopPropagation();
-    await handleDelete(video);
-  });
-
-  overlay.append(playButton, fullscreenButton, editButton, deleteButton);
+  overlay.append(playToggle, volumeToggle, fullscreenButton);
   videoWrapper.appendChild(videoElement);
   videoWrapper.appendChild(overlay);
 
@@ -364,7 +392,7 @@ function createVideoCard(video) {
 
   card.addEventListener('mouseleave', () => {
     videoElement.pause();
-    playButton.textContent = '播放';
+    setPlayIcon();
   });
 
   return card;

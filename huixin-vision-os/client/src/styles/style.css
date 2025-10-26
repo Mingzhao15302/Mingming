@@ -158,36 +158,79 @@ body.gallery-body {
 .video-overlay {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(111, 140, 255, 0.35), rgba(170, 90, 255, 0.35));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  gap: 12px;
-  padding: 12px;
+  pointer-events: none;
 }
 
-.video-card:hover .video-overlay {
+.video-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(116, 147, 255, 0.35) 0%,
+    rgba(74, 93, 208, 0.18) 55%,
+    rgba(33, 51, 147, 0.12) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-card:hover .video-overlay::before {
   opacity: 1;
 }
 
-.video-overlay button {
-  padding: 10px 16px;
-  border-radius: 16px;
-  border: none;
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--text-color);
-  font-weight: 600;
+.video-control {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1.2px solid rgba(255, 255, 255, 0.45);
+  background: rgba(14, 22, 48, 0.45);
+  box-shadow: 0 18px 40px rgba(20, 24, 56, 0.35);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 28px;
   cursor: pointer;
-  transition: var(--transition-base);
-  box-shadow: 0 10px 20px rgba(111, 140, 255, 0.25);
+  pointer-events: auto;
+  opacity: 0.82;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-.video-overlay button:hover {
+.video-control:hover,
+.video-control:focus-visible {
+  opacity: 1;
   transform: translateY(-2px);
-  box-shadow: 0 16px 30px rgba(111, 140, 255, 0.3);
+}
+
+.video-control:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.video-control.play-toggle {
+  width: 74px;
+  height: 74px;
+  font-size: 34px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.video-control.volume-toggle,
+.video-control.fullscreen-toggle {
+  width: 52px;
+  height: 52px;
+  font-size: 24px;
+}
+
+.video-control.volume-toggle {
+  top: calc(50% + 52px);
+  left: calc(50% - 72px);
+}
+
+.video-control.fullscreen-toggle {
+  top: calc(50% + 52px);
+  left: calc(50% + 72px);
 }
 
 .video-info {
