@@ -139,9 +139,9 @@ body {
 
 .multi-field-row {
   display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 16px 20px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 18px;
   border-radius: var(--border-radius-md);
   border: 1px solid rgba(255, 255, 255, 0.45);
   background: rgba(255, 255, 255, 0.45);
@@ -150,17 +150,22 @@ body {
 }
 
 .multi-field-row .field-title {
-  flex: 0 0 120px;
+  flex: 0 0 132px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-color);
   white-space: nowrap;
+  padding-top: 4px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .toggle-group {
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: wrap;
-  gap: 14px;
+  column-gap: 14px;
+  row-gap: 8px;
 }
 
 .toggle-option {

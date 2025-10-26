@@ -6,6 +6,7 @@ const multer = require('multer');
 const { parse } = require('csv-parse/sync');
 const { randomUUID } = require('crypto');
 const { execSync } = require('child_process');
+const iconv = require('iconv-lite');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -211,7 +212,24 @@ app.post('/api/videos/import-csv', upload.single('csv'), (req, res) => {
 
   let records = [];
   try {
-    records = parse(csvBuffer, {
+    let csvString = csvBuffer.toString('utf8');
+
+    if (csvBuffer.length >= 2) {
+      const bom = csvBuffer.slice(0, 2);
+      if (bom[0] === 0xff && bom[1] === 0xfe) {
+        csvString = iconv.decode(csvBuffer, 'utf16le');
+      } else if (bom[0] === 0xfe && bom[1] === 0xff) {
+        csvString = iconv.decode(csvBuffer, 'utf16be');
+      }
+    }
+
+    if (csvString.includes('\uFFFD')) {
+      csvString = iconv.decode(csvBuffer, 'gb18030');
+    }
+
+    csvString = csvString.replace(/^\uFEFF/, '');
+
+    records = parse(csvString, {
       columns: true,
       skip_empty_lines: true,
       trim: true,
@@ -295,7 +313,11 @@ app.get('/api/videos/export', (req, res) => {
     return [...base, ...categoryValues];
   });
 
-  const csvContent = [headers.join(','), ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))].join('\n');
+  const lines = [
+    headers.join(','),
+    ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
+  ];
+  const csvContent = `\uFEFF${lines.join('\r\n')}`;
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="videos-export.csv"');
