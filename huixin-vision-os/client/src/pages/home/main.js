@@ -421,8 +421,12 @@ function createVideoCard(video) {
         }
       } else if (videoWrapper.requestFullscreen) {
         await videoWrapper.requestFullscreen();
+      } else if (videoElement.requestFullscreen) {
+        await videoElement.requestFullscreen();
       } else if (videoWrapper.webkitRequestFullscreen) {
         videoWrapper.webkitRequestFullscreen();
+      } else if (videoElement.webkitRequestFullscreen) {
+        videoElement.webkitRequestFullscreen();
       }
     } catch (error) {
       console.error('切换全屏失败', error);
@@ -477,9 +481,15 @@ function createVideoCard(video) {
     button.type = 'button';
     button.className = `video-control ${className}`;
     button.setAttribute('aria-label', label);
-    button.addEventListener('click', (event) => {
+    button.tabIndex = 0;
+    button.addEventListener('click', async (event) => {
+      event.preventDefault();
       event.stopPropagation();
-      Promise.resolve(handler()).catch((error) => console.error('控件操作失败', error));
+      try {
+        await handler(event);
+      } catch (error) {
+        console.error('控件操作失败', error);
+      }
     });
     button.addEventListener('keydown', (event) => {
       if (event.key === ' ' || event.key === 'Spacebar' || event.key === 'Enter') {
