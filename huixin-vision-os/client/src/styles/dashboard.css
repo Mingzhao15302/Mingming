@@ -4,11 +4,12 @@ body.dashboard-body {
 }
 
 .dashboard-container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 100%;
 }
 
 .dashboard-header {
@@ -17,11 +18,12 @@ body.dashboard-body {
   align-items: center;
   gap: 24px;
   padding: 32px 40px;
+  width: 100%;
 }
 
 .dashboard-header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 30px;
 }
 
 .dashboard-header p {
@@ -43,12 +45,13 @@ body.dashboard-body {
 }
 
 .secondary-btn.ghost {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.3);
   color: var(--text-color);
 }
 
 .dashboard-main {
   padding: 32px;
+  width: 100%;
 }
 
 .table-wrapper {
@@ -58,7 +61,7 @@ body.dashboard-body {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 720px;
+  min-width: 780px;
 }
 
 thead tr {
@@ -94,7 +97,7 @@ tbody tr:hover {
 }
 
 .action-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: var(--text-color);
   border-radius: 999px;
@@ -104,7 +107,7 @@ tbody tr:hover {
 }
 
 .action-btn:hover {
-  background: rgba(111, 140, 255, 0.3);
+  background: rgba(111, 140, 255, 0.35);
   color: #fff;
 }
 
@@ -126,7 +129,7 @@ tbody tr:hover {
 }
 
 .modal-content {
-  width: min(720px, 90vw);
+  width: min(760px, 92vw);
   padding: 24px 32px 32px;
   display: flex;
   flex-direction: column;
@@ -149,7 +152,7 @@ tbody tr:hover {
 
 .edit-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px 18px;
 }
 
@@ -173,13 +176,18 @@ tbody tr:hover {
 }
 
 .edit-form select[multiple] {
-  min-height: 110px;
+  min-height: 120px;
+  grid-column: span 4;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.highlight-row {
+  box-shadow: inset 0 0 0 2px rgba(111, 140, 255, 0.75);
 }
 
 @media (max-width: 900px) {
@@ -191,6 +199,14 @@ tbody tr:hover {
   .header-actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .edit-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .edit-form select[multiple] {
+    grid-column: span 2;
   }
 }
 
