@@ -164,6 +164,16 @@ function createMultiField(field, container) {
   container.appendChild(wrapper);
 }
 
+function applyIcon(button, iconName) {
+  const previous = button.dataset.iconName;
+  if (previous === iconName) return;
+  if (previous) {
+    button.classList.remove(`icon-${previous}`);
+  }
+  button.dataset.iconName = iconName;
+  button.classList.add(`icon-${iconName}`);
+}
+
 function renderFilters() {
   const productType = categoryState.filters.productType || categoryState.defaultProductType;
   pruneFilters(productType);
@@ -280,15 +290,27 @@ function createVideoCard(video) {
   const overlay = document.createElement('div');
   overlay.className = 'video-overlay';
 
+  const centerControls = document.createElement('div');
+  centerControls.className = 'center-controls';
+
+  const bottomControls = document.createElement('div');
+  bottomControls.className = 'bottom-controls';
+
   const playToggle = document.createElement('button');
   playToggle.type = 'button';
   playToggle.className = 'video-control play-toggle';
 
-  const setPlayIcon = () => {
-    playToggle.textContent = videoElement.paused ? '▶️' : '⏸️';
+  const updatePlayIcon = () => {
+    if (videoElement.paused) {
+      applyIcon(playToggle, 'play');
+      playToggle.setAttribute('aria-label', '播放');
+    } else {
+      applyIcon(playToggle, 'pause');
+      playToggle.setAttribute('aria-label', '暂停');
+    }
   };
 
-  setPlayIcon();
+  updatePlayIcon();
 
   playToggle.addEventListener('click', (event) => {
     event.stopPropagation();
@@ -299,29 +321,44 @@ function createVideoCard(video) {
     }
   });
 
-  videoElement.addEventListener('play', setPlayIcon);
-  videoElement.addEventListener('pause', setPlayIcon);
+  videoElement.addEventListener('play', updatePlayIcon);
+  videoElement.addEventListener('pause', updatePlayIcon);
 
   const volumeToggle = document.createElement('button');
   volumeToggle.type = 'button';
   volumeToggle.className = 'video-control volume-toggle';
 
-  const setVolumeIcon = () => {
-    volumeToggle.textContent = videoElement.muted ? '🔇' : '🔊';
+  const updateVolumeIcon = () => {
+    if (videoElement.muted) {
+      applyIcon(volumeToggle, 'mute');
+      volumeToggle.setAttribute('aria-label', '恢复音量');
+    } else {
+      applyIcon(volumeToggle, 'volume');
+      volumeToggle.setAttribute('aria-label', '静音');
+    }
   };
 
-  setVolumeIcon();
+  updateVolumeIcon();
 
   volumeToggle.addEventListener('click', (event) => {
     event.stopPropagation();
     videoElement.muted = !videoElement.muted;
-    setVolumeIcon();
   });
+
+  videoElement.addEventListener('volumechange', updateVolumeIcon);
 
   const fullscreenButton = document.createElement('button');
   fullscreenButton.type = 'button';
   fullscreenButton.className = 'video-control fullscreen-toggle';
-  fullscreenButton.textContent = '⛶';
+  const isWrapperInFullscreen = () =>
+    document.fullscreenElement === videoWrapper || document.webkitFullscreenElement === videoWrapper;
+
+  const updateFullscreenState = () => {
+    const active = isWrapperInFullscreen();
+    applyIcon(fullscreenButton, active ? 'minimize' : 'fullscreen');
+    fullscreenButton.setAttribute('aria-label', active ? '退出全屏' : '全屏');
+    videoWrapper.classList.toggle('fullscreen-active', active);
+  };
 
   const exitFullscreen = () => {
     if (document.exitFullscreen) {
@@ -333,8 +370,7 @@ function createVideoCard(video) {
 
   fullscreenButton.addEventListener('click', (event) => {
     event.stopPropagation();
-    const isFullscreen = document.fullscreenElement === videoWrapper || document.webkitFullscreenElement === videoWrapper;
-    if (isFullscreen) {
+    if (isWrapperInFullscreen()) {
       exitFullscreen();
       return;
     }
@@ -346,7 +382,23 @@ function createVideoCard(video) {
     }
   });
 
-  overlay.append(playToggle, volumeToggle, fullscreenButton);
+  const handleFullscreenChange = () => {
+    if (!videoWrapper.isConnected) {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      return;
+    }
+    updateFullscreenState();
+  };
+
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+  updateFullscreenState();
+
+  centerControls.appendChild(playToggle);
+  bottomControls.append(volumeToggle, fullscreenButton);
+  overlay.append(centerControls, bottomControls);
   videoWrapper.appendChild(videoElement);
   videoWrapper.appendChild(overlay);
 
@@ -392,7 +444,7 @@ function createVideoCard(video) {
 
   card.addEventListener('mouseleave', () => {
     videoElement.pause();
-    setPlayIcon();
+    updatePlayIcon();
   });
 
   return card;

@@ -159,6 +159,9 @@ body.gallery-body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .video-overlay::before {
@@ -179,8 +182,39 @@ body.gallery-body {
   opacity: 1;
 }
 
-.video-control {
+.video-overlay .center-controls,
+.video-overlay .bottom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  pointer-events: none;
+}
+
+.video-overlay .center-controls {
+  position: relative;
+  z-index: 1;
+}
+
+.video-overlay .center-controls .video-control {
+  pointer-events: auto;
+}
+
+.video-overlay .bottom-controls {
   position: absolute;
+  top: calc(50% + 78px);
+  left: 50%;
+  transform: translate(-50%, 0);
+  gap: clamp(36px, 10vw, 88px);
+  z-index: 1;
+}
+
+.video-overlay .bottom-controls .video-control {
+  pointer-events: auto;
+}
+
+.video-control {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -188,12 +222,11 @@ body.gallery-body {
   border: 1.2px solid rgba(255, 255, 255, 0.45);
   background: rgba(14, 22, 48, 0.45);
   box-shadow: 0 18px 40px rgba(20, 24, 56, 0.35);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 28px;
   cursor: pointer;
   pointer-events: auto;
   opacity: 0.82;
   transition: opacity 0.25s ease, transform 0.25s ease;
+  font-size: 0;
 }
 
 .video-control:hover,
@@ -207,30 +240,100 @@ body.gallery-body {
   outline-offset: 2px;
 }
 
+.video-control:hover::before,
+.video-control:focus-visible::before {
+  background-color: rgba(255, 255, 255, 0.94);
+}
+
 .video-control.play-toggle {
-  width: 74px;
-  height: 74px;
-  font-size: 34px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 78px;
+  height: 78px;
 }
 
 .video-control.volume-toggle,
 .video-control.fullscreen-toggle {
+  width: 56px;
+  height: 56px;
+}
+
+.video-control::before {
+  content: '';
+  display: block;
+  width: 26px;
+  height: 26px;
+  background-color: rgba(255, 255, 255, 0.82);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  transition: background-color 0.25s ease;
+}
+
+.video-control.icon-play::before {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M8%205v14l11-7z'%2F%3E%3C%2Fsvg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M8%205v14l11-7z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.video-control.icon-pause::before {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M6%205h4v14H6zm8%200h4v14h-4z'%2F%3E%3C%2Fsvg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M6%205h4v14H6zm8%200h4v14h-4z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.video-control.icon-volume::before {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M4%209v6h4l5%205V4L8%209H4zm12%203a4%204%200%200%200-4-4v8a4%204%200%200%200%204-4z'%2F%3E%3C%2Fsvg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M4%209v6h4l5%205V4L8%209H4zm12%203a4%204%200%200%200-4-4v8a4%204%200%200%200%204-4z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.video-control.icon-mute::before {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'm16.5%2012%203.5-3.5-1.5-1.5L15%2010.5l-3.5-3.5L10%208.5l3.5%203.5L10%2015.5l1.5%201.5L15%2013.5l3.5%203.5%201.5-1.5-3.5-3.5zM9%209H5v6h4l5%205V4L9%209z'%2F%3E%3C%2Fsvg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'm16.5%2012%203.5-3.5-1.5-1.5L15%2010.5l-3.5-3.5L10%208.5l3.5%203.5L10%2015.5l1.5%201.5L15%2013.5l3.5%203.5%201.5-1.5-3.5-3.5zM9%209H5v6h4l5%205V4L9%209z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.video-control.icon-fullscreen::before {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M7%2014H5v5h5v-2H7v-3zm10%203h-3v2h5v-5h-2v3zM7%207h3V5H5v5h2V7zm7-2v2h3v3h2V5h-5z'%2F%3E%3C%2Fsvg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M7%2014H5v5h5v-2H7v-3zm10%203h-3v2h5v-5h-2v3zM7%207h3V5H5v5h2V7zm7-2v2h3v3h2V5h-5z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.video-control.icon-minimize::before {
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M9%207H5v2h4v4h2V7H9zm6%200h-2v6h2V9h4V7h-4zm0%2010h4v-2h-4v-4h-2v6h2zm-6-4H5v2h4v4h2v-6H9z'%2F%3E%3C%2Fsvg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20fill%3D'%2523fff'%20d%3D'M9%207H5v2h4v4h2V7H9zm6%200h-2v6h2V9h4V7h-4zm0%2010h4v-2h-4v-4h-2v6h2zm-6-4H5v2h4v4h2v-6H9z'%2F%3E%3C%2Fsvg%3E");
+}
+
+.video-wrapper.fullscreen-active .video-overlay {
+  align-items: stretch;
+  justify-content: center;
+  padding: 0 32px 32px;
+}
+
+.video-wrapper.fullscreen-active .center-controls {
+  width: auto;
+  justify-content: flex-start;
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+}
+
+.video-wrapper.fullscreen-active .center-controls .video-control {
+  width: 62px;
+  height: 62px;
+}
+
+.video-wrapper.fullscreen-active .bottom-controls {
+  width: auto;
+  top: auto;
+  bottom: 32px;
+  left: auto;
+  right: 32px;
+  transform: none;
+  justify-content: flex-end;
+  gap: 22px;
+}
+
+.video-wrapper.fullscreen-active .bottom-controls .video-control {
   width: 52px;
   height: 52px;
-  font-size: 24px;
-}
-
-.video-control.volume-toggle {
-  top: calc(50% + 52px);
-  left: calc(50% - 72px);
-}
-
-.video-control.fullscreen-toggle {
-  top: calc(50% + 52px);
-  left: calc(50% + 72px);
 }
 
 .video-info {
