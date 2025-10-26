@@ -79,14 +79,19 @@ function ensureBuildArtifacts() {
   }
 
   if (!fs.existsSync(CLIENT_DIR)) {
-    return;
+    throw new Error('前端构建产物缺失，且未找到可用的源代码目录。');
   }
 
   try {
     console.log('未检测到前端构建产物，正在执行 Vite 构建...');
     execSync('npx vite build', { stdio: 'inherit', cwd: ROOT_DIR });
   } catch (error) {
-    console.warn('Vite 构建失败，将使用未构建的前端资源。', error);
+    error.message = `Vite 构建失败，无法继续启动服务器: ${error.message}`;
+    throw error;
+  }
+
+  if (!fs.existsSync(distIndex)) {
+    throw new Error('Vite 构建完成后仍未找到构建产物。');
   }
 }
 
@@ -204,7 +209,7 @@ app.use('/videos', express.static(VIDEOS_DIR));
 const categoryCache = loadCategories();
 const defaultCategories = buildDefaultCategories(categoryCache);
 
-const staticDir = fs.existsSync(path.join(DIST_DIR, 'index.html')) ? DIST_DIR : CLIENT_DIR;
+const staticDir = DIST_DIR;
 app.use(express.static(staticDir));
 
 app.get('/api/config/categories', (req, res) => {
