@@ -212,9 +212,11 @@ const ICONS = {
     </svg>
   `,
   download: `
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
-      <path d="M10 34h28v6H10z" />
-      <path d="M24 8v18.34l-5.66-5.66-4.24 4.24L24 38l9.9-9.08-4.24-4.24L24 26.34V8z" />
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3">
+      <path d="M24 8v20" stroke-linecap="round" />
+      <path d="M16 22l8 8 8-8" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M14 36h20" stroke-linecap="round" />
+      <path d="M18 40h12" stroke-linecap="round" />
     </svg>
   `,
   rewind10: `
@@ -355,6 +357,9 @@ function createVideoCard(video) {
   videoElement.src = `/videos/${video.fileName}`;
   videoElement.preload = 'metadata';
   videoElement.controls = false;
+  videoElement.playsInline = true;
+  videoElement.setAttribute('playsinline', '');
+  videoElement.setAttribute('webkit-playsinline', '');
 
   const overlay = document.createElement('div');
   overlay.className = 'video-overlay';
@@ -375,14 +380,6 @@ function createVideoCard(video) {
 
   const isWrapperInFullscreen = () =>
     document.fullscreenElement === videoWrapper || document.webkitFullscreenElement === videoWrapper;
-
-  const exitFullscreen = () => {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  };
 
   const HIDE_DELAY = 2500;
   let hideControlsTimer;
@@ -414,14 +411,23 @@ function createVideoCard(video) {
     fullscreenControls.classList.remove('controls-hidden');
   };
 
-  const toggleFullscreen = () => {
-    if (isWrapperInFullscreen()) {
-      exitFullscreen();
-    } else if (videoWrapper.requestFullscreen) {
-      videoWrapper.requestFullscreen();
-    } else if (videoWrapper.webkitRequestFullscreen) {
-      videoWrapper.webkitRequestFullscreen();
+  const toggleFullscreen = async () => {
+    try {
+      if (isWrapperInFullscreen()) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      } else if (videoWrapper.requestFullscreen) {
+        await videoWrapper.requestFullscreen();
+      } else if (videoWrapper.webkitRequestFullscreen) {
+        videoWrapper.webkitRequestFullscreen();
+      }
+    } catch (error) {
+      console.error('切换全屏失败', error);
     }
+    updateFullscreenIcons();
   };
 
   const downloadVideo = () => {
@@ -433,8 +439,34 @@ function createVideoCard(video) {
     document.body.removeChild(link);
   };
 
+  const togglePlayState = async () => {
+    if (videoElement.paused) {
+      try {
+        await videoElement.play();
+      } catch (error) {
+        console.error('播放失败', error);
+      }
+    } else {
+      videoElement.pause();
+    }
+    updatePlayIcons();
+  };
+
+  const stopPlayback = () => {
+    videoElement.pause();
+    videoElement.currentTime = 0;
+    updatePlayIcons();
+  };
+
+  const toggleMuteState = () => {
+    videoElement.muted = !videoElement.muted;
+    updateVolumeIcons();
+  };
+
   const seekBy = (seconds) => {
-    const duration = Number.isFinite(videoElement.duration) ? videoElement.duration : videoElement.currentTime + Math.max(seconds, 0);
+    const duration = Number.isFinite(videoElement.duration)
+      ? videoElement.duration
+      : videoElement.currentTime + Math.max(seconds, 0);
     const next = Math.min(Math.max(0, videoElement.currentTime + seconds), duration);
     videoElement.currentTime = next;
     showFullscreenControls();
@@ -447,70 +479,52 @@ function createVideoCard(video) {
     button.setAttribute('aria-label', label);
     button.addEventListener('click', (event) => {
       event.stopPropagation();
-      handler();
+      Promise.resolve(handler()).catch((error) => console.error('控件操作失败', error));
+    });
+    button.addEventListener('keydown', (event) => {
+      if (event.key === ' ' || event.key === 'Spacebar' || event.key === 'Enter') {
+        event.preventDefault();
+        button.click();
+      }
     });
     return button;
   };
 
-  const previewPlayButton = createControlButton('play-toggle', '播放', () => {
-    if (videoElement.paused) {
-      videoElement.play();
-    } else {
-      videoElement.pause();
-    }
-  });
+  const previewPlayButton = createControlButton('play-toggle', '播放', () => togglePlayState());
 
-  const previewStopButton = createControlButton('stop-button', '停止', () => {
-    videoElement.pause();
-    videoElement.currentTime = 0;
-    updatePlayIcons();
-  });
+  const previewStopButton = createControlButton('stop-button', '停止', () => stopPlayback());
   applyIcon(previewStopButton, 'stop');
 
-  const previewFullscreenButton = createControlButton('fullscreen-toggle', '全屏', () => {
-    toggleFullscreen();
-  });
+  const previewFullscreenButton = createControlButton('fullscreen-toggle', '全屏', () => toggleFullscreen());
 
-  const previewDownloadButton = createControlButton('download-button', '下载', () => {
-    downloadVideo();
-  });
+  const previewDownloadButton = createControlButton('download-button', '下载', () => downloadVideo());
 
   previewControls.append(previewPlayButton, previewStopButton, previewFullscreenButton, previewDownloadButton);
 
-  const fullscreenRewindButton = createControlButton('rewind-button', '快退10秒', () => {
-    seekBy(-10);
-  });
+  const fullscreenRewindButton = createControlButton('rewind-button', '快退10秒', () => seekBy(-10));
   applyIcon(fullscreenRewindButton, 'rewind10');
 
   const fullscreenStopButton = createControlButton('stop-button', '停止', () => {
-    videoElement.pause();
-    videoElement.currentTime = 0;
-    updatePlayIcons();
+    stopPlayback();
     showFullscreenControls();
   });
   applyIcon(fullscreenStopButton, 'stop');
 
-  const fullscreenPlayButton = createControlButton('fullscreen-play-toggle', '播放', () => {
-    if (videoElement.paused) {
-      videoElement.play();
-    } else {
-      videoElement.pause();
-    }
+  const fullscreenPlayButton = createControlButton('fullscreen-play-toggle', '播放', async () => {
+    await togglePlayState();
     showFullscreenControls();
   });
 
-  const fullscreenForwardButton = createControlButton('forward-button', '快进10秒', () => {
-    seekBy(10);
-  });
+  const fullscreenForwardButton = createControlButton('forward-button', '快进10秒', () => seekBy(10));
   applyIcon(fullscreenForwardButton, 'forward10');
 
-  const fullscreenToggleButton = createControlButton('fullscreen-exit-toggle', '退出全屏', () => {
-    toggleFullscreen();
+  const fullscreenToggleButton = createControlButton('fullscreen-exit-toggle', '退出全屏', async () => {
+    await toggleFullscreen();
     showFullscreenControls();
   });
 
   const fullscreenVolumeButton = createControlButton('fullscreen-volume-toggle', '静音', () => {
-    videoElement.muted = !videoElement.muted;
+    toggleMuteState();
     showFullscreenControls();
   });
 
@@ -564,11 +578,7 @@ function createVideoCard(video) {
       case ' ': // Space
       case 'Spacebar':
         event.preventDefault();
-        if (videoElement.paused) {
-          videoElement.play();
-        } else {
-          videoElement.pause();
-        }
+        togglePlayState();
         showFullscreenControls();
         break;
       case 'ArrowLeft':
@@ -587,7 +597,7 @@ function createVideoCard(video) {
       case 'm':
       case 'M':
         event.preventDefault();
-        videoElement.muted = !videoElement.muted;
+        toggleMuteState();
         showFullscreenControls();
         break;
       default:
@@ -629,6 +639,10 @@ function createVideoCard(video) {
   videoElement.addEventListener('play', updatePlayIcons);
   videoElement.addEventListener('pause', updatePlayIcons);
   videoElement.addEventListener('volumechange', updateVolumeIcons);
+  videoElement.addEventListener('ended', () => {
+    stopPlayback();
+    showFullscreenControls();
+  });
   videoWrapper.appendChild(videoElement);
   videoWrapper.appendChild(overlay);
   videoWrapper.appendChild(previewControls);
@@ -675,8 +689,7 @@ function createVideoCard(video) {
   card.appendChild(info);
 
   card.addEventListener('mouseleave', () => {
-    videoElement.pause();
-    updatePlayIcons();
+    stopPlayback();
   });
 
   return card;
