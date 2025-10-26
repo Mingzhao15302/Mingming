@@ -176,6 +176,11 @@ const ICONS = {
       <rect x="26" y="12" width="8" height="24" rx="1.5" />
     </svg>
   `,
+  stop: `
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
+      <rect x="14" y="14" width="20" height="20" rx="3" />
+    </svg>
+  `,
   volumeUp: `
     <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48" fill="currentColor">
       <path d="M9 20h7.5L26 14v20l-9.5-6H9z" />
@@ -447,10 +452,6 @@ function createVideoCard(video) {
     return button;
   };
 
-  const previewVolumeButton = createControlButton('volume-toggle', '静音', () => {
-    videoElement.muted = !videoElement.muted;
-  });
-
   const previewPlayButton = createControlButton('play-toggle', '播放', () => {
     if (videoElement.paused) {
       videoElement.play();
@@ -458,6 +459,13 @@ function createVideoCard(video) {
       videoElement.pause();
     }
   });
+
+  const previewStopButton = createControlButton('stop-button', '停止', () => {
+    videoElement.pause();
+    videoElement.currentTime = 0;
+    updatePlayIcons();
+  });
+  applyIcon(previewStopButton, 'stop');
 
   const previewFullscreenButton = createControlButton('fullscreen-toggle', '全屏', () => {
     toggleFullscreen();
@@ -467,12 +475,20 @@ function createVideoCard(video) {
     downloadVideo();
   });
 
-  previewControls.append(previewVolumeButton, previewPlayButton, previewFullscreenButton, previewDownloadButton);
+  previewControls.append(previewPlayButton, previewStopButton, previewFullscreenButton, previewDownloadButton);
 
   const fullscreenRewindButton = createControlButton('rewind-button', '快退10秒', () => {
     seekBy(-10);
   });
   applyIcon(fullscreenRewindButton, 'rewind10');
+
+  const fullscreenStopButton = createControlButton('stop-button', '停止', () => {
+    videoElement.pause();
+    videoElement.currentTime = 0;
+    updatePlayIcons();
+    showFullscreenControls();
+  });
+  applyIcon(fullscreenStopButton, 'stop');
 
   const fullscreenPlayButton = createControlButton('fullscreen-play-toggle', '播放', () => {
     if (videoElement.paused) {
@@ -488,13 +504,14 @@ function createVideoCard(video) {
   });
   applyIcon(fullscreenForwardButton, 'forward10');
 
-  const fullscreenVolumeButton = createControlButton('fullscreen-volume-toggle', '静音', () => {
-    videoElement.muted = !videoElement.muted;
+  const fullscreenToggleButton = createControlButton('fullscreen-exit-toggle', '退出全屏', () => {
+    toggleFullscreen();
     showFullscreenControls();
   });
 
-  const fullscreenToggleButton = createControlButton('fullscreen-exit-toggle', '退出全屏', () => {
-    toggleFullscreen();
+  const fullscreenVolumeButton = createControlButton('fullscreen-volume-toggle', '静音', () => {
+    videoElement.muted = !videoElement.muted;
+    showFullscreenControls();
   });
 
   const fullscreenDownloadButton = createControlButton('fullscreen-download-button', '下载', () => {
@@ -502,8 +519,8 @@ function createVideoCard(video) {
     showFullscreenControls();
   });
 
-  fullscreenPrimary.append(fullscreenRewindButton, fullscreenPlayButton, fullscreenForwardButton);
-  fullscreenSecondary.append(fullscreenVolumeButton, fullscreenToggleButton, fullscreenDownloadButton);
+  fullscreenPrimary.append(fullscreenRewindButton, fullscreenStopButton, fullscreenPlayButton, fullscreenForwardButton);
+  fullscreenSecondary.append(fullscreenToggleButton, fullscreenVolumeButton, fullscreenDownloadButton);
 
   const updatePlayIcons = () => {
     const iconName = videoElement.paused ? 'play' : 'pause';
@@ -518,9 +535,7 @@ function createVideoCard(video) {
     const muted = videoElement.muted || videoElement.volume === 0;
     const iconName = muted ? 'volumeOff' : 'volumeUp';
     const label = muted ? '恢复音量' : '静音';
-    applyIcon(previewVolumeButton, iconName);
     applyIcon(fullscreenVolumeButton, iconName);
-    previewVolumeButton.setAttribute('aria-label', label);
     fullscreenVolumeButton.setAttribute('aria-label', label);
   };
 

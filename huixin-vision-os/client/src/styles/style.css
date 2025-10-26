@@ -191,10 +191,11 @@ body.gallery-body {
 
 .preview-controls {
   position: absolute;
+  inset: 0;
   display: flex;
-  right: clamp(16px, 4vw, 24px);
-  bottom: clamp(16px, 4vw, 24px);
-  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.8vw, 20px);
   z-index: 3;
   pointer-events: auto;
 }
@@ -224,21 +225,21 @@ body.gallery-body {
 .fullscreen-primary {
   position: absolute;
   left: 50%;
-  bottom: clamp(72px, 12vw, 120px);
+  bottom: clamp(40px, 11vw, 96px);
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(12px, 3vw, 22px);
   pointer-events: auto;
 }
 
 .fullscreen-secondary {
   position: absolute;
   right: clamp(20px, 5vw, 48px);
-  bottom: clamp(20px, 4vw, 36px);
+  bottom: clamp(18px, 5vw, 42px);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(12px, 3vw, 22px);
   pointer-events: auto;
 }
 
