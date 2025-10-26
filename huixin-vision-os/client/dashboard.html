@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>辉鑫科技视频管理系统 - 控制台</title>
+  </head>
+  <body class="dashboard-body fade-in">
+    <div class="background-glow"></div>
+    <div class="dashboard-container">
+      <header class="dashboard-header glass-card">
+        <div>
+          <h1>视频管理控制台</h1>
+          <p>导入、分类、导出一站式管理</p>
+        </div>
+        <div class="header-actions">
+          <button id="importVideosBtn" class="primary-btn">批量导入视频</button>
+          <button id="importCsvBtn" class="secondary-btn">导入 CSV</button>
+          <button id="exportCsvBtn" class="primary-btn outline">导出 CSV</button>
+          <button id="logoutBtn" class="secondary-btn ghost">退出登录</button>
+        </div>
+      </header>
+
+      <section id="importSummary" class="import-summary glass-card hidden" aria-live="polite">
+        <div class="import-summary__header">
+          <div>
+            <h2>CSV 导入结果</h2>
+            <p class="summary-subtitle">查看匹配情况与处理建议</p>
+          </div>
+          <button id="dismissImportSummary" class="close-btn" aria-label="关闭导入结果">×</button>
+        </div>
+        <div class="import-summary__grid">
+          <div class="summary-tile">
+            <span class="summary-label">总行数</span>
+            <span id="summaryTotal" class="summary-value">0</span>
+          </div>
+          <div class="summary-tile success">
+            <span class="summary-label">匹配成功</span>
+            <span id="summaryMatched" class="summary-value">0</span>
+          </div>
+          <div class="summary-tile warning">
+            <span class="summary-label">未匹配</span>
+            <span id="summaryUnmatched" class="summary-value">0</span>
+          </div>
+          <div class="summary-tile accent">
+            <span class="summary-label">重复覆盖条数</span>
+            <span id="summaryDuplicates" class="summary-value">0</span>
+          </div>
+        </div>
+        <div id="importSummaryMessage" class="summary-message"></div>
+        <div class="import-summary__actions">
+          <button id="downloadUnmatchedBtn" class="secondary-btn outline" disabled>下载未匹配清单</button>
+          <button id="downloadDuplicatesBtn" class="secondary-btn outline" disabled>下载重复覆盖清单</button>
+        </div>
+      </section>
+
+      <main class="dashboard-main glass-card">
+        <div class="table-wrapper">
+          <table id="videosTable">
+            <thead>
+              <tr>
+                <th>标题</th>
+                <th>文件名</th>
+                <th>分类摘要</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="videosTableBody"></tbody>
+          </table>
+          <p id="emptyState" class="empty-state hidden">尚未导入任何视频，点击“批量导入视频”开始管理。</p>
+        </div>
+      </main>
+    </div>
+
+    <div id="editModal" class="modal hidden">
+      <div class="modal-shell">
+        <button type="button" id="prevModalBtn" class="modal-nav" aria-label="上一条视频">
+          <span aria-hidden="true">&#8592;</span>
+        </button>
+        <div class="modal-content glass-card">
+          <header class="modal-header">
+            <h2 class="hero-title">编辑视频分类</h2>
+            <button id="closeModalBtn" class="close-btn" aria-label="关闭">×</button>
+          </header>
+          <div class="modal-body">
+            <form id="editForm" class="edit-form"></form>
+          </div>
+          <footer class="modal-actions">
+            <button type="button" id="cancelEditBtn" class="secondary-btn ghost">取消</button>
+            <button type="submit" form="editForm" class="primary-btn">保存</button>
+          </footer>
+        </div>
+        <button type="button" id="nextModalBtn" class="modal-nav" aria-label="下一条视频">
+          <span aria-hidden="true">&#8594;</span>
+        </button>
+      </div>
+    </div>
+
+    <input type="file" id="videoInput" accept="video/*" multiple hidden />
+    <input type="file" id="csvInput" accept=".csv" hidden />
+
+    <script type="module" src="/src/pages/dashboard/main.js"></script>
+  </body>
+</html>
