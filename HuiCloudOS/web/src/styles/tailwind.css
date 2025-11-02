@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-slate-900 text-slate-50 font-sans;
+}
+
+.glass-card {
+  @apply bg-glass-light/70 backdrop-blur-glass border border-white/20 rounded-3xl shadow-glow;
+}
+
+.glass-panel {
+  @apply bg-white/10 backdrop-blur-glass border border-white/10 rounded-2xl shadow-lg;
+}
+
+.tab-button {
+  @apply px-4 py-2 rounded-full transition shadow-sm hover:shadow-glow hover:-translate-y-0.5 bg-white/10 text-slate-100;
+}
