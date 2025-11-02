@@ -1,0 +1,11 @@
+node_modules
+*.log
+.DS_Store
+server/db/db.sqlite
+server/uploads/
+exports/**/*.pdf
+exports/**/*.csv
+web/node_modules
+web/dist
+web/.vite
+coverage
