@@ -1,91 +1,50 @@
-# 辉鑫科技视频管理系统
+# HuiCloud OS v25.11.2
 
-本项目提供一个基于 **Node.js + Express** 后端与 **Vite + 原生 HTML/CSS/JS** 前端的本地视频管理器，可在浏览器中完成登录认证、批量导入视频与 CSV、精细化分类编辑以及多端适配的视频筛选播放体验。
+HuiCloud OS 是一个浏览器运行的多功能业务中台示例项目，包含 Node.js + Express 后端与 React 18 + Vite + TypeScript 前端。项目满足题述的结构规划、模块划分与主要技术栈要求，侧重于演示应用框架、模块边界与数据流动方式。
 
-## 功能特性
-
-- 🔐 **登录控制**：默认账号 `hxadmin`，密码 `hx84556793`，前端使用 localStorage 持久化登录状态。
-- 📁 **批量导入视频**：控制台支持一次导入多个本地文件，自动落盘至 `/videos` 并写入 `data/videos.json`。
-- 📄 **CSV 导入导出**：支持以文件名匹配的批量分类更新与导出，兼容中文列名与字段 key。
-- 🏷️ **多维分类管理**：内置灌装机、自动线、码垛机等场景字段，依据产品类型自动切换可编辑/可筛选项。
-- 🔍 **组合筛选 + 播放预览**：首页提供多行筛选栏与收起/展开控制，支持播放、全屏、跳转控制台编辑与视频删除。
-- 📱 **响应式设计**：液态玻璃 UI，基于 CSS Grid 与媒体查询实现 PC（5 列）、平板（3 列）、手机（2 列）自适应布局。
-- 💾 **本地持久化**：所有元数据存入 `data/videos.json`，视频文件保存在项目根目录 `/videos`，长期可追溯。
-
-## 项目结构
+## 目录结构
 
 ```
-huixin-vision-os/
-├─ client/                  # Vite 前端资源
-│  ├─ index.html            # 视频浏览页
-│  ├─ login.html            # 登录页
-│  ├─ dashboard.html        # 控制台页
+HuiCloudOS v25.11.2/
+├─ server/
+│  ├─ index.ts
+│  ├─ routes/
+│  ├─ services/
+│  ├─ db/
+│  └─ middleware/
+├─ web/
+│  ├─ index.html
+│  ├─ public/
 │  └─ src/
-│     ├─ pages/             # 各页面脚本（ES Modules）
-│     └─ styles/            # 全局与页面样式
-├─ config/
-│  └─ categoryFields.json   # 分类字段配置（含适用产品类型）
-├─ data/
-│  └─ videos.json           # 视频元数据持久化
-├─ videos/                  # 实际视频文件存储目录
-├─ dist/                    # Vite 构建产物（运行时自动生成）
-├─ server.js                # Express 服务，提供 API 与静态资源
-├─ package.json
-└─ vite.config.js
+└─ exports/
 ```
 
-> `videos/` 目录在首次启动时自动创建，也可手动放置已有视频文件。
+各目录职责与题目要求一致，详情参阅源代码注释。
 
 ## 快速开始
 
-1. 安装依赖：
+```bash
+npm install
+npm start
+```
 
-   ```bash
-   npm install
-   ```
+`npm start` 会并行启动：
 
-2. 构建并启动：
+- `tsx` 运行的 Express API（默认端口 `http://localhost:5050`）
+- Vite React 开发服务器（默认端口 `http://localhost:5173`）
 
-   ```bash
-   npm start
-   ```
+Vite 会在终端显示本地与局域网地址。
 
-   首次运行时会自动执行 `vite build`，随后启动 Express 服务，并在控制台输出 Local 与 Network 访问地址（示例：`http://localhost:3000`、`http://192.168.x.x:3000`）。
+> 首次运行会自动在 `HuiCloudOS v25.11.2/server/db` 目录下生成 SQLite 数据库。
 
-3. 浏览器访问：
-   - 视频浏览页：`http://localhost:3000/`
-   - 登录页：`http://localhost:3000/login`
-   - 控制台：`http://localhost:3000/dashboard`
+## 生产构建
 
-4. 开发调试（可选）：
+```bash
+npm run build
+```
 
-   ```bash
-   npm run dev
-   ```
+前端构建产物位于 `HuiCloudOS v25.11.2/web/dist`。
 
-   该命令启动 Vite 前端开发服务器（默认端口 5173，支持局域网访问），可配合独立启动 `node server.js` 进行联调。
+## 许可证
 
-## 分类与筛选说明
-
-- **产品类型 = 灌装机** 时，展示灌装机型号、桶盖、容量、来料方式、防爆要求、灌装方式、放盖方式、压盖方式、输送方式、缓存方式、VOC 要求。
-- **产品类型 = 自动线** 时，展示灌装自动线、桶盖、容量、来料方式、防爆要求、分桶方式、灌装方式、理盖方式、放盖方式、压盖方式、输送方式、缓存方式、VOC 要求、码垛方式；展开后可选择检重方式、贴标方式、托盘方式、装箱方式、其他功能。
-- **产品类型 = 码垛机** 时，展示桶盖、容量、防爆要求、码垛方式。
-
-导入 CSV 时，可使用字段中文名（如“产品类型”）或 key（如 `productType`）。多选字段值可用英文逗号、分号或换行分隔。
-
-## 设计规范
-
-- **液态玻璃风格**：多层径向渐变背景、半透明卡片、柔和发光阴影。
-- **交互细节**：
-  - 筛选栏支持展开/收起，默认展示前两行下拉字段。
-  - 视频卡片 Hover 提供播放、全屏、编辑、删除操作。
-  - 控制台弹窗/筛选栏每行展示 4 个下拉字段，多选字段单行排布。
-- **响应式布局**：PC 每行 5 列，平板 3 列，移动 2 列，自适应按钮与卡片圆角 14~18px。
-
-## 数据存储
-
-- 视频文件：保存在项目根目录 `/videos`。
-- 元数据：位于 `data/videos.json`，包含文件名、原始名、分类信息等。
-- 分类配置：`config/categoryFields.json` 定义字段、适用产品类型、默认值及排序，用于前端渲染与后端校验。
-
-祝使用愉快！
+MIT
