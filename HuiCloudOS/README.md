@@ -1,63 +1,80 @@
-# HuiCloud OS
+# 辉云易达 OS（HuiCloud OS）
 
-HuiCloud OS 是一个运行在浏览器中的多功能业务中台，提供视频库管理、商城、报价/订单处理以及 CSV 导入导出等功能。项目采用 Express 后端与 React + Vite 前端，所有数据会持久化到本地 JSON 与文件夹。
+辉云易达 OS 是一个运行在浏览器中的多功能业务中台，采用 **Node.js 原生模块** 构建后端，与 **Vite + 原生 HTML/CSS/JS** 构建前端。系统覆盖欢迎页、登录、控制台、视频库、商城与订单流程等模块，支持海量视频管理、CSV 导入导出、报价单/合同打印视图等业务场景。
 
-## ✨ 功能概览
-- 欢迎页、登录页、多标签控制台、商城购物流程等完整页面
-- 视频库支持批量上传（单文件≤100MB）、懒加载浏览、首帧海报、分类编辑、CSV 导入导出
-- Web Worker 解析 CSV，前端上传队列控制（并发 3 个）并展示进度
-- 商城提供商品列表、详情、购物车、结算、订单成功页，支持报价/合同打印视图
-- 控制台标签包括视频库、报价、订单、商品、合同模板、导出、设置、维护
-- 后端将视频、海报、CSV 等写入 `src/data` 子目录，元数据存储于 `db.json`
-- 启动时使用 `os.networkInterfaces()` 打印 Local 与 Network 访问地址
+## ✨ 功能亮点
+- 全站单页多入口（Hash 路由），覆盖欢迎页、登录、商城、视频浏览、购物车、结算、下单成功与控制台多标签
+- 视频库支持批量上传（分片直传，单文件 ≤ 100MB）、分类筛选、服务端分页、前端懒加载与首帧图采集
+- CSV 支持 Web Worker 并行解析、Promise 池控制并发导入、UTF-8 with BOM 导出
+- 报价系统提供模板配置、优惠计算、打印视图（浏览器 `window.print()` 导出 PDF）
+- 控制台提供视频库、报价、订单、商品、合同模板、导出、设置、维护等标签页，数据实时刷新
+- 永久化存储基于本地文件系统，视频、首帧图、CSV、数据索引均落地至约定目录
 
-## 🛠️ 技术栈
-- **后端**：Node.js + Express（单文件 `src/server.js`）
-- **前端**：Vite + React + TypeScript + 原生 HTML/CSS
-- **持久化**：本地 JSON 文件 + 文件系统
-- **构建与开发**：`concurrently` 同时启动前后端
-
-## 📁 目录结构
+## 🧱 目录结构
 ```
 HuiCloudOS/
-├─ public/              # 构建输出目录（Vite build）
-├─ src/
-│  ├─ server.js         # Express 服务，提供 REST API 与静态资源
-│  ├─ lib/              # CSV、存储、上传、工具方法
-│  └─ data/             # 运行时写入（videos/posters/csv/db.json）
-├─ ui/                  # Vite + React 前端源代码
-├─ package.json         # 根脚本：npm start / npm run dev / npm run build
-└─ .gitignore           # 忽略运行期生成的二进制/数据文件
+├─ web/
+│  ├─ index.html             # 单入口，Hash 路由控制多页面视图
+│  ├─ main.js                # 原生 JS 应用逻辑，欢迎页通过 CDN ESM 引入 Vue 3 动效
+│  ├─ styles.css             # 全局玻璃拟态风格样式
+│  ├─ workers/
+│  │  └─ csvWorker.js        # Web Worker CSV 解析器
+│  └─ public/
+│     ├─ assets/
+│     │  ├─ logos/           # LOGO（运行时放置 huixin-logo.png）
+│     │  └─ backgrounds/     # 欢迎页背景图 home-hero.jpg
+│     ├─ products/           # 产品卡片与轮播图目录（运行时放置）
+│     ├─ videos/             # 视频文件存储（运行时写入）
+│     └─ posters/            # 视频首帧图（运行时写入）
+├─ server/
+│  ├─ server.js              # Node 原生 http 服务，提供 REST API 与静态资源
+│  └─ lib/
+│     ├─ csv.js              # CSV 读写与格式化
+│     ├─ store.js            # JSON 数据仓库与初始化
+│     ├─ upload.js           # 分片上传写入与合并
+│     └─ utils.js            # 常用工具函数（响应封装、ID 生成等）
+├─ scripts/
+│  └─ dev.js                 # npm start：child_process 同启 Vite(--host) 与后端
+├─ package.json              # 根脚本
+└─ .gitignore                # 忽略运行时生成的二进制/数据文件
 ```
 
-> 注意：`src/data/db.json`、`videos/`、`posters/`、`csv/` 等运行时生成目录不会提交到 Git。
+> **重要提示**：仓库不包含任何二进制媒体文件。请在 `web/public/assets/logos/` 与 `web/public/assets/backgrounds/` 中放入必需的 LOGO 与背景图；视频、首帧图、产品图等运行时写入的文件已在 `.gitignore` 中排除。
 
-## 🚀 本地运行
+## 🚀 快速开始
 ```bash
-npm install          # 安装根依赖（同时安装 ui/ 中的依赖）
-npm start            # 同时启动 Express(8080) 与 Vite(5173) 开发服务器
+npm install
+npm start
 ```
 
-启动后终端会显示类似信息：
-```
-HuiCloud OS API 已启动，端口 8080
-HuiCloud OS 服务地址:
-  • http://localhost:8080
-  • http://192.168.x.x:8080
-```
+`npm start` 将并行启动：
+- Vite 开发服务器（`vite --host`），输出 Local 与 Network 访问地址
+- Node 原生后端（`server/server.js`），启动时通过 `os.networkInterfaces()` 打印 API Local/Network 地址
 
-前端默认运行在 `http://localhost:5173`，通过代理访问后端 API。
+访问 `http://localhost:5173/#/welcome` 可进入欢迎页。
+
+### 账号信息
+- 账号：`hxadmin`
+- 密码：`hx84556793`
+
+登录后可进入控制台进行视频上传、分类、CSV 导出等操作。登录凭证将储存在 `sessionStorage`，后端使用简单 token 校验。
 
 ## 📦 构建
 ```bash
-npm run build        # 构建前端到 public/ 目录
-npm run server       # 启动仅后端服务（可用于部署）
+npm run build
 ```
 
-## 📝 约束与说明
-- 禁止提交任何二进制多媒体文件，视频/海报/CSV 会在运行时上传到 `src/data`
-- CSV 导出默认包含 UTF-8 BOM (`\uFEFF`)
-- PDF 导出通过浏览器 `window.print()` 完成，不引入第三方 PDF 库
-- 所有上传文件大小限制为 100 MB，超限会被拒绝
+前端构建产物输出至 `web/dist/`。生产部署时可通过任意静态服务器托管 `web/dist` 并使用 `node server/server.js` 启动后端。
 
-如需初始化默认数据，可运行应用后通过控制台界面导入 CSV 或手动上传视频。
+## 📁 数据与上传目录
+- `web/public/videos/`：视频文件（运行时生成，单文件 ≤ 100 MB）
+- `web/public/posters/`：视频首帧 JPG（运行时生成）
+- `server/data/`：索引/临时文件夹（`uploads/`、`csv/`、`exports/`、`db.json` 等）
+
+运行时若目录不存在，后端会自动创建。批量导入 CSV、分片上传视频均支持断点续传与失败重试。
+
+## 🧪 测试数据
+首次运行若 `server/data/db.json` 不存在，后端会自动生成 2,000 条示例视频记录、若干产品样例与默认分类，用于演示大规模数据分页与筛选。示例条目引用 `web/public/videos/sample.mp4` 与 `web/public/posters/sample.jpg`，请在实际部署时替换为真实素材。
+
+## 📄 许可证
+MIT
