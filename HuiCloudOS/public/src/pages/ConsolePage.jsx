@@ -434,7 +434,7 @@ const QuoteModule = () => {
           { key: 'discount', header: '优惠(%)' },
           { key: 'terms', header: '条款' },
           { key: 'createdAt', header: '创建时间', render: (value) => new Date(value).toLocaleString() }
-        ]
+        ]}
         data={quotes}
       />
     </div>
@@ -463,7 +463,7 @@ const OrdersModule = () => {
         { key: 'total', header: '订单金额', render: (value) => `￥${value.toLocaleString()}` },
         { key: 'final', header: '应付金额', render: (value) => `￥${value.toLocaleString()}` },
         { key: 'createdAt', header: '创建时间', render: (value) => new Date(value).toLocaleString() }
-      ]
+      ]}
       data={orders}
     />
   );
@@ -491,7 +491,7 @@ const ProductsModule = () => {
         { key: 'price', header: '价格', render: (value) => `￥${value.toLocaleString()}` },
         { key: 'stock', header: '库存' },
         { key: 'updatedAt', header: '更新时间', render: (value) => new Date(value).toLocaleString() }
-      ]
+      ]}
       data={products}
     />
   );
@@ -520,7 +520,7 @@ const ContractsModule = () => {
           { key: 'name', header: '文件名' },
           { key: 'size', header: '大小', render: (value) => `${(value / 1024).toFixed(2)} KB` },
           { key: 'uploadedAt', header: '上传时间', render: (value) => new Date(value).toLocaleString() }
-        ]
+        ]}
         data={templates}
       />
     </div>
