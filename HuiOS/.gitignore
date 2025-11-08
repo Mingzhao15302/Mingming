@@ -1,0 +1,16 @@
+node_modules/
+web/dist/
+*.log
+.DS_Store
+npm-debug.log*
+
+# Local data exports
+/data/videos/*
+/data/posters/*
+/data/csv/*
+/data/exports/*
+/data/temp/
+!/data/videos/.gitkeep
+!/data/posters/.gitkeep
+!/data/csv/.gitkeep
+!/data/exports/.gitkeep
